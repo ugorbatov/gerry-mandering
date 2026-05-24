@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Legal Tracker · Gerrymandering Revealed</title>
+<meta name="description" content="Every major redistricting lawsuit — cases, judges, oral arguments, demographic impact, AI summaries, and compliance status." />
+<meta name="theme-color" content="#0A0A0B" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#0A0A0B; --surface:#111113; --surface-2:#18181B; --border:#1F1F23;
+  --border-hi:#2E2E33; --text:#F4F4F5; --text-dim:#A1A1AA; --text-mute:#52525B;
+  --dem:#3B82F6; --rep:#EF4444; --ind:#A855F7; --green:#22C55E; --amber:#F59E0B; --orange:#F97316;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:14px}
+a{color:var(--text-dim);text-decoration:underline;text-decoration-color:var(--border-hi);text-underline-offset:2px;transition:color 150ms}
+a:hover{color:var(--text);text-decoration-color:var(--text-dim)}
+.page{padding:16px 20px 40px;min-height:100vh;max-width:1280px;margin:0 auto}
+
+/* ── TOP RIGHT ── */
+.top-right{position:absolute;top:18px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:5}
+.ts-line{font-size:10px;color:var(--text-mute);letter-spacing:.04em;font-family:"JetBrains Mono",monospace;display:flex;align-items:center;gap:6px}
+.ts-line .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6)}
+
+/* ── EYEBROW / HEADER ── */
+header{margin-bottom:18px;padding-right:220px;position:relative}
+.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.eyebrow .pill{width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,var(--dem) 0%,var(--rep) 100%)}
+.eyebrow span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);font-weight:500}
+.eyebrow .wordmark{color:var(--text);font-weight:600;letter-spacing:.08em}
+.eyebrow .eyebrow-sub{color:var(--text-mute);font-weight:500;letter-spacing:.1em;padding-left:10px;border-left:1px solid var(--border-hi)}
+h1{font-size:28px;font-weight:600;margin:0;letter-spacing:-.02em;line-height:1.15}
+.lede{font-size:13px;color:var(--text-dim);margin-top:6px;max-width:640px;line-height:1.5}
+
+/* ── NAV ── */
+.site-nav{display:flex;align-items:center;gap:2px;margin-top:10px;margin-bottom:16px;padding:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;width:fit-content;position:relative;z-index:10}
+.nav-item{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:5px;font-size:11px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--text-mute);text-decoration:none;cursor:pointer;border:none;background:none;transition:all 150ms;white-space:nowrap}
+.nav-item:hover{color:var(--text-dim);background:var(--surface-2);text-decoration:none}
+.nav-item.active{color:var(--text);background:var(--surface-2);border:1px solid var(--border-hi)}
+.nav-item .nav-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.nav-divider{width:1px;height:16px;background:var(--border-hi);flex-shrink:0;margin:0 2px}
+.nav-dropdown{position:relative}
+.nav-dropdown-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:260px;background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.6);z-index:100}
+.nav-dropdown-menu.open{display:block}
+.nav-dropdown-header{padding:8px 12px 6px;font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-family:"JetBrains Mono",monospace;border-bottom:1px solid var(--border)}
+.nav-dd-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;text-decoration:none;cursor:pointer;transition:background 150ms;border-bottom:1px solid var(--border)}
+.nav-dd-item:last-child{border-bottom:none}
+.nav-dd-item:hover{background:var(--surface-2)}
+.nav-dd-icon{width:28px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.nav-dd-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.nav-dd-sub{font-size:11px;color:var(--text-mute);line-height:1.4}
+.nav-dd-tag{font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px;font-family:"JetBrains Mono",monospace;vertical-align:middle}
+.tag-live{background:rgba(34,197,94,.15);color:var(--green)}
+.tag-soon{background:rgba(245,158,11,.15);color:var(--amber)}
+.tag-new{background:rgba(59,130,246,.15);color:var(--dem)}
+
+/* ── TRACKER BODY ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.stat{background:var(--surface);padding:9px 13px}
+.stat .label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:3px}
+.stat .value{font-size:20px;font-weight:600;font-family:"JetBrains Mono",monospace;letter-spacing:-.02em}
+.source-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;background:var(--surface);border:1px solid var(--border);border-radius:4px;font-size:9px;letter-spacing:.04em;color:var(--text-dim);font-family:"JetBrains Mono",monospace}
+.source-tag .dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+.tabs{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;overflow-x:auto}
+.tab{font-size:11px;padding:7px 12px;border:none;background:var(--surface);color:var(--text-mute);cursor:pointer;letter-spacing:.04em;white-space:nowrap;flex-shrink:0;font-family:inherit;transition:all 150ms}
+.tab:hover{color:var(--text-dim);background:var(--surface-2)}
+.tab.active{color:var(--text);background:var(--surface-2);font-weight:500}
+.pane{display:none}.pane.active{display:block}
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.filters{display:flex;gap:5px;flex-wrap:wrap}
+.fbtn{font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--border-hi);background:var(--surface);color:var(--text-mute);cursor:pointer;letter-spacing:.03em;font-family:inherit;transition:all 150ms}
+.fbtn:hover{color:var(--text-dim);border-color:var(--text-mute)}
+.fbtn.active{background:rgba(59,130,246,.12);color:var(--dem);border-color:rgba(59,130,246,.3)}
+.search-wrap{position:relative}
+.search-wrap input{background:var(--surface);border:1px solid var(--border-hi);border-radius:6px;color:var(--text);padding:5px 9px 5px 28px;font-size:12px;width:160px;font-family:inherit;outline:none}
+.search-wrap input:focus{border-color:var(--dem)}
+.search-wrap input::placeholder{color:var(--text-mute)}
+.si{position:absolute;left:9px;top:50%;transform:translateY(-50%);color:var(--text-mute);font-size:12px}
+.cases-list{display:flex;flex-direction:column;gap:6px}
+.ccard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;cursor:pointer;transition:border-color 150ms}
+.ccard:hover{border-color:var(--border-hi)}
+.ch{display:flex;align-items:flex-start;justify-content:space-between;gap:8px}
+.ctitle{font-size:13px;font-weight:500;color:var(--text);margin-bottom:3px}
+.cmeta{font-size:11px;color:var(--text-mute);font-family:"JetBrains Mono",monospace;letter-spacing:.02em}
+.badges{display:flex;gap:4px;flex-wrap:wrap;flex-shrink:0}
+.badge{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;letter-spacing:.03em;white-space:nowrap;display:inline-flex;align-items:center;gap:4px}
+.badge .dot{width:5px;height:5px;border-radius:50%}
+.badge.won{background:rgba(34,197,94,.12);color:var(--green)}.badge.won .dot{background:var(--green)}
+.badge.lost{background:rgba(239,68,68,.12);color:var(--rep)}.badge.lost .dot{background:var(--rep)}
+.badge.active-s{background:rgba(59,130,246,.12);color:var(--dem)}.badge.active-s .dot{background:var(--dem)}
+.badge.appealed{background:rgba(249,115,22,.12);color:var(--orange)}.badge.appealed .dot{background:var(--orange)}
+.badge.racial{background:rgba(168,85,247,.12);color:var(--ind)}
+.badge.partisan{background:rgba(245,158,11,.12);color:var(--amber)}
+.cbody{display:none;border-top:1px solid var(--border);padding-top:10px;margin-top:10px;font-size:12px;color:var(--text-dim);line-height:1.6}
+.cbody.open{display:block}
+.dr{display:flex;gap:8px;margin-bottom:3px;font-size:11px}
+.dl{color:var(--text-mute);min-width:80px;font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.04em;text-transform:uppercase;padding-top:1px}
+.tl{display:flex;flex-direction:column;gap:4px;margin-top:8px}
+.tli{display:flex;gap:8px;font-size:11px}
+.tld{width:6px;height:6px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.tld.done{background:var(--green)}.tld.pending{background:var(--text-mute)}
+.imp-g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-top:8px}
+.imp-c{text-align:center}
+.imp-l{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px}
+.imp-b{height:4px;border-radius:2px;background:var(--border-hi);overflow:hidden;margin-bottom:3px}
+.imp-f{height:100%;border-radius:2px}
+.score-num{font-family:"JetBrains Mono",monospace;font-size:12px;font-weight:500}
+.jgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:8px}
+.jcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1rem}
+.javatar{width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;flex-shrink:0;font-family:"JetBrains Mono",monospace}
+.lean-bar{display:flex;height:4px;border-radius:2px;overflow:hidden;margin:6px 0 2px}
+.lean-d{background:var(--dem);height:100%}
+.lean-r{background:var(--rep);height:100%}
+.lean-n{background:var(--text-mute);height:100%}
+.lcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:6px}
+.lstat{font-size:10px;padding:2px 7px;border-radius:4px;font-weight:500;letter-spacing:.04em;font-family:"JetBrains Mono",monospace}
+.ls-intro{background:rgba(59,130,246,.12);color:var(--dem)}
+.ls-committee{background:rgba(245,158,11,.12);color:var(--amber)}
+.ls-passed{background:rgba(34,197,94,.12);color:var(--green)}
+.ls-failed{background:rgba(239,68,68,.12);color:var(--rep)}
+.prog-track{height:3px;border-radius:2px;background:var(--border-hi);overflow:hidden;margin:8px 0 4px}
+.prog-fill{height:100%;border-radius:2px;background:var(--dem)}
+.demo-panel{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px}
+.dcard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem}
+.dlabel{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:10px;font-family:"JetBrains Mono",monospace}
+.dbar-row{display:flex;align-items:center;gap:8px;margin-bottom:6px;font-size:11px}
+.dbar-w{flex:1;height:6px;background:var(--border-hi);border-radius:3px;overflow:hidden}
+.dbar-f{height:100%;border-radius:3px}
+.dpct{min-width:30px;text-align:right;color:var(--text-mute);font-family:"JetBrains Mono",monospace;font-size:10px}
+.delta{font-size:10px;padding:1px 6px;border-radius:3px;font-family:"JetBrains Mono",monospace;margin-left:3px}
+.delta-pos{background:rgba(34,197,94,.12);color:var(--green)}
+.delta-neg{background:rgba(239,68,68,.12);color:var(--rep)}
+.acard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:6px}
+.aquote{font-size:12px;color:var(--text-dim);font-style:italic;border-left:2px solid var(--border-hi);padding-left:10px;margin-bottom:8px;line-height:1.6}
+.asig{font-size:11px;color:var(--text-mute);background:var(--surface-2);padding:5px 8px;border-radius:5px;line-height:1.5}
+.aside{font-size:10px;padding:2px 7px;border-radius:4px;font-family:"JetBrains Mono",monospace;letter-spacing:.03em}
+.as-court{background:rgba(59,130,246,.12);color:var(--dem)}
+.as-plaintiff{background:rgba(34,197,94,.12);color:var(--green)}
+.as-defense{background:rgba(239,68,68,.12);color:var(--rep)}
+.tl-page{position:relative;padding-left:24px}
+.tl-line{position:absolute;left:8px;top:0;bottom:0;width:1px;background:var(--border)}
+.tl-event{position:relative;margin-bottom:16px}
+.tl-circle{position:absolute;left:-20px;width:12px;height:12px;border-radius:50%;border:1.5px solid;display:flex;align-items:center;justify-content:center;top:2px;background:var(--bg)}
+.icard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:6px}
+.ai-panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:10px}
+.ai-result{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:.9rem;font-size:13px;color:var(--text);line-height:1.7;min-height:70px;white-space:pre-wrap}
+.tag-row{display:flex;gap:4px;flex-wrap:wrap;margin-top:8px}
+.qtag{font-size:11px;padding:3px 8px;border-radius:4px;background:var(--surface-2);color:var(--text-mute);cursor:pointer;border:1px solid var(--border-hi);letter-spacing:.02em;font-family:inherit;transition:all 150ms}
+.qtag:hover{color:var(--text-dim);border-color:var(--text-mute)}
+.map-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-mute);margin-top:8px;font-family:"JetBrains Mono",monospace;letter-spacing:.02em}
+.leg-i{display:flex;align-items:center;gap:5px}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+.agrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:8px}
+.alert-form{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:1rem;margin-bottom:10px}
+.form-row{display:flex;gap:7px;margin-bottom:7px;flex-wrap:wrap}
+.form-row input,.form-row select{background:var(--surface-2);border:1px solid var(--border-hi);border-radius:6px;color:var(--text);padding:6px 9px;font-size:12px;flex:1;min-width:130px;font-family:inherit;outline:none}
+.form-row input:focus,.form-row select:focus{border-color:var(--dem)}
+.form-row select option{background:var(--surface-2)}
+.fcheck{display:flex;align-items:center;gap:7px;font-size:12px;color:var(--text-dim);margin-bottom:5px;cursor:pointer}
+.fcheck input[type=checkbox]{width:14px;height:14px;accent-color:var(--dem);cursor:pointer}
+.alerts-list{display:flex;flex-direction:column;gap:6px}
+.alert-item{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 11px;display:flex;align-items:flex-start;gap:9px}
+.success-msg{background:rgba(34,197,94,.1);color:var(--green);border:1px solid rgba(34,197,94,.2);border-radius:6px;padding:8px 11px;font-size:12px;display:none;margin-top:8px;font-family:"JetBrains Mono",monospace;letter-spacing:.02em}
+.btn{background:var(--surface-2);border:1px solid var(--border-hi);border-radius:6px;color:var(--text-dim);padding:6px 14px;font-size:12px;cursor:pointer;font-family:inherit;letter-spacing:.03em;transition:all 150ms}
+.btn:hover{color:var(--text);border-color:var(--text-mute)}
+.btn.primary{background:rgba(59,130,246,.15);border-color:rgba(59,130,246,.3);color:var(--dem)}
+.btn.primary:hover{background:rgba(59,130,246,.25)}
+select.full{width:100%;background:var(--surface-2);border:1px solid var(--border-hi);border-radius:6px;color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;margin-bottom:10px;outline:none}
+select.full:focus{border-color:var(--dem)}
+select.full option{background:var(--surface-2)}
+input.full{width:100%;background:var(--surface-2);border:1px solid var(--border-hi);border-radius:6px;color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;outline:none;margin-bottom:8px}
+input.full:focus{border-color:var(--dem)}
+.section-label{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-weight:500;font-family:"JetBrains Mono",monospace;margin-bottom:8px}
+</style>
+</head>
+<body>
+<div class="page" style="position:relative">
+
+  <div class="top-right">
+    <div class="ts-line"><span class="dot"></span><span>LEGAL TRACKER — 2025</span></div>
+  </div>
+
+  <header>
+    <div class="eyebrow">
+      <span class="pill"></span>
+      <span class="wordmark">Gerrymandering Revealed</span>
+      <span class="eyebrow-sub">Legal Tracker</span>
+    </div>
+
+    <nav class="site-nav" aria-label="Site navigation">
+      <a class="nav-item" href="index.html">
+        <span class="nav-dot" style="background:var(--text-mute)"></span>
+        District Map
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-dropdown" id="nav-tools-dropdown">
+        <button class="nav-item" onclick="toggleNavDropdown()" aria-expanded="false" aria-haspopup="true" id="nav-tools-btn">
+          Tools &amp; Data
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:2px;opacity:.5" aria-hidden="true">
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-tools-menu" role="menu">
+          <div class="nav-dropdown-header">Gerrymandering Revealed · Suite</div>
+          <a class="nav-dd-item" href="index.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(59,130,246,.12)">🗺</div>
+            <div><div class="nav-dd-title">District Map <span class="nav-dd-tag tag-live">LIVE</span></div><div class="nav-dd-sub">Interactive map of every U.S. congressional district — 119th Congress.</div></div>
+          </a>
+          <a class="nav-dd-item" href="legal-tracker.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(168,85,247,.12)">⚖</div>
+            <div><div class="nav-dd-title">Legal Tracker <span class="nav-dd-tag tag-new">NEW</span></div><div class="nav-dd-sub">Every major redistricting lawsuit — cases, judges, oral arguments, and AI summaries.</div></div>
+          </a>
+          <a class="nav-dd-item" href="vote-gap.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(245,158,11,.12)">📊</div>
+            <div><div class="nav-dd-title">Vote Gap Analyzer <span class="nav-dd-tag tag-soon">SOON</span></div><div class="nav-dd-sub">Compare votes cast vs. seats won in each state.</div></div>
+          </a>
+          <a class="nav-dd-item" href="redistricting-history.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(34,197,94,.12)">◎</div>
+            <div><div class="nav-dd-title">Redistricting History <span class="nav-dd-tag tag-soon">SOON</span></div><div class="nav-dd-sub">How district lines have changed every decade since 1990.</div></div>
+          </a>
+          <a class="nav-dd-item" href="follow-the-money.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(239,68,68,.12)">💰</div>
+            <div><div class="nav-dd-title">Follow the Money <span class="nav-dd-tag tag-soon">SOON</span></div><div class="nav-dd-sub">Donor-to-politician networks funding redistricting battles.</div></div>
+          </a>
+        </div>
+      </div>
+      <div class="nav-divider"></div>
+      <a class="nav-item active" href="legal-tracker.html" aria-current="page">
+        <span class="nav-dot" style="background:var(--ind)"></span>
+        Legal Tracker
+      </a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="about.html">About</a>
+    </nav>
+
+    <h1>Redistricting Lawsuits &amp; Rulings</h1>
+    <p class="lede">Every major gerrymandering case — cases, judges, legislation, demographics, oral arguments, and AI-powered summaries. Non-partisan. Updated continuously.</p>
+  </header>
+
+  <div class="stats-row">
+    <div class="stat"><div class="label">Cases tracked</div><div class="value">8</div></div>
+    <div class="stat"><div class="label">Active</div><div class="value" style="color:var(--dem)">2</div></div>
+    <div class="stat"><div class="label">Plaintiff wins</div><div class="value" style="color:var(--green)">3</div></div>
+    <div class="stat"><div class="label">On appeal</div><div class="value" style="color:var(--orange)">1</div></div>
+    <div class="stat"><div class="label">Judges tracked</div><div class="value">9</div></div>
+    <div class="stat"><div class="label">Bills tracked</div><div class="value">6</div></div>
+  </div>
+
+  <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span class="source-tag"><span class="dot"></span>SCOTUS</span>
+    <span class="source-tag"><span class="dot"></span>STATE COURTS</span>
+    <span class="source-tag"><span class="dot"></span>FEDERAL DISTRICT</span>
+    <span class="source-tag"><span class="dot"></span>119TH CONGRESS</span>
+  </div>
+
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('cases')">⚖ CASES</button>
+    <button class="tab" onclick="showTab('judges')">👨‍⚖️ JUDGES</button>
+    <button class="tab" onclick="showTab('legislation')">📜 LEGISLATION</button>
+    <button class="tab" onclick="showTab('demographics')">📊 DEMOGRAPHICS</button>
+    <button class="tab" onclick="showTab('oral')">🎙 ORAL ARGS</button>
+    <button class="tab" onclick="showTab('timeline')">◎ TIMELINE</button>
+    <button class="tab" onclick="showTab('impact')">▲ IMPACT</button>
+    <button class="tab" onclick="showTab('ai')">✦ AI SUMMARY</button>
+    <button class="tab" onclick="showTab('map')">◈ MAP</button>
+    <button class="tab" onclick="showTab('attorneys')">◉ ATTORNEYS</button>
+    <button class="tab" onclick="showTab('alerts')">◎ ALERTS</button>
+  </div>
+
+  <div id="pane-cases" class="pane active">
+    <div class="top-bar">
+      <div class="filters" id="filters">
+        <button class="fbtn active" data-filter="all">ALL</button>
+        <button class="fbtn" data-filter="active">ACTIVE</button>
+        <button class="fbtn" data-filter="racial">RACIAL</button>
+        <button class="fbtn" data-filter="partisan">PARTISAN</button>
+        <button class="fbtn" data-filter="won">WON</button>
+        <button class="fbtn" data-filter="appealed">APPEALED</button>
+      </div>
+      <div class="search-wrap"><span class="si">⌕</span><input type="text" id="search" placeholder="Search cases…" /></div>
+    </div>
+    <div class="cases-list" id="cases-list"></div>
+  </div>
+  <div id="pane-judges" class="pane"><div style="font-size:12px;color:var(--text-mute);margin-bottom:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em">KEY JUDGES — appointment history, ideological lean, notable redistricting contributions</div><div class="jgrid" id="jgrid"></div></div>
+  <div id="pane-legislation" class="pane"><div style="font-size:12px;color:var(--text-mute);margin-bottom:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em">FEDERAL & STATE BILLS that could reshape the redistricting legal landscape</div><div id="leglist"></div></div>
+  <div id="pane-demographics" class="pane"><div style="font-size:12px;color:var(--text-mute);margin-bottom:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em">RACIAL & PARTISAN SHIFT — challenged map vs. court-ordered replacement</div><select class="full" id="demo-select" onchange="renderDemo()"><option value="">Select a case…</option><option value="allen">Allen v. Milligan — Alabama</option><option value="lwv">LWV v. WI Elections Comm. — Wisconsin</option><option value="harper">Harper v. Hall — North Carolina</option><option value="rucho">Rucho v. Common Cause — Federal</option></select><div id="demo-panel"></div></div>
+  <div id="pane-oral" class="pane"><div style="font-size:12px;color:var(--text-mute);margin-bottom:10px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em">KEY ORAL ARGUMENT EXCHANGES — pivotal questions & what they signaled</div><select class="full" id="arg-select" onchange="renderOral()"><option value="">Select a case…</option><option value="allen">Allen v. Milligan — SCOTUS Oct 2022</option><option value="rucho">Rucho v. Common Cause — SCOTUS Mar 2019</option><option value="alexander">Alexander v. SC NAACP — SCOTUS Oct 2023</option></select><div id="arg-list"></div></div>
+  <div id="pane-timeline" class="pane"><div style="font-size:12px;color:var(--text-mute);margin-bottom:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em">CHRONOLOGICAL — every major event from 2018 to present</div><div class="tl-page" id="tl-page"><div class="tl-line"></div></div></div>
+  <div id="pane-impact" class="pane"><div style="font-size:12px;color:var(--text-mute);margin-bottom:12px;font-family:'JetBrains Mono',monospace;letter-spacing:.02em">IMPACT SCORES — democratic effect, legal precedent, compliance risk (0–100)</div><div id="impact-page"></div></div>
+  <div id="pane-ai" class="pane">
+    <div class="ai-panel">
+      <div style="font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;margin-bottom:8px">✦ AI CASE ANALYZER</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">Select a case and ask any question — or tap a suggested prompt below.</div>
+      <select class="full" id="ai-case-select"><option value="">Select a case…</option><option value="Allen v. Milligan">Allen v. Milligan (Alabama)</option><option value="Alexander v. SC NAACP">Alexander v. SC NAACP</option><option value="Harper v. Hall">Harper v. Hall (NC)</option><option value="LWV v. WI Elections Comm.">LWV v. WI Elections Comm.</option><option value="Common Cause v. Lewis">Common Cause v. Lewis (NC)</option><option value="Caster v. Merrill">Caster v. Merrill (Alabama)</option><option value="Rucho v. Common Cause">Rucho v. Common Cause</option><option value="WI Legislature v. WI Elections Comm.">WI Legislature v. WI Elections Comm.</option></select>
+      <div style="display:flex;gap:7px;margin-bottom:8px"><input type="text" id="ai-query" class="full" style="margin-bottom:0" placeholder="Ask anything about this case…" /><button class="btn primary" onclick="runAI()" style="white-space:nowrap;flex-shrink:0">ASK →</button></div>
+      <div class="tag-row">
+        <button class="qtag" onclick="setQ('What was the core legal argument?')">CORE ARGUMENT</button>
+        <button class="qtag" onclick="setQ('What is the real-world impact on voters?')">VOTER IMPACT</button>
+        <button class="qtag" onclick="setQ('How does this affect future redistricting cases?')">FUTURE PRECEDENT</button>
+        <button class="qtag" onclick="setQ('Explain the ruling in plain English')">PLAIN ENGLISH</button>
+        <button class="qtag" onclick="setQ('What are the strongest counterarguments?')">COUNTERARGUMENTS</button>
+        <button class="qtag" onclick="setQ('What happens next legally?')">WHAT NEXT?</button>
+      </div>
+    </div>
+    <div class="ai-result" id="ai-result"><span style="color:var(--text-mute);font-family:'JetBrains Mono',monospace;font-size:11px">— SELECT A CASE AND ASK A QUESTION —</span></div>
+  </div>
+  <div id="pane-map" class="pane"><div id="map" style="width:100%"></div><div class="map-legend"><span class="leg-i"><span class="leg-sq" style="background:var(--orange)"></span>ON APPEAL</span><span class="leg-i"><span class="leg-sq" style="background:var(--dem)"></span>PLAINTIFF WON</span><span class="leg-i"><span class="leg-sq" style="background:var(--text-mute)"></span>DISMISSED</span></div><div id="map-detail" style="margin-top:10px;display:none"><div class="ccard"><div style="font-size:13px;font-weight:500;margin-bottom:8px" id="map-detail-title"></div><div id="map-detail-body" style="font-size:12px;color:var(--text-dim)"></div></div></div></div>
+  <div id="pane-attorneys" class="pane"><div class="agrid" id="agrid"></div></div>
+  <div id="pane-alerts" class="pane">
+    <div class="alert-form">
+      <div style="font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-family:'JetBrains Mono',monospace;margin-bottom:8px">◎ CASE ALERT SUBSCRIPTIONS</div>
+      <div style="font-size:12px;color:var(--text-dim);margin-bottom:10px">Get notified when cases update — rulings, filings, compliance deadlines.</div>
+      <div class="form-row"><input type="text" placeholder="Your name" /><input type="email" id="alert-email" placeholder="Email address" /></div>
+      <div class="form-row"><select><option>All states</option><option>Alabama</option><option>North Carolina</option><option>Wisconsin</option><option>South Carolina</option></select><select><option>All types</option><option>Racial gerrymander</option><option>Partisan gerrymander</option></select></div>
+      <label class="fcheck"><input type="checkbox" checked /> New rulings</label>
+      <label class="fcheck"><input type="checkbox" checked /> New cases filed</label>
+      <label class="fcheck"><input type="checkbox" /> Compliance deadlines</label>
+      <label class="fcheck"><input type="checkbox" /> Weekly digest</label>
+      <button class="btn primary" onclick="submitAlert()" style="margin-top:8px">◎ SUBSCRIBE</button>
+      <div class="success-msg" id="success-msg">✓ SUBSCRIBED — we'll notify you when cases update</div>
+    </div>
+    <div class="section-label">RECENT ACTIVITY</div>
+    <div class="alerts-list" id="alerts-list"></div>
+  </div>
+
+</div><!-- .page -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script>
+/* ── DATA ── */
+const cases=[{id:1,title:"Allen v. Milligan",state:"Alabama",court:"U.S. Supreme Court",filed:"2021",type:["racial"],status:"won",summary:"Challenged Alabama's congressional map for diluting Black voting power. SCOTUS ruled 5-4 that Alabama violated Section 2 of the Voting Rights Act, ordering a new majority-Black district.",details:{plaintiff:"Evan Milligan et al.",defendant:"Wes Allen, SoS",judge:"SCOTUS (Roberts majority)"},impact:{democratic:92,precedent:95,compliance:78},timeline:[{date:"Nov 2021",text:"Filed in N.D. Alabama",done:true},{date:"Jan 2022",text:"District court orders new map",done:true},{date:"Jun 2023",text:"SCOTUS affirms — plaintiff wins",done:true},{date:"2024–25",text:"Compliance proceedings ongoing",done:false}]},{id:2,title:"Alexander v. SC NAACP",state:"South Carolina",court:"U.S. Supreme Court",filed:"2022",type:["racial","partisan"],status:"lost",summary:"Challenged SC's 1st Congressional District map. SCOTUS reversed, ruling the map was a permissible partisan gerrymander, not an illegal racial one.",details:{plaintiff:"SC NAACP, Taiwan Scott",defendant:"James H. Alexander",judge:"SCOTUS (Alito majority)"},impact:{democratic:68,precedent:82,compliance:20},timeline:[{date:"Jan 2022",text:"Filed in D.S.C.",done:true},{date:"Jan 2023",text:"District court rules racial gerrymander",done:true},{date:"May 2024",text:"SCOTUS reverses — defendant wins",done:true}]},{id:3,title:"Harper v. Hall",state:"North Carolina",court:"NC Supreme Court",filed:"2021",type:["partisan"],status:"lost",summary:"After a Democratic majority struck NC maps, a new Republican majority reversed the ruling in 2023, allowing maps to stand.",details:{plaintiff:"Rebecca Harper et al.",defendant:"Timothy Moore, Speaker",judge:"NC Supreme Court"},impact:{democratic:74,precedent:71,compliance:30},timeline:[{date:"2021",text:"Filed in NC courts",done:true},{date:"Feb 2022",text:"Trial court finds gerrymander",done:true},{date:"Apr 2023",text:"New Rep majority reverses ruling",done:true}]},{id:4,title:"LWV v. WI Elections Comm.",state:"Wisconsin",court:"WI Supreme Court",filed:"2023",type:["partisan"],status:"won",summary:"WI Supreme Court struck down legislative maps as unconstitutional under the state constitution. New maps used for 2024 elections.",details:{plaintiff:"League of Women Voters WI",defendant:"WI Elections Commission",judge:"WI Supreme Court"},impact:{democratic:85,precedent:78,compliance:65},timeline:[{date:"Feb 2023",text:"Filed",done:true},{date:"Dec 2023",text:"Court strikes down maps",done:true},{date:"Feb 2024",text:"New maps adopted",done:true}]},{id:5,title:"Common Cause v. Lewis",state:"North Carolina",court:"NC Superior Court",filed:"2018",type:["partisan"],status:"won",summary:"Historic NC case — one of the first state courts to strike down partisan gerrymanders under the state constitution.",details:{plaintiff:"Common Cause NC",defendant:"David Lewis",judge:"Three-judge Superior Court"},impact:{democratic:80,precedent:88,compliance:72},timeline:[{date:"2018",text:"Filed",done:true},{date:"Sep 2019",text:"Court rules maps unconstitutional",done:true},{date:"Feb 2020",text:"New maps used in 2020",done:true}]},{id:6,title:"Caster v. Merrill",state:"Alabama",court:"N.D. Alabama",filed:"2021",type:["racial"],status:"appealed",summary:"Sister case to Allen v. Milligan. Alabama drew a non-compliant map after SCOTUS ruling, triggering ongoing compliance hearings.",details:{plaintiff:"Evan Caster et al.",defendant:"John Merrill",judge:"N.D. Alabama three-judge panel"},impact:{democratic:88,precedent:70,compliance:90},timeline:[{date:"Nov 2021",text:"Consolidated with Milligan",done:true},{date:"Jun 2023",text:"SCOTUS rules for plaintiffs",done:true},{date:"Sep 2023",text:"AL draws non-compliant map",done:true},{date:"2024–25",text:"Compliance hearings ongoing",done:false}]},{id:7,title:"Rucho v. Common Cause",state:"Federal / NC & MD",court:"U.S. Supreme Court",filed:"2018",type:["partisan"],status:"lost",summary:"Landmark SCOTUS ruling: federal courts cannot review partisan gerrymanders. Pushed all challenges to state courts.",details:{plaintiff:"Common Cause et al.",defendant:"Robert Rucho",judge:"SCOTUS (Roberts majority)"},impact:{democratic:95,precedent:98,compliance:15},timeline:[{date:"2018",text:"Consolidated NC + MD cases",done:true},{date:"Jun 2019",text:"SCOTUS rules partisan gerry not reviewable federally",done:true},{date:"Post-2019",text:"Spurs wave of state-court challenges",done:true}]},{id:8,title:"WI Legislature v. WI Elections Comm.",state:"Wisconsin",court:"WI Supreme Court",filed:"2023",type:["partisan"],status:"active",summary:"Republican legislature challenged WI court's authority to strike maps. Largely mooted by 2024 elections; next cycle litigation expected.",details:{plaintiff:"WI State Legislature",defendant:"WI Elections Commission",judge:"WI Supreme Court"},impact:{democratic:60,precedent:55,compliance:40},timeline:[{date:"2023",text:"Legislature files counter-petition",done:true},{date:"2024",text:"New maps upheld",done:true},{date:"2025–26",text:"Next cycle litigation expected",done:false}]}];
+const judges=[{name:"John G. Roberts",title:"Chief Justice, SCOTUS",appointed:"2005 · G.W. Bush",lean:{d:15,r:55,n:30},leanLabel:"MODERATE CONSERVATIVE",cases:["Allen v. Milligan (maj.)","Rucho v. Common Cause (maj.)"],bio:"Author of both landmark redistricting rulings. Sided with liberals in Milligan on VRA grounds; wrote Rucho barring federal partisan gerry review.",initials:"JR",dColor:"rgba(239,68,68,.15)",tc:"#EF4444"},{name:"Samuel Alito",title:"Associate Justice, SCOTUS",appointed:"2006 · G.W. Bush",lean:{d:5,r:80,n:15},leanLabel:"CONSERVATIVE",cases:["Alexander v. SC NAACP (maj.)"],bio:"Wrote the Alexander decision reversing the lower court, holding the SC map was partisan rather than racial — significantly raising the burden of proof for racial gerry claims.",initials:"SA",dColor:"rgba(239,68,68,.15)",tc:"#EF4444"},{name:"Sonia Sotomayor",title:"Associate Justice, SCOTUS",appointed:"2009 · Obama",lean:{d:85,r:5,n:10},leanLabel:"LIBERAL",cases:["Allen v. Milligan (concur.)","Alexander (dissent)"],bio:"Consistent vote for voting rights plaintiffs. Her Alexander dissent argued the majority made racial gerrymander claims nearly impossible to win.",initials:"SS",dColor:"rgba(59,130,246,.15)",tc:"#3B82F6"},{name:"Ketanji Brown Jackson",title:"Associate Justice, SCOTUS",appointed:"2022 · Biden",lean:{d:90,r:5,n:5},leanLabel:"LIBERAL",cases:["Allen v. Milligan (concur.)"],bio:"Her Milligan concurrence traced the VRA's explicit remedial purpose — widely cited in subsequent lower court redistricting filings.",initials:"KJ",dColor:"rgba(59,130,246,.15)",tc:"#3B82F6"},{name:"Elena Kagan",title:"Associate Justice, SCOTUS",appointed:"2010 · Obama",lean:{d:85,r:5,n:10},leanLabel:"LIBERAL",cases:["Rucho v. Common Cause (dissent)"],bio:"Her Rucho dissent is widely taught in law schools as the definitive argument for federal courts reviewing partisan gerrymandering.",initials:"EK",dColor:"rgba(59,130,246,.15)",tc:"#3B82F6"},{name:"Clarence Thomas",title:"Associate Justice, SCOTUS",appointed:"1991 · G.H.W. Bush",lean:{d:2,r:95,n:3},leanLabel:"VERY CONSERVATIVE",cases:["Allen v. Milligan (dissent)","Rucho (concur.)"],bio:"Dissented in Milligan, arguing VRA Section 2 does not apply to single-member redistricting — a position that could gut VRA protections if the Court shifts further right.",initials:"CT",dColor:"rgba(239,68,68,.15)",tc:"#EF4444"},{name:"Janet Protasiewicz",title:"Justice, WI Supreme Court",appointed:"2023 · Elected",lean:{d:80,r:10,n:10},leanLabel:"LIBERAL",cases:["LWV v. WI Elections Comm. (maj.)"],bio:"Her 2023 election flipped the WI court liberal, directly enabling the redistricting challenge to succeed.",initials:"JP",dColor:"rgba(59,130,246,.15)",tc:"#3B82F6"},{name:"Paul Newby",title:"Chief Justice, NC Supreme Court",appointed:"2020 · Elected",lean:{d:10,r:80,n:10},leanLabel:"CONSERVATIVE",cases:["Harper v. Hall (reversed)"],bio:"Led the new Republican majority that reversed the prior court's ruling striking down NC partisan gerrymanders.",initials:"PN",dColor:"rgba(239,68,68,.15)",tc:"#EF4444"},{name:"Allison Riggs",title:"Justice, NC Supreme Court",appointed:"2023 · Elected",lean:{d:75,r:10,n:15},leanLabel:"LIBERAL",cases:["NC redistricting challenges"],bio:"Former SCSJ voting rights attorney. Her election shifts NC's redistricting outlook heading into the 2030 cycle.",initials:"AR",dColor:"rgba(59,130,246,.15)",tc:"#3B82F6"}];
+const legislation=[{title:"John R. Lewis Voting Rights Advancement Act",chamber:"U.S. Senate",sponsor:"Sen. Raphael Warnock (D-GA)",status:"committee",summary:"Would restore VRA preclearance — requiring states with discrimination histories to get federal approval before changing voting laws or maps.",impact:"HIGH — would directly affect redistricting in Alabama, NC, and other covered states.",tags:["FEDERAL","VRA","RACIAL"],year:"2023"},{title:"Freedom to Vote Act",chamber:"U.S. Senate",sponsor:"Sen. Jeff Merkley (D-OR)",status:"intro",summary:"Would require states to use independent commissions for congressional redistricting, banning partisan map-drawing by legislatures.",impact:"VERY HIGH — would fundamentally change redistricting for all 435 congressional seats.",tags:["FEDERAL","PARTISAN","INDEPENDENT"],year:"2023"},{title:"Redistricting Reform Act",chamber:"U.S. House",sponsor:"Rep. Zoe Lofgren (D-CA)",status:"committee",summary:"National standards for redistricting criteria — requiring compactness, contiguity, and prohibiting maps that intentionally dilute minority voting power.",impact:"HIGH — sets floor requirements all states must meet.",tags:["FEDERAL","STANDARDS","CRITERIA"],year:"2024"},{title:"Wisconsin Independent Maps Amendment",chamber:"WI Legislature",sponsor:"Bipartisan coalition",status:"passed",summary:"Constitutional amendment requiring Wisconsin to use a nonpartisan process for drawing legislative and congressional maps.",impact:"HIGH — permanently removes WI legislature from redistricting.",tags:["WISCONSIN","INDEPENDENT","STATE"],year:"2024"},{title:"Alabama Redistricting Compliance Act",chamber:"AL Legislature",sponsor:"Plaintiffs' advocates",status:"failed",summary:"Would have required Alabama to comply with the SCOTUS Milligan ruling and draw a second majority-Black congressional district.",impact:"DIRECT — would resolve ongoing Caster v. Merrill compliance crisis.",tags:["ALABAMA","VRA","COMPLIANCE"],year:"2023"},{title:"MAPS Act",chamber:"U.S. Senate",sponsor:"Sen. Amy Klobuchar (D-MN)",status:"intro",summary:"Regulates AI and algorithmic tools in redistricting, requiring disclosure when computer models are used to draw district lines.",impact:"EMERGING — addresses next-generation gerrymandering before widespread use.",tags:["FEDERAL","AI","TECHNOLOGY"],year:"2024"}];
+const demoData={allen:{title:"Allen v. Milligan — Alabama 7th District",before:{label:"CHALLENGED MAP (2022)",black:27,white:62,hisp:5,d:38,r:62},after:{label:"COURT-ORDERED MAP (2024)",black:54,white:38,hisp:5,d:62,r:38},context:"Alabama's challenged map packed Black voters into a single district, preventing a second majority-Black seat. The court-ordered replacement created a second district with a Black voting-age majority, shifting two seats from safe-R to competitive."},lwv:{title:"LWV v. WI Elections Comm. — State Assembly",before:{label:"CHALLENGED MAPS (2021)",black:12,white:74,hisp:8,d:35,r:65},after:{label:"COURT-ORDERED MAPS (2024)",black:15,white:70,hisp:9,d:47,r:53},context:"Wisconsin's legislative maps were among the most extreme partisan gerrymanders in the country. New maps reduced the Republican structural advantage from ~65-35 to near-parity."},harper:{title:"Harper v. Hall — NC General Assembly",before:{label:"STRUCK MAPS (2022)",black:18,white:68,hisp:9,d:40,r:60},after:{label:"REINSTATED MAPS (2023)",black:18,white:68,hisp:9,d:40,r:60},context:"The case turned entirely on judicial reviewability — no demographic change resulted when the new Republican court majority reinstated the original maps."},rucho:{title:"Rucho v. Common Cause — NC Congressional",before:{label:"CHALLENGED MAP (2016)",black:22,white:65,hisp:8,d:33,r:67},after:{label:"POST-RULING STATUS QUO",black:22,white:65,hisp:8,d:33,r:67},context:"Rucho established that federal courts cannot review partisan gerrymandering. Maps remained in place — the ruling's impact was procedural, routing all future challenges to state courts."}};
+const oralArgs={allen:[{speaker:"Justice Sotomayor",side:"court",time:"14:22",quote:"If Alabama's position is correct, Section 2 of the Voting Rights Act would be essentially nullified in the redistricting context. Isn't that a dramatic departure from forty years of precedent?",sig:"Signaled the liberal wing's concern — foreshadowed her eventual concurrence."},{speaker:"Chief Justice Roberts",side:"court",time:"28:45",quote:"The question is whether the State must always draw a second majority-minority district if the minority population is large enough to form one. That's not what the statute says, is it?",sig:"Roberts' careful parsing previewed his eventual majority opinion — enforcing VRA while limiting automatic application."},{speaker:"Edmund LaCour (AL Solicitor General)",side:"defense",time:"42:10",quote:"Alabama drew a map that gives Black voters an equal opportunity to elect their preferred candidates. Section 2 does not require proportional representation.",sig:"Core defense argument — rejected by SCOTUS majority."},{speaker:"Deuel Ross (NAACP LDF)",side:"plaintiff",time:"8:33",quote:"Black Alabamians are 27% of the population but have meaningful electoral opportunity in only one of seven districts. The VRA was enacted precisely to prevent this structural exclusion.",sig:"Plaintiff's central argument — statistical underrepresentation as Section 2 violation."}],rucho:[{speaker:"Justice Kagan",side:"court",time:"22:15",quote:"You're basically saying this is a political question courts should stay out of entirely. But we've never said that about any other constitutional violation — why this one?",sig:"Previewed her landmark dissent arguing the majority was abandoning judicial oversight of democracy."},{speaker:"Chief Justice Roberts",side:"court",time:"35:40",quote:"The question is whether there are judicially manageable standards. Every test proposed so far has required courts to make inherently political judgments.",sig:"Roberts' manageability concern became the foundation of his majority opinion."},{speaker:"Paul Clement (NC defense)",side:"defense",time:"51:20",quote:"Partisan gerrymandering has been practiced since the founding. The Framers knew about it. They chose structural remedies — not judicial review of map outcomes.",sig:"Historical argument that proved persuasive to the majority."},{speaker:"Allison Riggs (Common Cause)",side:"plaintiff",time:"12:05",quote:"When legislatures draw maps to guarantee their own re-election regardless of how voters vote, they are breaking the fundamental compact between representatives and the represented.",sig:"The framing Kagan adopted in her dissent."}],alexander:[{speaker:"Justice K.B. Jackson",side:"court",time:"18:30",quote:"If a legislature knows race and party are extremely correlated, and it uses party as a proxy, how can a plaintiff ever prove that race — rather than party — was the predominant factor?",sig:"Identified the core evidentiary paradox central to her eventual concurrence."},{speaker:"Justice Alito",side:"court",time:"31:55",quote:"The district court's finding was based on comparing the challenged district to a hypothetical alternative. But there are many ways to draw any district — how do we know the alternative is the right baseline?",sig:"Alito's baseline problem became the foundation of his majority opinion."},{speaker:"Leah Aden (NAACP LDF)",side:"plaintiff",time:"9:45",quote:"The legislature's own documents show mapmakers were given racial data precinct by precinct and told to move Black voters out of District 1. The intent evidence here is overwhelming.",sig:"Plaintiff's strongest argument — rejected by the majority given partisan correlation."},{speaker:"Robert McNamara (SC defense)",side:"defense",time:"44:20",quote:"In a polarized state, drawing a Republican district that happens to be majority-white is simply drawing a Republican district.",sig:"The defense's winning argument — in polarized states, racial and partisan sorting are inseparable."}]};
+const tlEvents=[{date:"2018",title:"Common Cause v. Lewis filed",sub:"NC Superior Court — first major state-court partisan gerry challenge",color:"#A855F7",done:true},{date:"Jun 2019",title:"Rucho v. Common Cause — SCOTUS",sub:"Federal courts permanently barred from reviewing partisan gerrymandering",color:"#EF4444",done:true},{date:"Sep 2019",title:"NC court strikes maps",sub:"Common Cause v. Lewis — historic first state-court win",color:"#22C55E",done:true},{date:"Feb 2020",title:"New NC maps take effect",sub:"Common Cause victory implemented",color:"#22C55E",done:true},{date:"Nov 2021",title:"Alabama VRA challenges filed",sub:"Allen v. Milligan + Caster v. Merrill",color:"#A855F7",done:true},{date:"Jan 2022",title:"District court blocks AL map",sub:"Three-judge panel orders new majority-Black district",color:"#22C55E",done:true},{date:"Feb 2023",title:"LWV files WI challenge",sub:"State constitutional challenge to legislative maps",color:"#A855F7",done:true},{date:"Apr 2023",title:"Harper v. Hall reversed",sub:"New NC Republican court reverses earlier ruling",color:"#EF4444",done:true},{date:"Jun 2023",title:"SCOTUS affirms Allen v. Milligan",sub:"5-4 — Alabama violated the Voting Rights Act",color:"#22C55E",done:true},{date:"Sep 2023",title:"Alabama draws non-compliant map",sub:"Legislature defies SCOTUS — contempt risk begins",color:"#EF4444",done:true},{date:"Dec 2023",title:"WI Supreme Court strikes maps",sub:"LWV v. WI — maps unconstitutional",color:"#22C55E",done:true},{date:"Feb 2024",title:"New Wisconsin maps certified",sub:"Redrawn maps used for 2024 elections",color:"#22C55E",done:true},{date:"May 2024",title:"SCOTUS reverses Alexander v. SC NAACP",sub:"Alito majority — map was partisan, not racial",color:"#EF4444",done:true},{date:"2024–25",title:"Alabama compliance hearings ongoing",sub:"Caster v. Merrill — state faces contempt",color:"#F97316",done:false},{date:"2025–26",title:"Next redistricting cycle begins",sub:"New wave of challenges expected nationwide",color:"#3B82F6",done:false}];
+const attorneys=[{name:"Deuel Ross",org:"NAACP Legal Defense Fund",role:"Lead counsel — Allen v. Milligan",phone:"(212) 965-2200",email:"info@naacpldf.org",cases:["Alabama","VRA"],side:"plaintiff"},{name:"Marc Elias",org:"Elias Law Group",role:"Lead — partisan gerry cases",phone:"(202) 968-4490",email:"info@elias.law",cases:["NC","WI","Federal"],side:"plaintiff"},{name:"Allison Riggs",org:"Southern Coalition for Social Justice",role:"Voting rights litigation",phone:"(919) 323-3380",email:"info@southerncoalition.org",cases:["NC","SC"],side:"plaintiff"},{name:"Ruth Greenwood",org:"Election Law Clinic, Harvard",role:"Academic counsel & amicus",phone:"(617) 496-5067",email:"electionlaw@harvard.edu",cases:["Federal","WI"],side:"plaintiff"},{name:"Jason Torchinsky",org:"Holtzman Vogel",role:"Defense — Republican maps",phone:"(540) 341-8808",email:"jtorchinsky@hvjt.law",cases:["AL","NC","SC"],side:"defense"},{name:"Abha Khanna",org:"Elias Law Group",role:"Co-counsel — WI & AL",phone:"(206) 656-0177",email:"info@elias.law",cases:["WI","AL"],side:"plaintiff"}];
+const recentAlerts=[{icon:"⚖",text:"Alabama compliance hearing scheduled",sub:"Caster v. Merrill — N.D. Alabama",time:"2d ago",color:"#F97316"},{icon:"📄",text:"New amicus briefs filed",sub:"Allen v. Milligan compliance phase",time:"1w ago",color:"#3B82F6"},{icon:"✓",text:"Wisconsin new maps certified",sub:"LWV v. WI Elections Commission",time:"3w ago",color:"#22C55E"},{icon:"⚠",text:"SC NAACP petitions for rehearing",sub:"Alexander v. SC NAACP",time:"1mo ago",color:"#EF4444"},{icon:"◎",text:"NC redistricting cycle begins",sub:"Post-Harper v. Hall — 2025 maps expected",time:"2mo ago",color:"#A855F7"}];
+const stateData={"Alabama":{color:"#F97316",cases:2},"North Carolina":{color:"#52525B",cases:2},"Wisconsin":{color:"#3B82F6",cases:2},"South Carolina":{color:"#52525B",cases:1}};
+
+let activeFilter="all",searchQ="";
+function showTab(t){document.querySelectorAll(".tab").forEach(b=>b.classList.toggle("active",b.getAttribute("onclick").includes("'"+t+"'")));document.querySelectorAll(".pane").forEach(p=>p.classList.remove("active"));document.getElementById("pane-"+t).classList.add("active");if(t==="map"&&!document.getElementById("map").querySelector("svg"))renderMap();if(t==="timeline"&&document.getElementById("tl-page").children.length<2)renderTimeline();if(t==="impact"&&!document.getElementById("impact-page").children.length)renderImpact();if(t==="judges"&&!document.getElementById("jgrid").children.length)renderJudges();if(t==="legislation"&&!document.getElementById("leglist").children.length)renderLegislation();if(t==="attorneys"&&!document.getElementById("agrid").children.length)renderAttorneys();if(t==="alerts"&&!document.getElementById("alerts-list").children.length)renderAlerts();}
+function getStatusBadge(s){return{active:["ACTIVE","active-s"],won:["PLAINTIFF WON","won"],lost:["DISMISSED","lost"],appealed:["ON APPEAL","appealed"]}[s]||["UNKNOWN","active-s"];}
+function renderCases(){let f=cases.filter(c=>{const mf=activeFilter==="all"||(activeFilter==="active"&&c.status==="active")||(activeFilter==="racial"&&c.type.includes("racial"))||(activeFilter==="partisan"&&c.type.includes("partisan"))||(activeFilter==="won"&&c.status==="won")||(activeFilter==="appealed"&&c.status==="appealed");const ms=!searchQ||c.title.toLowerCase().includes(searchQ)||c.state.toLowerCase().includes(searchQ)||c.summary.toLowerCase().includes(searchQ);return mf&&ms;});const list=document.getElementById("cases-list");if(!f.length){list.innerHTML='<div style="text-align:center;padding:2rem;color:var(--text-mute);font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.04em">NO MATCHING CASES</div>';return;}list.innerHTML=f.map(c=>{const[sl,sc]=getStatusBadge(c.status);const tb=c.type.map(t=>t==="racial"?'<span class="badge racial">RACIAL</span>':'<span class="badge partisan">PARTISAN</span>').join("");const tl=c.timeline.map(t=>`<div class="tli"><div class="tld ${t.done?"done":"pending"}"></div><div><span style="color:var(--text-mute);margin-right:5px;font-family:'JetBrains Mono',monospace;font-size:10px">${t.date}</span>${t.text}</div></div>`).join("");const ov=Math.round((c.impact.democratic+c.impact.precedent+c.impact.compliance)/3);const scoreC=ov>=80?"var(--green)":ov>=60?"var(--amber)":"var(--rep)";return`<div class="ccard" onclick="toggleCase(${c.id})"><div class="ch"><div><div class="ctitle">${c.title}</div><div class="cmeta">◈ ${c.state} · ${c.court} · ${c.filed}</div></div><div class="badges"><span style="font-size:11px;font-weight:600;color:${scoreC};font-family:'JetBrains Mono',monospace">${ov}</span><span class="badge ${sc}"><span class="dot"></span>${sl}</span>${tb}</div></div><div class="cbody" id="body-${c.id}"><p style="margin-bottom:8px">${c.summary}</p><div class="dr"><span class="dl">PLAINTIFF</span><span>${c.details.plaintiff}</span></div><div class="dr"><span class="dl">DEFENDANT</span><span>${c.details.defendant}</span></div><div class="dr"><span class="dl">COURT</span><span>${c.details.judge}</span></div><div style="margin-top:10px"><div style="font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin-bottom:6px">IMPACT SCORES</div><div class="imp-g">${[["DEMOCRATIC",c.impact.democratic,"var(--dem)"],["PRECEDENT",c.impact.precedent,"var(--ind)"],["COMPLIANCE",c.impact.compliance,"var(--rep)"]].map(([l,v,col])=>`<div class="imp-c"><div class="imp-l">${l}</div><div class="imp-b"><div class="imp-f" style="width:${v}%;background:${col}"></div></div><div class="score-num" style="color:${col}">${v}</div></div>`).join("")}</div></div><div style="margin-top:10px;font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin-bottom:5px">TIMELINE</div><div class="tl">${tl}</div></div></div>`;}).join("");}
+function toggleCase(id){document.getElementById("body-"+id).classList.toggle("open");}
+function renderJudges(){document.getElementById("jgrid").innerHTML=judges.map(j=>`<div class="jcard"><div style="display:flex;align-items:flex-start;gap:10px;margin-bottom:10px"><div class="javatar" style="background:${j.dColor};color:${j.tc}">${j.initials}</div><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text)">${j.name}</div><div style="font-size:11px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;letter-spacing:.02em">${j.title}</div><div style="font-size:10px;color:var(--text-mute);margin-top:1px;font-family:'JetBrains Mono',monospace">APT: ${j.appointed}</div></div></div><div style="margin-bottom:7px"><div style="font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.06em;font-family:'JetBrains Mono',monospace;margin-bottom:3px">${j.leanLabel}</div><div class="lean-bar"><div class="lean-d" style="width:${j.lean.d}%"></div><div class="lean-n" style="width:${j.lean.n}%"></div><div class="lean-r" style="width:${j.lean.r}%"></div></div><div style="display:flex;justify-content:space-between;font-size:9px;color:var(--text-mute);font-family:'JetBrains Mono',monospace"><span>LIB</span><span>CON</span></div></div><div style="font-size:11px;color:var(--text-dim);margin-bottom:8px;line-height:1.55">${j.bio}</div><div style="display:flex;gap:4px;flex-wrap:wrap">${j.cases.map(c=>`<span style="font-size:10px;padding:2px 6px;background:var(--surface-2);color:var(--text-mute);border-radius:3px;font-family:'JetBrains Mono',monospace;border:1px solid var(--border-hi)">${c}</span>`).join("")}</div></div>`).join("");}
+function renderLegislation(){const sm={intro:["INTRODUCED","ls-intro",10],committee:["IN COMMITTEE","ls-committee",30],passed:["PASSED","ls-passed",100],failed:["FAILED","ls-failed",0]};document.getElementById("leglist").innerHTML=legislation.map(l=>{const[sl,sc,prog]=sm[l.status]||["UNKNOWN","ls-intro",0];return`<div class="lcard"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px"><div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:2px">${l.title}</div><div style="font-size:10px;color:var(--text-mute);font-family:'JetBrains Mono',monospace">${l.chamber} · ${l.year}</div></div><span class="lstat ${sc}">${sl}</span></div><div class="prog-track"><div class="prog-fill" style="width:${prog}%"></div></div><div style="font-size:12px;color:var(--text-dim);margin-bottom:7px;line-height:1.5">${l.summary}</div><div style="font-size:11px;color:var(--text-mute);background:var(--surface-2);padding:5px 8px;border-radius:5px;margin-bottom:7px;border:1px solid var(--border)"><span style="font-weight:500;color:var(--text-dim)">Impact: </span>${l.impact}</div><div style="display:flex;gap:4px;flex-wrap:wrap">${l.tags.map(t=>`<span style="font-size:10px;padding:2px 7px;background:var(--surface-2);color:var(--text-mute);border-radius:3px;font-family:'JetBrains Mono',monospace;border:1px solid var(--border-hi)">${t}</span>`).join("")}</div></div>`;}).join("");}
+function renderDemo(){const key=document.getElementById("demo-select").value;const panel=document.getElementById("demo-panel");if(!key){panel.innerHTML="";return;}const d=demoData[key];const br=(label,val,color)=>`<div class="dbar-row"><span style="min-width:70px;color:var(--text-dim)">${label}</span><div class="dbar-w"><div class="dbar-f" style="width:${val}%;background:${color}"></div></div><span class="dpct">${val}%</span></div>`;const dlt=(a,b,lbl)=>{const diff=b-a;if(Math.abs(diff)<1)return"";return`<span class="delta ${diff>0?"delta-pos":"delta-neg"}">${diff>0?"+":""}${diff}% ${lbl}</span>`;};panel.innerHTML=`<div style="font-size:13px;font-weight:500;color:var(--text);margin-bottom:10px">${d.title}</div><div class="demo-panel"><div class="dcard"><div class="dlabel">${d.before.label}</div>${br("Black",d.before.black,"var(--ind)")}${br("White",d.before.white,"var(--text-mute)")}${br("Hispanic",d.before.hisp,"var(--amber)")}<div style="margin-top:8px;padding-top:7px;border-top:1px solid var(--border)">${br("Dem lean",d.before.d,"var(--dem)")}${br("Rep lean",d.before.r,"var(--rep)")}</div></div><div class="dcard"><div class="dlabel">${d.after.label}</div>${br("Black",d.after.black,"var(--ind)")}${br("White",d.after.white,"var(--text-mute)")}${br("Hispanic",d.after.hisp,"var(--amber)")}<div style="margin-top:8px;padding-top:7px;border-top:1px solid var(--border)">${br("Dem lean",d.after.d,"var(--dem)")}${br("Rep lean",d.after.r,"var(--rep)")}</div></div></div><div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${dlt(d.before.black,d.after.black,"Black")}${dlt(d.before.d,d.after.d,"Dem")}${dlt(d.before.r,d.after.r,"Rep")}</div><div style="font-size:12px;color:var(--text-dim);background:var(--surface);border:1px solid var(--border);padding:10px 12px;border-radius:8px;line-height:1.6">${d.context}</div>`;}
+function renderOral(){const key=document.getElementById("arg-select").value;const list=document.getElementById("arg-list");if(!key){list.innerHTML="";return;}const sm={court:["COURT","as-court"],plaintiff:["PLAINTIFF","as-plaintiff"],defense:["DEFENSE","as-defense"]};list.innerHTML=oralArgs[key].map(a=>{const[sl,sc]=sm[a.side]||["UNKNOWN","as-court"];return`<div class="acard"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:8px"><div><div style="font-size:12px;font-weight:500;color:var(--text)">${a.speaker}</div><div style="font-size:10px;color:var(--text-mute);font-family:'JetBrains Mono',monospace">at ${a.time}</div></div><span class="aside ${sc}">${sl}</span></div><div class="aquote">"${a.quote}"</div><div class="asig"><span style="font-weight:500;color:var(--text-dim)">Why it mattered: </span>${a.sig}</div></div>`;}).join("");}
+function renderTimeline(){const pg=document.getElementById("tl-page");pg.innerHTML='<div class="tl-line"></div>'+tlEvents.map(e=>`<div class="tl-event"><div class="tl-circle" style="border-color:${e.color}"><span style="font-size:6px;color:${e.color}">${e.done?"●":"○"}</span></div><div style="font-size:10px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;margin-bottom:2px">${e.date}</div><div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px">${e.title}</div><div style="font-size:11px;color:var(--text-dim)">${e.sub}</div></div>`).join("");}
+function renderImpact(){const sorted=[...cases].sort((a,b)=>(b.impact.democratic+b.impact.precedent)-(a.impact.democratic+a.impact.precedent));document.getElementById("impact-page").innerHTML=sorted.map(c=>{const ov=Math.round((c.impact.democratic+c.impact.precedent+c.impact.compliance)/3);const sc=ov>=80?"var(--green)":ov>=60?"var(--amber)":"var(--rep)";return`<div class="icard"><div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px"><div><div style="font-size:13px;font-weight:500;color:var(--text)">${c.title}</div><div style="font-size:10px;color:var(--text-mute);font-family:'JetBrains Mono',monospace">${c.state}</div></div><div style="text-align:right"><div style="font-size:22px;font-weight:600;color:${sc};font-family:'JetBrains Mono',monospace">${ov}</div><div style="font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.06em">OVERALL</div></div></div><div class="imp-g">${[["DEMOCRATIC",c.impact.democratic,"var(--dem)"],["PRECEDENT",c.impact.precedent,"var(--ind)"],["COMPLIANCE RISK",c.impact.compliance,"var(--rep)"]].map(([l,v,col])=>`<div class="imp-c"><div class="imp-l">${l}</div><div class="imp-b"><div class="imp-f" style="width:${v}%;background:${col}"></div></div><div class="score-num" style="color:${col}">${v}/100</div></div>`).join("")}</div></div>`;}).join("");}
+function renderAttorneys(){document.getElementById("agrid").innerHTML=attorneys.map(a=>`<div class="jcard"><div style="display:flex;align-items:center;gap:9px;margin-bottom:9px"><div class="javatar" style="background:${a.side==="plaintiff"?"rgba(59,130,246,.15)":"rgba(239,68,68,.15)"};color:${a.side==="plaintiff"?"var(--dem)":"var(--rep)"}"> ${a.name.split(" ").map(w=>w[0]).slice(0,2).join("")}</div><div><div style="font-size:13px;font-weight:500;color:var(--text)">${a.name}</div><div style="font-size:10px;color:var(--text-mute);font-family:'JetBrains Mono',monospace">${a.org}</div></div></div><div style="font-size:11px;color:var(--text-dim);padding:5px 8px;background:var(--surface-2);border-radius:5px;margin-bottom:8px;border:1px solid var(--border)">${a.role}</div><div style="font-size:11px;color:var(--text-mute);margin-bottom:3px;font-family:'JetBrains Mono',monospace">◌ ${a.phone}</div><div style="font-size:11px;margin-bottom:8px;font-family:'JetBrains Mono',monospace">✉ <a href="mailto:${a.email}" style="color:var(--dem);text-decoration:none">${a.email}</a></div><div style="display:flex;gap:4px;flex-wrap:wrap">${a.cases.map(c=>`<span style="font-size:10px;padding:2px 7px;background:var(--surface-2);color:var(--text-mute);border-radius:3px;font-family:'JetBrains Mono',monospace;border:1px solid var(--border-hi)">${c}</span>`).join("")}</div></div>`).join("");}
+function renderAlerts(){document.getElementById("alerts-list").innerHTML=recentAlerts.map(a=>`<div class="alert-item"><div style="font-size:16px;flex-shrink:0;color:${a.color}">${a.icon}</div><div style="flex:1"><div style="font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px">${a.text}</div><div style="font-size:11px;color:var(--text-mute)">${a.sub}</div></div><div style="font-size:10px;color:var(--text-mute);white-space:nowrap;font-family:'JetBrains Mono',monospace">${a.time}</div></div>`).join("");}
+function renderMap(){const svg=d3.select("#map").append("svg").attr("viewBox","0 0 900 560").attr("width","100%");const proj=d3.geoAlbersUsa().scale(1100).translate([450,280]);const path=d3.geoPath(proj);d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(us=>{svg.selectAll("path").data(topojson.feature(us,us.objects.states).features).join("path").attr("d",path).attr("stroke","#1F1F23").attr("stroke-width","0.7").attr("fill",d=>stateData[d.properties.name]?stateData[d.properties.name].color:"#18181B").attr("cursor",d=>stateData[d.properties.name]?"pointer":"default").on("click",function(event,d){const name=d.properties.name,sd=stateData[name];if(!sd)return;const sc=cases.filter(c=>c.state.includes(name.split(" ")[0]));document.getElementById("map-detail-title").textContent=name+" — "+sd.cases+" case"+(sd.cases>1?"s":"");document.getElementById("map-detail-body").innerHTML=sc.map(c=>`<div style="margin-bottom:8px"><span style="font-weight:500;color:var(--text)">${c.title}</span> <span style="color:var(--text-mute);font-family:'JetBrains Mono',monospace;font-size:10px">(${c.filed})</span><br><span style="font-size:11px">${c.summary.substring(0,130)}…</span></div>`).join("");document.getElementById("map-detail").style.display="block";});}).catch(()=>{});}
+function setQ(q){document.getElementById("ai-query").value=q;}
+async function runAI(){const caseName=document.getElementById("ai-case-select").value;const query=document.getElementById("ai-query").value.trim();if(!caseName||!query)return;const caseObj=cases.find(c=>c.title===caseName);const el=document.getElementById("ai-result");el.innerHTML='<span style="color:var(--text-mute);font-family:\'JetBrains Mono\',monospace;font-size:11px;letter-spacing:.04em">ANALYZING…</span>';try{const res=await fetch("https://api.anthropic.com/v1/messages",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({model:"claude-sonnet-4-20250514",max_tokens:1000,system:"You are a concise legal analyst specializing in US redistricting and voting rights law. Answer questions clearly and accurately for a non-lawyer audience in 3–5 sentences.",messages:[{role:"user",content:`Case: ${caseObj.title} (${caseObj.state}, ${caseObj.filed})\nStatus: ${caseObj.status}\nSummary: ${caseObj.summary}\nCourt: ${caseObj.court}\nType: ${caseObj.type.join(", ")}\n\nQuestion: ${query}`}]})});const data=await res.json();el.textContent=data.content?.filter(b=>b.type==="text").map(b=>b.text).join("\n")||"No response.";}catch(e){el.innerHTML='<span style="color:var(--rep);font-family:\'JetBrains Mono\',monospace;font-size:11px">ERROR — PLEASE TRY AGAIN</span>';}}
+document.getElementById("ai-query").addEventListener("keydown",e=>{if(e.key==="Enter")runAI();});
+function submitAlert(){const email=document.getElementById("alert-email").value;if(!email||!email.includes("@"))return;document.getElementById("success-msg").style.display="block";}
+document.getElementById("filters").addEventListener("click",e=>{if(e.target.dataset.filter){activeFilter=e.target.dataset.filter;document.querySelectorAll(".fbtn").forEach(b=>b.classList.toggle("active",b.dataset.filter===activeFilter));renderCases();}});
+document.getElementById("search").addEventListener("input",e=>{searchQ=e.target.value.toLowerCase();renderCases();});
+
+/* ── NAV DROPDOWN ── */
+function toggleNavDropdown(){const menu=document.getElementById('nav-tools-menu');const btn=document.getElementById('nav-tools-btn');const open=menu.classList.toggle('open');btn.setAttribute('aria-expanded',open);}
+document.addEventListener('click',function(e){const dd=document.getElementById('nav-tools-dropdown');if(dd&&!dd.contains(e.target)){document.getElementById('nav-tools-menu').classList.remove('open');document.getElementById('nav-tools-btn').setAttribute('aria-expanded','false');}});
+document.addEventListener('keydown',function(e){if(e.key==='Escape'){document.getElementById('nav-tools-menu').classList.remove('open');document.getElementById('nav-tools-btn').setAttribute('aria-expanded','false');}});
+
+renderCases();
+</script>
+</body>
+</html>

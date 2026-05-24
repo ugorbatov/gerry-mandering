@@ -1,0 +1,75 @@
+{
+  "_meta": {
+    "description": "Plain-English summaries of bills written by Claude. Updated as bills come up.",
+    "lastUpdated": "2026-05-10",
+    "format": "Key format: 'hr-NUMBER' for House bills, 's-NUMBER' for Senate bills, 'hres-NUMBER' for House resolutions, 'sres-NUMBER' for Senate resolutions.",
+    "writingStyle": "Plain English, 2-4 sentences, explain what the bill does and who it affects, avoid jargon."
+  },
+  "bills": {
+    "hr-8645": {
+      "title": "New Pathways Act",
+      "topic": "Crime",
+      "summary": "Helps people leaving prison get a state ID more easily. The bill changes the Second Chance Act so that the federal government works with states to make sure formerly incarcerated people can get the identification they need for jobs, housing, and benefits — the things most people take for granted but that are hard to access without an ID."
+    },
+    "hr-8588": {
+      "title": "Tenant Screening Fairness Act",
+      "topic": "Housing",
+      "summary": "Stops companies that do background checks for landlords from including old or unfair information that can prevent people from renting an apartment. It also sets new rules that landlords have to follow when they use these tenant screening reports, making it harder to deny someone housing based on incomplete or outdated records."
+    },
+    "hr-8568": {
+      "title": "Lower Utility Bills Act",
+      "topic": "Energy",
+      "summary": "Requires electric and gas utility companies to give customers the lowest fair profit rate, instead of the highest one. Right now utilities can charge customers more than necessary to ensure investor profits — this bill would lower household electric and gas bills by capping that profit margin."
+    },
+    "hr-8555": {
+      "title": "Living Wage Act",
+      "topic": "Labor",
+      "summary": "Raises the federal minimum wage in stages until it equals the national median wage (about half of what the typical worker earns). Large profitable companies have to raise wages first. Also ends 'subminimum wages' — the lower wages currently allowed for tipped workers, workers with disabilities, and young workers."
+    },
+    "hr-7724": {
+      "title": "No Waivers for Fraud Act",
+      "topic": "Government Operations",
+      "summary": "Prevents people who have been convicted of fraud against the government from getting waivers that would let them work with federal agencies again. It closes loopholes that have allowed convicted fraudsters to keep getting government contracts."
+    },
+    "hr-6938": {
+      "title": "Commerce, Justice, Science, Energy, Water and Interior Appropriations Act",
+      "topic": "Budget",
+      "summary": "A government funding bill that pays for the Departments of Commerce, Justice, Energy, and the Interior for the 2026 fiscal year. It funds things like the FBI, federal courts, NASA, national parks, and Army Corps of Engineers projects. This is one of the regular bills Congress passes every year to keep the government running."
+    },
+    "hr-8692": {
+      "title": "Autonomous Vehicle Transit Act",
+      "topic": "Transportation",
+      "summary": "Lets cities and transit agencies use federal transportation grants to buy and deploy self-driving shuttle and shared-ride vehicles. The goal is to help expand public transportation in places that don't have enough drivers or service, using new self-driving vehicle technology."
+    },
+    "hr-1": {
+      "title": "One Big Beautiful Bill Act",
+      "topic": "Budget",
+      "summary": "A large Republican-led budget reconciliation bill that combines multiple policy changes: extending the 2017 tax cuts, cutting Medicaid and SNAP (food stamps), increasing border enforcement spending, and rolling back some clean energy programs from the Biden-era Inflation Reduction Act. It passed mostly along party lines."
+    },
+    "hr-22": {
+      "title": "SAVE Act (Safeguard American Voter Eligibility)",
+      "topic": "Elections",
+      "summary": "Requires people to show documents proving U.S. citizenship — like a passport or birth certificate — when registering to vote in federal elections. Supporters say it prevents non-citizens from voting. Critics argue it could prevent eligible voters from voting if they don't have these documents readily available, especially married women whose maiden names don't match their current ID."
+    },
+    "hr-77": {
+      "title": "Midnight Rules Relief Act",
+      "topic": "Government Operations",
+      "summary": "Lets Congress reverse multiple last-minute regulations issued by an outgoing presidential administration all at once, instead of having to vote on each one separately. The bill is named after the practice of presidents rushing through new rules in the final months — 'midnight' — of their term."
+    },
+    "hr-8704": {
+      "title": "STABLE DRC Act",
+      "topic": "Foreign Policy",
+      "summary": "Sets U.S. policy toward the Democratic Republic of the Congo to promote peace, stability, and good governance. It includes measures to address the ongoing conflict in eastern Congo and the humanitarian crisis there, and may include sanctions options for those undermining peace."
+    },
+    "hr-7268": {
+      "title": "CLEAN-UP Act",
+      "topic": "Environment",
+      "summary": "Lets the Army Corps of Engineers clean up polluted river and lake sediments at the same time it does water development projects (like flood control or dredging), if it works together with the EPA on a cleanup plan. The goal is to clean contaminated waterways faster instead of having two separate processes."
+    },
+    "hr-8445": {
+      "title": "Stop DEI Act",
+      "topic": "Education",
+      "summary": "Would ban federal funding from being used for diversity, equity, and inclusion (DEI) programs at colleges and government agencies. Schools and agencies that keep DEI programs could lose federal grants and contracts."
+    }
+  }
+}

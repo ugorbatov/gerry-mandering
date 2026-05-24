@@ -1,0 +1,121 @@
+DISTRICT CLICK TROUBLESHOOTING
+==============================
+
+WHAT SHOULD HAPPEN WHEN YOU CLICK A DISTRICT:
+
+1. Desktop:
+   - Hover over a district → tooltip appears with voting stats + demographics
+   - Click on district → district highlights with thick border + side panel updates
+   - The voting stats should show 2024 Presidential vote breakdown
+
+2. Mobile:
+   - Tap a district → popup appears with full details
+   - Double-tap → opens full profile panel
+
+---
+
+FILES NEEDED FOR CLICKING TO WORK:
+
+✓ index.html (you have this)
+✓ voting-stats-all-states.js (you have this)
+✓ voting-stats.css (you have this)
+✓ rep-integration.js (I just created this - place in same folder)
+✓ governors.js (should already exist in your project)
+✓ congress data (embedded in index.html, no separate file needed)
+
+---
+
+TROUBLESHOOTING STEPS:
+
+1. CHECK BROWSER CONSOLE FOR ERRORS:
+   - Right-click → Inspect → Console tab
+   - Look for red error messages
+   - Report any errors you see
+
+2. MAKE SURE YOU HAVE ALL FILES:
+   - Place these 4 files in the SAME folder as index.html:
+     • index.html
+     • voting-stats-all-states.js
+     • voting-stats.css
+     • rep-integration.js (NEW)
+     • governors.js (if you have it)
+
+3. TEST EACH STATE:
+   - Try clicking different states first
+   - Then try clicking districts within each state
+   - Voting stats should appear below demographics
+
+4. CLEAR BROWSER CACHE:
+   - Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+   - Or clear cache manually in browser settings
+
+5. CHECK IF DISTRICTS EVEN APPEAR:
+   - Click a state on the main map
+   - Do the district boundaries show up?
+   - If not, the issue is with district data loading (not voting stats)
+
+---
+
+WHAT THE CODE DOES:
+
+Line 5957-5980 in index.html:
+  → Handles mousemove on district paths
+  → Calls buildShortDistrictHint() to create tooltip with voting stats
+  → Shows tooltip with voting data
+
+Line 5988-6001 in index.html:
+  → Handles click on district paths
+  → Calls selectDistrict() to highlight the district
+  → Calls repProfileManager.onDistrictClick() to trigger rep profile
+
+File: rep-integration.js (NEW)
+  → Provides the repProfileManager object
+  → Handles district click events
+  → Logs district selections
+
+---
+
+EXPECTED TOOLTIP CONTENTS:
+
+When you hover/click a district, you should see:
+
+┌─────────────────────────────────┐
+│ District 5                      │
+│ Rep Name (Party)                │
+│                                 │
+│ DISTRICT DEMOGRAPHICS           │
+│ [Race bar visualization]        │
+│ Med. income  $99.8k             │
+│ Poverty rate  10.0%             │
+│                                 │
+│ 🗳️ 2024 ELECTION RESULTS        │
+│                                 │
+│ Presidential                    │
+│ [████████░] ← visual bar       │
+│ ● 65%    ● 33%                 │
+│                                 │
+│ Click for full profile          │
+└─────────────────────────────────┘
+
+The voting stats are the new addition at the bottom!
+
+---
+
+STILL NOT WORKING?
+
+1. Check the browser console (F12) for JavaScript errors
+2. Verify all 4 files are in the same folder
+3. Make sure index.html loads without errors
+4. Try a different browser
+5. Check if the geojson CDN is accessible (some networks block it)
+
+---
+
+NETWORK DEPENDENCIES:
+
+The app fetches district boundaries from these CDNs:
+- cdn.jsdelivr.net/gh/benbalter/congressional-districts
+- cdn.jsdelivr.net/gh/unitedstates/districts
+- www.govtrack.us
+
+If your network blocks these, districts won't load.

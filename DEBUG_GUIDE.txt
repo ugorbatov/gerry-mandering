@@ -1,0 +1,203 @@
+DEBUG GUIDE: District Clicks Not Working
+=========================================
+
+STEP 1: OPEN BROWSER DEVELOPER CONSOLE
+--------------------------------------
+1. Open your map in a web browser
+2. Right-click anywhere → "Inspect" (or press F12)
+3. Click the "Console" tab
+4. Look for any RED ERROR messages
+
+STEP 2: TRY CLICKING A DISTRICT
+-------------------------------
+1. First, click on a STATE on the map (e.g., New Jersey)
+2. Wait for the district boundaries to load (may take a few seconds)
+3. Look at the console - you should see something like:
+   
+   [District Click] Clicked district: 3 in state: New Jersey
+   [District Click] activeRep is now: {...}
+
+STEP 3: WHAT TO LOOK FOR IN CONSOLE
+-----------------------------------
+
+✓ SUCCESS - You should see these messages:
+  [District Click] Clicked district: 3 in state: New Jersey
+  [District Click] activeRep is now: {name, party, ...}
+
+✗ PROBLEM 1 - No message appears:
+  → The click event isn't firing
+  → Districts probably didn't load
+  → Check if you can hover and see tooltips (should show voting stats)
+
+✗ PROBLEM 2 - "ReferenceError: activeState is not defined":
+  → The state view wasn't initialized properly
+  → Try clicking a state first, wait for districts to load
+
+✗ PROBLEM 3 - "TypeError: selectDistrict is not a function":
+  → There's a JavaScript error in the code
+  → The page didn't load properly
+  → Try reloading the page
+
+✗ PROBLEM 4 - Console shows API errors from CDN:
+  → The district boundary data can't be loaded
+  → Your network might be blocking: cdn.jsdelivr.net
+  → Check your firewall/network settings
+
+---
+
+STEP 4: CHECK IF DISTRICTS LOAD
+-------------------------------
+1. Click on a STATE (any state - New Jersey, California, Texas, etc.)
+2. Wait 3-5 seconds
+3. Do you see district BOUNDARIES appear on the map?
+   - YES → Districts loaded, move to STEP 5
+   - NO → Districts aren't loading, skip to TROUBLESHOOTING section
+
+---
+
+STEP 5: CHECK IF CLICK WORKS
+-----------------------------
+1. Hover over a district → does a TOOLTIP appear?
+   - The tooltip should show:
+     • District number
+     • Rep name
+     • Demographics (race breakdown, income, poverty)
+     • NEW: 🗳️ 2024 ELECTION RESULTS with voting %
+   
+   - YES → Voting stats working! Move to STEP 6
+   - NO → Voting stats not loading, check console for errors
+
+---
+
+STEP 6: CHECK IF DETAIL PANEL UPDATES
+-------------------------------------
+1. Click on a district (after hovering and seeing tooltip)
+2. Look at the RIGHT SIDE PANEL (the sidebar/detail section)
+3. Does it show:
+   • Rep photo
+   • Rep name
+   • Party badge
+   • Demographics
+   • Bills (if available)
+   
+   - YES → Everything works!
+   - NO → Detail panel not updating, see TROUBLESHOOTING
+
+---
+
+TROUBLESHOOTING
+===============
+
+PROBLEM: "No districts appear when I click a state"
+
+SOLUTIONS:
+1. Hard refresh: Ctrl+Shift+R (Windows) or Cmd+Shift+R (Mac)
+2. Clear browser cache and cookies
+3. Try a different browser (Chrome, Firefox, Safari, Edge)
+4. Check console for CDN errors
+5. Your network might be blocking cdn.jsdelivr.net
+   - Try from a different network/VPN if possible
+6. Wait longer (up to 10 seconds) - districts load from CDN
+
+---
+
+PROBLEM: "Tooltip shows but no detail panel updates on click"
+
+SOLUTIONS:
+1. Check if the detail panel is visible on the right
+2. The detail panel might be hidden - check browser width
+   - Make sure your browser window is wide enough (not mobile)
+3. Check console for JavaScript errors
+4. Try clicking the same district again
+5. Try clicking a different district
+
+---
+
+PROBLEM: "Voting stats don't appear in tooltip"
+
+SOLUTIONS:
+1. Check that voting-stats-all-states.js is in the same folder
+2. Check browser console for errors loading the file
+3. Hard refresh the page (Ctrl+Shift+R)
+4. Verify window.votingStatsAll exists:
+   - Type in console: window.votingStatsAll
+   - Should show an object with all 50 states
+
+---
+
+WHAT VOTING STATS SHOULD SHOW
+=============================
+
+When you hover/click a district, you should see:
+
+District 5
+Rep Name (Party)
+
+DISTRICT DEMOGRAPHICS
+[Race Bar]
+Med. income $XXX
+Poverty rate XX%
+
+🗳️ 2024 ELECTION RESULTS
+
+Presidential
+[████░] ← Bar chart
+● 52%  ● 46%
+
+Click for full profile
+
+
+---
+
+STILL NOT WORKING?
+==================
+
+1. Take a screenshot of your console (F12, Console tab)
+2. Note which STATE you tested
+3. Note if districts APPEAR on the map
+4. Note if TOOLTIP shows when hovering
+5. Note if DETAIL PANEL updates when clicking
+6. Share these details for debugging
+
+---
+
+FILES CHECKLIST
+===============
+
+Make sure ALL these files are in the same folder:
+□ index.html
+□ voting-stats-all-states.js (44 KB)
+□ voting-stats.css (2 KB)
+□ rep-integration.js (new file, should be ~2 KB)
+□ governors.js (if you have it)
+
+---
+
+BROWSER SUPPORT
+===============
+
+Tested browsers:
+- Chrome/Chromium ✓
+- Firefox ✓
+- Safari ✓
+- Edge ✓
+
+Mobile support:
+- Click doesn't work on mobile (by design)
+- Tap once to show popup
+- Tap again to show detail panel
+- Depends on your screen size
+
+---
+
+TEST STATES
+===========
+
+Try these states to test:
+- New Jersey (13 districts)
+- California (52 districts)  
+- Texas (38 districts)
+- Wyoming (1 district)
+- Alaska (1 district)
+
+All should work the same way.

@@ -1,0 +1,118 @@
+/* Voting Statistics Display Styling */
+
+#votingStats {
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+
+.voting-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 16px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.voting-section {
+  margin-bottom: 20px;
+}
+
+.voting-section-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-dim);
+  margin-bottom: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+}
+
+.voting-bars-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.voting-bar-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.voting-bar-label {
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 60px;
+  text-align: right;
+}
+
+.voting-bar-wrapper {
+  flex: 1;
+  background-color: var(--surface-2);
+  border-radius: 4px;
+  height: 24px;
+  overflow: hidden;
+  display: flex;
+  border: 1px solid var(--border-hi);
+}
+
+.voting-bar-segment {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 600;
+  color: white;
+  transition: flex 0.3s ease;
+}
+
+.voting-bar-dem {
+  background-color: var(--dem);
+}
+
+.voting-bar-rep {
+  background-color: var(--rep);
+}
+
+.voting-bar-other {
+  background-color: var(--text-mute);
+}
+
+.voting-summary {
+  margin-top: 16px;
+  padding: 12px;
+  background-color: var(--surface-2);
+  border-radius: 4px;
+  border-left: 3px solid var(--border-hi);
+}
+
+.voting-summary-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  font-size: 13px;
+}
+
+.voting-summary-row:last-child {
+  margin-bottom: 0;
+}
+
+.voting-summary-label {
+  color: var(--text-dim);
+}
+
+.voting-summary-value {
+  color: var(--text);
+  font-weight: 600;
+}
+
+.voting-margin {
+  font-size: 12px;
+  color: var(--text-mute);
+  margin-top: 8px;
+  padding-top: 8px;
+  border-top: 1px solid var(--border);
+}

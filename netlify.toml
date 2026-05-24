@@ -1,0 +1,36 @@
+functionsDirectory = "C:\\Users\\volk2\\Desktop\\gerry-deploy\\netlify\\functions"
+functionsDirectoryOrigin = "config"
+plugins = []
+headers = []
+redirects = []
+
+[build]
+publish = "C:\\Users\\volk2\\Desktop\\gerry-deploy"
+publishOrigin = "config"
+functions = "C:\\Users\\volk2\\Desktop\\gerry-deploy\\netlify\\functions"
+
+  [build.environment]
+
+  [build.processing]
+
+    [build.processing.css]
+
+    [build.processing.html]
+
+    [build.processing.images]
+
+    [build.processing.js]
+
+  [build.services]
+
+[env]
+
+  [env.production]
+
+[dev]
+functions = "netlify/functions"
+
+[functions]
+
+  [functions."*"]
+  node_bundler = "esbuild"

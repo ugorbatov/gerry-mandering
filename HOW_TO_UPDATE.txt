@@ -1,0 +1,60 @@
+STEP-BY-STEP: Add Voting Stats to Your index.html
+===================================================
+
+STEP 1: Add CSS link in <head>
+------------------------------
+Find: </style> (around line 790)
+Add BEFORE it:
+  <link rel="stylesheet" href="voting-stats.css">
+
+STEP 2: Add voting data script in <head>
+----------------------------------------
+Find: </head> (near the end of head section)
+Add BEFORE it:
+  <script src="voting-stats-nj.js"></script>
+
+STEP 3: Update the district tooltip function
+---------------------------------------------
+Find: "Per-district demographics — most detailed of the three tiers."
+      This is around line 4938
+
+After line 4962 (after the closing of the demographics div):
+  }
+
+ADD THIS CODE (keep the closing brace):
+
+  // Add voting stats for supported states (NJ)
+  if (stateName === 'New Jersey' && window.votingStatsNJ) {
+    const votingData = window.votingStatsNJ[districtNum];
+    if (votingData) {
+      const presMargin = Math.abs(votingData.presidential.dem - votingData.presidential.rep);
+      const presWinner = votingData.presidential.dem > votingData.presidential.rep ? 'D' : 'R';
+      html += '<div class="tt-hint-voting" style="margin:8px 0 0;">' +
+        '<div style="font-size:9.5px;color:var(--text-mute);text-transform:uppercase;letter-spacing:0.06em;margin-bottom:6px;">🗳️ 2024 Election Results</div>' +
+        '<div style="margin-bottom:8px;">' +
+        '<div style="font-size:8.5px;color:var(--text-dim);margin-bottom:3px;">Presidential</div>' +
+        '<div style="display:flex;gap:3px;margin-bottom:3px;">' +
+        '<div style="flex:' + votingData.presidential.dem + ';height:5px;background:var(--dem);border-radius:1px;"></div>' +
+        '<div style="flex:' + votingData.presidential.rep + ';height:5px;background:var(--rep);border-radius:1px;"></div>' +
+        '</div>' +
+        '<div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:8px;color:var(--text-dim);font-family:\'JetBrains Mono\',monospace;">' +
+        '<span><span style="color:var(--dem);">●</span> ' + votingData.presidential.dem + '%</span>' +
+        '<span><span style="color:var(--rep);">●</span> ' + votingData.presidential.rep + '%</span>' +
+        '</div>' +
+        '</div>' +
+        '</div>';
+    }
+  }
+
+STEP 4: Save and test
+---------------------
+Save your updated index.html
+Replace the old one in your project
+Click a New Jersey district - you should see voting stats below demographics!
+
+FILES NEEDED IN SAME FOLDER:
+- voting-stats-nj.js
+- voting-stats.css
+- Your updated index.html
+
+That's it!
