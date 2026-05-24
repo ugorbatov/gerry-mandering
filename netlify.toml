@@ -5,9 +5,9 @@ headers = []
 redirects = []
 
 [build]
-publish = "C:\\Users\\volk2\\Desktop\\gerry-deploy"
-publishOrigin = "config"
-functions = "C:\\Users\\volk2\\Desktop\\gerry-deploy\\netlify\\functions"
+publish = "."
+functions = "netlify/functions"
+functionsDirectory = "netlify/functions"
 
   [build.environment]
 
