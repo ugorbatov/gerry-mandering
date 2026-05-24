@@ -20,7 +20,7 @@
 <meta name="robots" content="index, follow, max-image-preview:large" />
 <meta name="theme-color" content="#0A0A0B" />
 
-<link rel="canonical" href="https://gerrymandering-revealed.netlify.app/" />
+<link rel="canonical" href="https://gerrymandering-revealed.example/" />
 
 <!-- Open Graph (Facebook, LinkedIn, Slack, Discord) -->
 <meta property="og:type" content="website" />
@@ -30,7 +30,7 @@
 <meta property="og:url" content="https://gerrymandering-revealed.netlify.app/" />
 <meta property="og:locale" content="en_US" />
 <!-- og:image: replace this with a 1200x630 PNG once you have one -->
-<meta property="og:image" content="https://gerrymandering-revealed.netlify.appog-image.png" />
+<meta property="og:image" content="https://gerrymandering-revealed.example/og-image.png" />
 <meta property="og:image:width" content="1200" />
 <meta property="og:image:height" content="630" />
 <meta property="og:image:alt" content="Map of the United States colored by each state's congressional delegation party balance" />
@@ -39,7 +39,7 @@
 <meta name="twitter:card" content="summary_large_image" />
 <meta name="twitter:title" content="Gerrymandering Revealed · How Votes Become Seats" />
 <meta name="twitter:description" content="Interactive non-partisan map of every U.S. congressional district in the 119th Congress." />
-<meta name="twitter:image" content="https://gerrymandering-revealed.netlify.appog-image.png" />
+<meta name="twitter:image" content="https://gerrymandering-revealed.example/og-image.png" />
 <meta name="twitter:image:alt" content="Map of the United States colored by each state's congressional delegation party balance" />
 
 <!-- JSON-LD: tells search engines this is an interactive dataset -->
@@ -48,7 +48,7 @@
   "@context": "https://schema.org",
   "@type": "WebApplication",
   "name": "Gerrymandering Revealed",
-  "url": "https://gerrymandering-revealed.netlify.app",
+  "url": "https://gerrymandering-revealed.example/",
   "description": "Interactive non-partisan map of every U.S. congressional district in the 119th Congress, with representatives, party breakdowns, and recent election results.",
   "applicationCategory": "GovernmentApplication",
   "operatingSystem": "Any",
@@ -5640,6 +5640,7 @@ async function showStateView(stateName) {
   mobilePopupHide();
 
   // Update chrome
+  document.title = stateName + "'s Congressional Districts - Gerrymandering Revealed";
   document.getElementById('main-heading').textContent = stateName + "'s congressional districts";
   document.getElementById('lede').textContent = isMobile()
     ? 'All ' + (getDelegation(stateName).d + getDelegation(stateName).r) +
