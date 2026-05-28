@@ -6786,6 +6786,31 @@ function openRepDetailModal(districtNum, rep) {
   
   console.log('[Modal] Demographics lookup:', { activeState, districtNum, abbr, districtKey, hasDistrictDem: !!DISTRICT_DEMOGRAPHICS[districtKey], hasSateDem: !!STATE_DEMOGRAPHICS[activeState], dem: dem ? 'found' : 'NOT FOUND', demPopulation: dem ? dem.population : 'N/A' });
 
+  // Fetch Census population shifts data asynchronously
+  let populationShifts = null;
+  fetch(`/api/census-data?state=${abbr}&shifts=true`)
+    .then(r => r.ok ? r.json() : null)
+    .then(data => {
+      if (data && data.shifts) {
+        populationShifts = data.shifts;
+        // Update the modal if it's still showing the same state
+        const activeAbbr = STATE_ABBR[activeState];
+        if (activeAbbr === abbr && document.getElementById('rep-detail-modal').style.display === 'flex') {
+          const changeEl = document.querySelector('[data-census-change]');
+          const growthEl = document.querySelector('[data-census-growth]');
+          if (changeEl && populationShifts) {
+            const sign = populationShifts.totalChange > 0 ? '+' : '';
+            changeEl.textContent = sign + populationShifts.totalChange.toLocaleString() + ' (' + populationShifts.changePercent.toFixed(2) + '%)';
+          }
+          if (growthEl && populationShifts) {
+            const sign = populationShifts.avgAnnualGrowth > 0 ? '+' : '';
+            growthEl.textContent = sign + populationShifts.avgAnnualGrowth.toFixed(3) + '%';
+          }
+        }
+      }
+    })
+    .catch(err => console.warn('[Census] Failed to fetch shifts:', err));
+
   let html = '<div class="rep-modal-header">';
   
   // Photo with fallback handling
@@ -6873,6 +6898,17 @@ function openRepDetailModal(districtNum, rep) {
       '<div class="rep-modal-stat-label" style="border-bottom:1px dotted var(--text-dim);cursor:help;">State Pop.</div>' +
       '<div class="rep-modal-stat-value" style="font-size:11px;border-bottom:1px dotted var(--text-dim);cursor:help;" title="State population from Census Bureau Vintage 2025 estimates">' + statePop.toLocaleString() + '</div>' +
       '</div>';
+    
+    // Population Shifts (2020-2023) - from Census Bureau
+    html += '<div class="rep-modal-stat">' +
+      '<div class="rep-modal-stat-label" style="border-bottom:1px dotted var(--text-dim);cursor:help;">Pop. Change (2020-23)</div>' +
+      '<div class="rep-modal-stat-value" style="font-size:11px;border-bottom:1px dotted var(--text-dim);cursor:help;" title="Population change from Census Bureau 2020-2023 estimates" data-census-change>—</div>' +
+      '</div>' +
+      '<div class="rep-modal-stat" style="margin-top:-8px;">' +
+      '<div class="rep-modal-stat-label" style="font-size:9px;color:var(--text-mute);">Avg Annual Growth</div>' +
+      '<div class="rep-modal-stat-value" style="font-size:10px;color:var(--text-mute);" data-census-growth>—</div>' +
+      '</div>';
+    
     if (totalSeats > 0) {
       const districtPop = dem.population || idealDistrictPop;
       const popLabel = dem.population ? 'District Pop. (actual)' : 'District Pop. (ideal)';
