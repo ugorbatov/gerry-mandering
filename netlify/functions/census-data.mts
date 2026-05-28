@@ -3,6 +3,23 @@ import type { Context, Config } from "@netlify/functions";
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 
+// 2020 Census data (official baseline for post-redistricting analysis)
+const CENSUS_2020: Record<string, number> = {
+  AL: 5024279, AK: 733391, AZ: 7151502, AR: 3011524,
+  CA: 39538223, CO: 5773714, CT: 3605944, DE: 990837,
+  FL: 21538187, GA: 10711908, HI: 1435138, ID: 1839106,
+  IL: 12812508, IN: 6785528, IA: 3190369, KS: 2937880,
+  KY: 4505836, LA: 4657757, ME: 1362359, MD: 6177224,
+  MA: 7029917, MI: 10077331, MN: 5706494, MS: 2961279,
+  MO: 6154913, MT: 1084225, NE: 1961504, NV: 3104614,
+  NH: 1377529, NJ: 8882190, NM: 2117522, NY: 20201249,
+  NC: 10439388, ND: 779094, OH: 11799448, OK: 3959353,
+  OR: 4237256, PA: 13002700, RI: 1097379, SC: 5118425,
+  SD: 886667, TN: 6910840, TX: 29145505, UT: 3271616,
+  VT: 643077, VA: 8631393, WA: 7705281, WV: 1793716,
+  WI: 5893718, WY: 576851, DC: 705749
+};
+
 function getStateFips(stateAbbr: string): string {
   const fipsMap: Record<string, string> = {
     AL: "01", AK: "02", AZ: "04", AR: "05", CA: "06", CO: "08", CT: "09",
@@ -29,7 +46,6 @@ async function fetchStatePopulation(state: string, censusApiKey: string) {
     const fips = getStateFips(state);
     if (!fips) throw new Error(`Invalid state code: ${state}`);
 
-    // Fetch 2023 population
     const url = `https://api.census.gov/data/2023/pep/charv?get=POP&for=state:${fips}&YEAR=2023&key=${censusApiKey}`;
     console.log(`[census-data] Fetching state population for ${state}`);
 
@@ -62,77 +78,31 @@ async function fetchStatePopulation(state: string, censusApiKey: string) {
   }
 }
 
-// Fetch multi-year population for calculating shifts (2020-2023)
-async function fetchPopulationShifts(state: string, censusApiKey: string) {
-  const cacheKey = `census-shifts-${state}`;
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-
+// Calculate population shifts: 2020 Census to 2023 PEP
+async function calculatePopulationShifts(state: string, pop2023: number) {
   try {
-    const fips = getStateFips(state);
-    if (!fips) throw new Error(`Invalid state code: ${state}`);
+    const pop2020 = CENSUS_2020[state];
+    if (!pop2020) throw new Error(`No 2020 Census data for ${state}`);
 
-    console.log(`[census-data] Fetching population shifts for ${state}`);
+    console.log(`[census-data] Calculating shifts for ${state}: 2020=${pop2020} 2023=${pop2023}`);
 
-    // Fetch multiple years to calculate shifts
-    const years = [2020, 2021, 2022, 2023];
-    const populationByYear: Record<number, number> = {};
+    const totalChange = pop2023 - pop2020;
+    const changePercent = (totalChange / pop2020) * 100;
+    const yearsSpan = 3; // 2020 to 2023 = 3 years
+    const avgAnnualGrowth = changePercent / yearsSpan;
 
-    for (const year of years) {
-      const url = `https://api.census.gov/data/${year}/pep/charv?get=POP&for=state:${fips}&YEAR=${year}&key=${censusApiKey}`;
-      const response = await fetch(url);
-      
-      if (!response.ok) {
-        console.warn(`[census-data] Could not fetch year ${year}`);
-        continue;
-      }
-
-      const rawData = await response.json() as any[];
-      if (!Array.isArray(rawData) || rawData.length < 2) continue;
-
-      const header = rawData[0];
-      const dataRow = rawData[1];
-      const popIndex = header.indexOf("POP");
-      if (popIndex === -1) continue;
-
-      const population = parseInt(dataRow[popIndex], 10);
-      if (!isNaN(population)) {
-        populationByYear[year] = population;
-      }
-    }
-
-    if (Object.keys(populationByYear).length < 2) {
-      throw new Error("Not enough years of data to calculate shifts");
-    }
-
-    const yearsSorted = Object.keys(populationByYear).map(Number).sort((a, b) => a - b);
-    const startYear = yearsSorted[0];
-    const endYear = yearsSorted[yearsSorted.length - 1];
-    const startPop = populationByYear[startYear];
-    const endPop = populationByYear[endYear];
-
-    const totalChange = endPop - startPop;
-    const changePercent = (totalChange / startPop) * 100;
-    const yearsSpan = endYear - startYear;
-    const avgAnnualGrowth = yearsSpan > 0 ? changePercent / yearsSpan : 0;
-
-    const data = {
-      startYear,
-      endYear,
-      startPop,
-      endPop,
+    return {
+      startYear: 2020,
+      endYear: 2023,
+      startPop: pop2020,
+      endPop: pop2023,
       totalChange,
       changePercent: Number(changePercent.toFixed(2)),
       avgAnnualGrowth: Number(avgAnnualGrowth.toFixed(3))
     };
-
-    cache.set(cacheKey, { data, timestamp: Date.now() });
-    return data;
   } catch (error) {
     console.error(`[census-data] Error calculating shifts:`, error);
-    throw error;
+    return null;
   }
 }
 
@@ -245,14 +215,9 @@ export default async (req: Request, context: Context) => {
       timestamp: new Date().toISOString(),
     };
 
-    // Optionally include shifts
+    // Optionally include shifts (2020 Census to 2023 PEP)
     if (includeShifts) {
-      try {
-        response.shifts = await fetchPopulationShifts(state, censusApiKey);
-      } catch (err) {
-        console.warn(`[census-data] Could not calculate shifts:`, err);
-        response.shifts = null;
-      }
+      response.shifts = await calculatePopulationShifts(state, populationData.population);
     }
 
     return new Response(JSON.stringify(response, null, 2), {
