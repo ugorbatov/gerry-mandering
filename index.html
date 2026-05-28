@@ -5935,11 +5935,6 @@ async function showStateView(stateName) {
 
     renderStateMap();
     renderStateDetail(legResult.status === 'rejected' ? legResult.reason : null);
-    
-    // Load Census Bureau population data
-    if (window.populationEstimatesDisplay) {
-      populationEstimatesDisplay.insert(abbr);
-    }
   } catch (err) {
     // Hide tooltip in case it's stuck visible
     document.getElementById('tooltip').classList.remove('visible');
