@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Follow the Money · Gerrymandering Revealed</title>
+<meta name="description" content="The donors, PACs, and dollars behind every state's redistricting fight." />
+<meta name="theme-color" content="#0A0A0B" />
+<link rel="canonical" href="https://gerrymandering-revealed.example/follow-the-money.html" />
+<link rel="stylesheet" href="ftm-shared.css" />
+<link rel="stylesheet" href="theme.css" />
+<script src="theme-toggle.js"></script>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="top-right">
+    <div class="ts-line"><span class="dot"></span><span>FOLLOW THE MONEY — PREVIEW</span></div>
+    <div class="ts-line" style="opacity:.7"><span>2 STATES COVERED</span></div>
+  </div>
+
+  <header>
+    <div class="eyebrow">
+      <span class="pill"></span>
+      <span class="wordmark">Gerrymandering Revealed</span>
+      <span class="eyebrow-sub">Follow the Money</span>
+    </div>
+
+    <nav class="site-nav" aria-label="Site navigation">
+      <a class="nav-item" href="index.html">
+        <span class="nav-dot" style="background:var(--text-mute)"></span>
+        District Map
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-dropdown" id="nav-tools-dropdown">
+        <button class="nav-item" onclick="toggleNavDropdown()" aria-expanded="false" aria-haspopup="true" id="nav-tools-btn">
+          Tools &amp; Data
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:2px;opacity:.5" aria-hidden="true">
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-tools-menu" role="menu">
+          <div class="nav-dropdown-header">Gerrymandering Revealed · Suite</div>
+          <a class="nav-dd-item" href="index.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(59,130,246,.12)">🗺</div>
+            <div><div class="nav-dd-title">District Map <span class="nav-dd-tag tag-live">LIVE</span></div><div class="nav-dd-sub">Interactive map of every U.S. congressional district — 119th Congress.</div></div>
+          </a>
+          <a class="nav-dd-item" href="legal-tracker.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(168,85,247,.12)">⚖</div>
+            <div><div class="nav-dd-title">Legal Tracker <span class="nav-dd-tag tag-new">NEW</span></div><div class="nav-dd-sub">Every major redistricting lawsuit — cases, judges, AI summaries.</div></div>
+          </a>
+          <a class="nav-dd-item" href="vote-gap.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(245,158,11,.12)">📊</div>
+            <div><div class="nav-dd-title">Vote Gap Analyzer <span class="nav-dd-tag tag-live">LIVE</span></div><div class="nav-dd-sub">Compare votes cast vs. seats won in each state.</div></div>
+          </a>
+          <a class="nav-dd-item" href="follow-the-money.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(239,68,68,.12)">💰</div>
+            <div><div class="nav-dd-title">Follow the Money <span class="nav-dd-tag tag-preview">PREVIEW</span></div><div class="nav-dd-sub">Donor-to-politician networks funding redistricting battles.</div></div>
+          </a>
+        </div>
+      </div>
+      <div class="nav-divider"></div>
+      <a class="nav-item active" href="follow-the-money.html" aria-current="page">
+        <span class="nav-dot" style="background:var(--rep)"></span>
+        Money
+      </a>
+    </nav>
+
+    <h1>The donors behind the maps</h1>
+    <p class="lede">Every state's redistricting fight runs on money — sometimes obvious (party PACs spending on incumbents), sometimes subtle (philanthropies funding the "neutral" academics who advise tiebreakers). We trace both. Each case study below ships only after the donor data is sourced from FEC filings and the editorial claims are independently corroborated by at least two outlets.</p>
+  </header>
+
+  <!-- SOURCE TAGS -->
+  <div style="margin-bottom:14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span class="source-tag"><span class="dot"></span>FEC FILINGS</span>
+    <span class="source-tag"><span class="dot"></span>OPENSECRETS</span>
+    <span class="source-tag"><span class="dot"></span>PROPUBLICA ITEMIZER</span>
+    <span class="source-tag"><span class="dot"></span>STATE INVESTIGATIONS</span>
+    <span class="source-tag"><span class="dot"></span>NEWSROOM REPORTING</span>
+  </div>
+
+  <!-- STATE PICKER -->
+  <div class="section-label"><span>STATES COVERED</span><span class="line"></span><span style="font-family:'JetBrains Mono',monospace;color:var(--text-mute);font-size:10px">2 OF ~12 PLANNED</span></div>
+  <div class="state-grid">
+    <a class="state-card live" href="ftm-nj.html">
+      <div class="sc-abbr"><span>NJ · 2021 cycle</span><span class="sc-tag live">LIVE</span></div>
+      <div class="sc-name">New Jersey</div>
+      <div class="sc-hook">Who funded the tiebreaker's advisors — and what they gave to the incumbents whose seats were on the line.</div>
+    </a>
+    <a class="state-card live" href="ftm-wi.html">
+      <div class="sc-abbr"><span>WI · 2023 &amp; 2025</span><span class="sc-tag live">LIVE</span></div>
+      <div class="sc-name">Wisconsin</div>
+      <div class="sc-hook">Buy the court that rules on the maps. Back-to-back Supreme Court races set every U.S. judicial spending record.</div>
+    </a>
+    <div class="state-card soon">
+      <div class="sc-abbr"><span>NC · 2021 cycle</span><span class="sc-tag soon">SOON</span></div>
+      <div class="sc-name">North Carolina</div>
+      <div class="sc-hook">The most-litigated state in the country. Three maps, four lawsuits, $40M+ in outside money.</div>
+    </div>
+    <div class="state-card soon">
+      <div class="sc-abbr"><span>TX · 2021 cycle</span><span class="sc-tag soon">SOON</span></div>
+      <div class="sc-name">Texas</div>
+      <div class="sc-hook">Oil &amp; gas PACs, demographic shifts, and the legislators who drew the new lines.</div>
+    </div>
+    <div class="state-card soon">
+      <div class="sc-abbr"><span>FL · 2021 cycle</span><span class="sc-tag soon">SOON</span></div>
+      <div class="sc-name">Florida</div>
+      <div class="sc-hook">Governor-drawn map, the donors who backed the override, and the courts that let it stand.</div>
+    </div>
+    <div class="state-card soon">
+      <div class="sc-abbr"><span>GA · 2021 cycle</span><span class="sc-tag soon">SOON</span></div>
+      <div class="sc-name">Georgia</div>
+      <div class="sc-hook">Voting Rights Act litigation, the donors funding both sides of it.</div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════ DONOR ORIGIN MAP ═══════════════════════════════════════ -->
+  <div class="section-label"><span>WHERE THE MONEY COMES FROM</span><span class="line"></span><span style="font-family:'JetBrains Mono',monospace;color:var(--text-mute);font-size:10px">ALL TRACKED STATES · AGGREGATED</span></div>
+
+  <div class="callout">
+    <span class="ci">◎</span>
+    <div>Each bubble shows the total dollars sent from that state into the redistricting fights tracked on this site. <strong>Dashed amber circles mark the states being targeted</strong> — the ones whose maps the money is fighting over. Bubble size is proportional to dollars (square-root scale); color shows which side the majority of the state's donations backed. Hover any bubble for the donor breakdown.</div>
+  </div>
+
+  <div class="usmap-wrap">
+    <div id="donor-origin-map" data-ftm-donormap='{"cases":["nj","wi"],"targetStates":["NJ","WI"]}' style="position:relative"></div>
+  </div>
+
+</div><!-- .page -->
+
+<script src="ftm-data.js"></script>
+<script src="ftm-viz.js"></script>
+<script>
+function toggleNavDropdown() {
+  const m = document.getElementById('nav-tools-menu');
+  const b = document.getElementById('nav-tools-btn');
+  const open = m.classList.toggle('open');
+  b.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('nav-tools-dropdown');
+  if (dd && !dd.contains(e.target)) {
+    document.getElementById('nav-tools-menu').classList.remove('open');
+    document.getElementById('nav-tools-btn').setAttribute('aria-expanded','false');
+  }
+});
+
+document.addEventListener('DOMContentLoaded', () => {
+  FtmViz.renderDonorMap('donor-origin-map', { cases: ['nj','wi'], targetStates: ['NJ','WI'] });
+});
+</script>
+
+</body>
+</html>

@@ -1666,9 +1666,239 @@
     body:not(.simulate-mobile) .mobile-title-strip { display: none !important; }
   }
  <link rel="stylesheet" href="voting-stats.css">
+  
+  /* ============================================================
+     POPULATION ESTIMATES DISPLAY - CSS Styles
+     ============================================================ */
+  .population-estimates {
+    padding: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-top: 12px;
+    margin-bottom: 12px;
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  .pop-header {
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text);
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .pop-section {
+    margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border-hi);
+  }
+
+  .pop-section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+    padding-bottom: 0;
+  }
+
+  .pop-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .pop-current {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pop-current-number {
+    font-size: 24px;
+    font-weight: 700;
+    color: var(--green);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    letter-spacing: -0.02em;
+  }
+
+  .pop-yoy {
+    font-size: 11px;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 6px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    border-left: 2px solid var(--border-hi);
+  }
+
+  .pop-yoy-label {
+    color: var(--text-mute);
+    font-weight: 500;
+  }
+
+  .pop-yoy-value {
+    color: var(--text);
+    font-weight: 600;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  .pop-metric-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+
+  .pop-metric {
+    padding: 8px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  .pop-metric-label {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-mute);
+    font-weight: 500;
+  }
+
+  .pop-metric-value {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--text);
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  .pop-metric-pct {
+    font-size: 11px;
+    color: var(--text-dim);
+    font-weight: 500;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+
+  .pop-trend-chart {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pop-trend-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-dim);
+  }
+
+  .pop-trend-bars {
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 4px;
+    height: 80px;
+    padding: 8px 4px;
+    background: var(--surface-2);
+    border-radius: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .pop-trend-bar {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .pop-trend-bar-fill {
+    width: 100%;
+    background: var(--text-mute);
+    border-radius: 2px 2px 0 0;
+    transition: background-color 150ms;
+  }
+
+  .pop-trend-bar-fill.positive {
+    background: var(--green);
+  }
+
+  .pop-trend-bar-fill.negative {
+    background: var(--amber);
+  }
+
+  .pop-trend-bar:hover .pop-trend-bar-fill {
+    opacity: 0.8;
+  }
+
+  .pop-trend-year {
+    font-size: 8px;
+    color: var(--text-mute);
+    font-weight: 500;
+    text-align: center;
+    white-space: nowrap;
+  }
+
+  .pop-footer {
+    padding-top: 8px;
+    margin-top: 8px;
+    border-top: 1px solid var(--border-hi);
+  }
+
+  .pop-footer-text {
+    font-size: 9px;
+    color: var(--text-mute);
+    letter-spacing: 0.02em;
+    font-style: italic;
+  }
+
+  @media (max-width: 640px) {
+    .population-estimates {
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+
+    .pop-header {
+      font-size: 11px;
+      margin-bottom: 10px;
+    }
+
+    .pop-current-number {
+      font-size: 20px;
+    }
+
+    .pop-metric-row {
+      grid-template-columns: 1fr;
+    }
+
+    .pop-trend-bars {
+      height: 60px;
+    }
+  }
 
 </style>
 <script src="voting-stats-all-states.js"></script>
+<link rel="stylesheet" href="theme.css" />
+<script src="theme-toggle.js"></script>
 </head>
 <body>
 <div class="page">
@@ -1733,7 +1963,7 @@
           <a class="nav-dd-item" href="vote-gap.html" role="menuitem">
             <div class="nav-dd-icon" style="background:rgba(245,158,11,.12)">📊</div>
             <div class="nav-dd-text">
-              <div class="nav-dd-title">Vote Gap Analyzer <span class="nav-dd-tag tag-soon">SOON</span></div>
+              <div class="nav-dd-title">Vote Gap Analyzer <span class="nav-dd-tag tag-new">NEW</span></div>
               <div class="nav-dd-sub">Compare how votes cast vs. seats won diverge in each state — quantifying partisan advantage district by district.</div>
             </div>
           </a>
@@ -5704,6 +5934,11 @@ async function showStateView(stateName) {
 
     renderStateMap();
     renderStateDetail(legResult.status === 'rejected' ? legResult.reason : null);
+    
+    // Load Census Bureau population data
+    if (window.populationEstimatesDisplay) {
+      populationEstimatesDisplay.insert(abbr);
+    }
   } catch (err) {
     // Hide tooltip in case it's stuck visible
     document.getElementById('tooltip').classList.remove('visible');
@@ -7934,5 +8169,6 @@ document.addEventListener('keydown', function(e) {
   }
 });
 </script>
+<script src="population-estimates-display.js"></script>
 </body>
 </html>

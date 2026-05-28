@@ -1,0 +1,122 @@
+/* ─────────────────────────────────────────────────────────────────
+   Gerrymandering Revealed — light theme
+   Activated by setting data-theme="light" on the <html> element.
+   Theme-toggle.js handles persistence and the toggle button.
+   ───────────────────────────────────────────────────────────────── */
+
+html[data-theme="light"] {
+  --bg:        #FAFAFA;
+  --surface:   #FFFFFF;
+  --surface-2: #F4F4F5;
+  --border:    #E4E4E7;
+  --border-hi: #D4D4D8;
+  --text:      #18181B;
+  --text-dim:  #52525B;
+  --text-mute: #71717A;
+  /* Identity colors unchanged: --dem, --rep, --ind, --tie, --green, --amber, --orange, --unknown */
+}
+
+/* Shadows are tuned for each theme. Dark theme uses near-black drops; light needs softer, smaller. */
+html[data-theme="light"] .nav-dropdown-menu,
+html[data-theme="light"] .stat-card,
+html[data-theme="light"] .ccard {
+  box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 4px 12px rgba(0,0,0,.06);
+}
+
+/* The site has many translucent rgba() overlays like rgba(59,130,246,.12).
+   On light backgrounds those drop to barely-visible tints. Lift their alpha. */
+html[data-theme="light"] .badge.won,
+html[data-theme="light"] .badge.active-s,
+html[data-theme="light"] .badge.lost,
+html[data-theme="light"] .badge.appealed,
+html[data-theme="light"] .badge.racial,
+html[data-theme="light"] .badge.partisan,
+html[data-theme="light"] .fbtn.active,
+html[data-theme="light"] .eg-pill.lean-d,
+html[data-theme="light"] .eg-pill.lean-r,
+html[data-theme="light"] .dist-tag,
+html[data-theme="light"] .delta,
+html[data-theme="light"] .nav-dd-tag,
+html[data-theme="light"] .ls-intro,
+html[data-theme="light"] .ls-committee,
+html[data-theme="light"] .ls-passed,
+html[data-theme="light"] .ls-failed,
+html[data-theme="light"] .aside,
+html[data-theme="light"] .as-court,
+html[data-theme="light"] .as-plaintiff,
+html[data-theme="light"] .as-defense,
+html[data-theme="light"] .btn.primary {
+  filter: saturate(1.15);
+}
+
+/* Body & page backgrounds: subtle texture instead of stark white where helpful */
+html[data-theme="light"] body {
+  background: var(--bg);
+}
+
+/* Hairlines look heavier on light — fade slightly */
+html[data-theme="light"] .stats-row,
+html[data-theme="light"] .tabs {
+  background: var(--border);
+}
+
+/* The dot status indicator in top-right uses green w/ glow — soften halo on light */
+html[data-theme="light"] .ts-line .dot {
+  box-shadow: 0 0 4px rgba(34,197,94,.3);
+}
+
+/* Code-style monospace blocks read better with subtle background lift on light */
+html[data-theme="light"] .source-tag {
+  background: var(--surface-2);
+}
+
+/* ─── Index map overlays ───
+   index.html hardcodes rgba(10,10,11,...) as a translucent dark background for
+   the map legend, source attribution, zoom buttons, view switcher, and mobile
+   title strip. On light mode those become near-black overlays on a white map.
+   Override with a light translucent panel using a similar alpha shape. */
+html[data-theme="light"] .legend,
+html[data-theme="light"] .map-source,
+html[data-theme="light"] .zoom-btn,
+html[data-theme="light"] .zoom-btn[disabled]:hover {
+  background: rgba(255,255,255,0.78);
+}
+html[data-theme="light"] .view-switcher {
+  background: rgba(255,255,255,0.92);
+  box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+}
+/* Mobile title strip uses a gradient (fades top→transparent) */
+html[data-theme="light"] .mobile-title-strip,
+html[data-theme="light"] body.simulate-mobile .mobile-title-strip {
+  background: linear-gradient(180deg, rgba(255,255,255,0.92) 0%, rgba(255,255,255,0) 100%);
+}
+
+/* ─── Toggle button (lives in nav) ─── */
+.theme-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px; height: 30px;
+  border-radius: 6px;
+  border: 1px solid var(--border-hi);
+  background: var(--surface);
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 150ms;
+  padding: 0;
+  margin-left: 6px;
+  flex-shrink: 0;
+}
+.theme-toggle:hover {
+  color: var(--text);
+  border-color: var(--text-mute);
+}
+.theme-toggle svg {
+  width: 14px; height: 14px;
+  display: block;
+}
+/* Show sun in light mode (offering switch to dark), moon in dark mode (offering switch to light) */
+.theme-toggle .icon-sun  { display: none; }
+.theme-toggle .icon-moon { display: block; }
+html[data-theme="light"] .theme-toggle .icon-sun  { display: block; }
+html[data-theme="light"] .theme-toggle .icon-moon { display: none; }

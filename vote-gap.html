@@ -1,0 +1,971 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Vote Gap Analyzer · Gerrymandering Revealed</title>
+<meta name="description" content="Compare votes cast vs. seats won in every U.S. state — efficiency gap, packing, cracking, and 30 years of how votes translate into power." />
+<meta name="theme-color" content="#0A0A0B" />
+<link rel="canonical" href="https://gerrymandering-revealed.example/vote-gap.html" />
+<link rel="stylesheet" href="theme.css" />
+<script src="theme-toggle.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#0A0A0B; --surface:#111113; --surface-2:#18181B; --border:#1F1F23;
+  --border-hi:#2E2E33; --text:#F4F4F5; --text-dim:#A1A1AA; --text-mute:#52525B;
+  --dem:#3B82F6; --rep:#EF4444; --ind:#A855F7; --green:#22C55E; --amber:#F59E0B; --orange:#F97316;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:14px}
+a{color:var(--text-dim);text-decoration:underline;text-decoration-color:var(--border-hi);text-underline-offset:2px;transition:color 150ms}
+a:hover{color:var(--text);text-decoration-color:var(--text-dim)}
+.page{padding:16px 20px 40px;min-height:100vh;max-width:1280px;margin:0 auto;position:relative}
+
+/* TOP RIGHT */
+.top-right{position:absolute;top:18px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:5}
+.ts-line{font-size:10px;color:var(--text-mute);letter-spacing:.04em;font-family:"JetBrains Mono",monospace;display:flex;align-items:center;gap:6px}
+.ts-line .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6)}
+
+/* HEADER */
+header{margin-bottom:18px;padding-right:220px;position:relative}
+.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.eyebrow .pill{width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,var(--dem) 0%,var(--rep) 100%)}
+.eyebrow span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);font-weight:500}
+.eyebrow .wordmark{color:var(--text);font-weight:600;letter-spacing:.08em}
+.eyebrow .eyebrow-sub{color:var(--text-mute);font-weight:500;letter-spacing:.1em;padding-left:10px;border-left:1px solid var(--border-hi)}
+h1{font-size:28px;font-weight:600;margin:0;letter-spacing:-.02em;line-height:1.15}
+.lede{font-size:13px;color:var(--text-dim);margin-top:6px;max-width:680px;line-height:1.5}
+
+/* NAV — mirrors legal-tracker */
+.site-nav{display:flex;align-items:center;gap:2px;margin-top:10px;margin-bottom:16px;padding:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;width:fit-content;position:relative;z-index:10}
+.nav-item{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:5px;font-size:11px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--text-mute);text-decoration:none;cursor:pointer;border:none;background:none;transition:all 150ms;white-space:nowrap}
+.nav-item:hover{color:var(--text-dim);background:var(--surface-2);text-decoration:none}
+.nav-item.active{color:var(--text);background:var(--surface-2);border:1px solid var(--border-hi)}
+.nav-item .nav-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.nav-divider{width:1px;height:16px;background:var(--border-hi);flex-shrink:0;margin:0 2px}
+.nav-dropdown{position:relative}
+.nav-dropdown-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:260px;background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.6);z-index:100}
+.nav-dropdown-menu.open{display:block}
+.nav-dropdown-header{padding:8px 12px 6px;font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-family:"JetBrains Mono",monospace;border-bottom:1px solid var(--border)}
+.nav-dd-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;text-decoration:none;cursor:pointer;transition:background 150ms;border-bottom:1px solid var(--border)}
+.nav-dd-item:last-child{border-bottom:none}
+.nav-dd-item:hover{background:var(--surface-2)}
+.nav-dd-icon{width:28px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.nav-dd-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.nav-dd-sub{font-size:11px;color:var(--text-mute);line-height:1.4}
+.nav-dd-tag{font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px;font-family:"JetBrains Mono",monospace;vertical-align:middle}
+.tag-live{background:rgba(34,197,94,.15);color:var(--green)}
+.tag-soon{background:rgba(245,158,11,.15);color:var(--amber)}
+.tag-new{background:rgba(59,130,246,.15);color:var(--dem)}
+
+/* STATS ROW */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:14px}
+.stat{background:var(--surface);padding:9px 13px}
+.stat .label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:3px}
+.stat .value{font-size:20px;font-weight:600;font-family:"JetBrains Mono",monospace;letter-spacing:-.02em}
+.stat .sub{font-size:10px;color:var(--text-mute);font-family:"JetBrains Mono",monospace;margin-top:2px}
+
+/* SOURCE TAGS */
+.source-tag{display:inline-flex;align-items:center;gap:4px;padding:2px 7px;background:var(--surface);border:1px solid var(--border);border-radius:4px;font-size:9px;letter-spacing:.04em;color:var(--text-dim);font-family:"JetBrains Mono",monospace}
+.source-tag .dot{width:5px;height:5px;border-radius:50%;background:var(--green)}
+
+/* TABS */
+.tabs{display:flex;gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden;margin-bottom:14px;overflow-x:auto}
+.tab{font-size:11px;padding:7px 12px;border:none;background:var(--surface);color:var(--text-mute);cursor:pointer;letter-spacing:.04em;white-space:nowrap;flex-shrink:0;font-family:inherit;transition:all 150ms}
+.tab:hover{color:var(--text-dim);background:var(--surface-2)}
+.tab.active{color:var(--text);background:var(--surface-2);font-weight:500}
+.pane{display:none}.pane.active{display:block}
+
+/* TOP BAR / FILTERS */
+.top-bar{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.filters{display:flex;gap:5px;flex-wrap:wrap;align-items:center}
+.fbtn{font-size:11px;padding:4px 10px;border-radius:5px;border:1px solid var(--border-hi);background:var(--surface);color:var(--text-mute);cursor:pointer;letter-spacing:.03em;font-family:inherit;transition:all 150ms}
+.fbtn:hover{color:var(--text-dim);border-color:var(--text-mute)}
+.fbtn.active{background:rgba(59,130,246,.12);color:var(--dem);border-color:rgba(59,130,246,.3)}
+.fbtn-amber.active{background:rgba(245,158,11,.12);color:var(--amber);border-color:rgba(245,158,11,.3)}
+.flabel{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em;font-family:"JetBrains Mono",monospace;margin-right:6px}
+
+/* SELECTS */
+select.state-pick{background:var(--surface-2);border:1px solid var(--border-hi);border-radius:6px;color:var(--text);padding:6px 30px 6px 10px;font-size:12px;font-family:inherit;outline:none;cursor:pointer;min-width:200px;appearance:none;background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10' fill='none'><path d='M2 3.5L5 6.5L8 3.5' stroke='%23A1A1AA' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");background-repeat:no-repeat;background-position:right 10px center}
+select.state-pick:focus{border-color:var(--dem)}
+select.state-pick option{background:var(--surface-2)}
+
+/* CARDS */
+.ccard{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.85rem 1rem;margin-bottom:6px}
+.ccard.hov{cursor:pointer;transition:border-color 150ms}
+.ccard.hov:hover{border-color:var(--border-hi)}
+
+/* SECTION LABELS */
+.section-label{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-weight:500;font-family:"JetBrains Mono",monospace;margin-bottom:8px;margin-top:14px}
+.section-label:first-child{margin-top:0}
+
+/* STATE SUMMARY CARD */
+.summary-grid{display:grid;grid-template-columns:1.4fr 1fr;gap:10px;margin-bottom:14px}
+@media (max-width:760px){.summary-grid{grid-template-columns:1fr}}
+.sum-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.sum-title{font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em;font-family:"JetBrains Mono",monospace;margin-bottom:10px}
+.sum-bar-row{margin-bottom:10px}
+.sum-bar-label{display:flex;justify-content:space-between;font-size:11px;color:var(--text-dim);margin-bottom:4px;font-family:"JetBrains Mono",monospace}
+.sum-bar-label .l-val{color:var(--text);font-weight:500}
+.sum-bar-wrap{height:8px;background:var(--surface-2);border-radius:4px;overflow:hidden;display:flex}
+.sum-bar-d{background:var(--dem);height:100%}
+.sum-bar-r{background:var(--rep);height:100%}
+.sum-bar-o{background:var(--text-mute);height:100%}
+.delta{font-size:10px;padding:1px 6px;border-radius:3px;font-family:"JetBrains Mono",monospace;margin-left:6px}
+.delta-pos-d{background:rgba(59,130,246,.15);color:var(--dem)}
+.delta-pos-r{background:rgba(239,68,68,.15);color:var(--rep)}
+.delta-neutral{background:var(--surface-2);color:var(--text-mute)}
+
+/* EFFICIENCY GAP GAUGE */
+.eg-gauge{margin:14px 0 6px}
+.eg-track{position:relative;height:12px;background:var(--surface-2);border-radius:6px;overflow:hidden}
+.eg-mid{position:absolute;left:50%;top:0;bottom:0;width:1px;background:var(--border-hi)}
+.eg-thresh-l,.eg-thresh-r{position:absolute;top:0;bottom:0;width:1px;background:var(--amber);opacity:.5}
+.eg-thresh-l{left:35%}.eg-thresh-r{right:35%}
+.eg-marker{position:absolute;top:-3px;width:18px;height:18px;border-radius:50%;border:2px solid var(--bg);transform:translateX(-50%);transition:left 300ms}
+.eg-marker.lean-d{background:var(--dem)}
+.eg-marker.lean-r{background:var(--rep)}
+.eg-marker.neutral{background:var(--text-mute)}
+.eg-scale{display:flex;justify-content:space-between;font-size:10px;color:var(--text-mute);margin-top:4px;font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+
+/* DISTRICT GRID */
+.district-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px;margin-top:6px}
+.dist-cell{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px 10px;transition:border-color 150ms;cursor:default}
+.dist-cell.tagged{border-color:var(--amber)}
+.dist-cell:hover{border-color:var(--border-hi)}
+.dist-num{font-size:10px;color:var(--text-mute);font-family:"JetBrains Mono",monospace;letter-spacing:.04em;margin-bottom:4px;display:flex;justify-content:space-between;align-items:center}
+.dist-tag{font-size:8px;padding:1px 5px;border-radius:3px;font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+.dist-tag.packed{background:rgba(168,85,247,.15);color:var(--ind)}
+.dist-tag.cracked{background:rgba(245,158,11,.15);color:var(--amber)}
+.dist-tag.flip{background:rgba(34,197,94,.15);color:var(--green)}
+.dist-tag.split{background:rgba(168,85,247,.15);color:var(--ind)}
+.dist-result{font-size:12px;font-weight:500;color:var(--text);margin-bottom:6px}
+.dist-result.win-d{color:var(--dem)}
+.dist-result.win-r{color:var(--rep)}
+.dist-bar-stack{display:flex;flex-direction:column;gap:3px}
+.dist-bar-row{display:flex;align-items:center;gap:5px;font-size:10px;font-family:"JetBrains Mono",monospace}
+.dist-bar-row .lbl{width:24px;color:var(--text-mute)}
+.dist-bar-row .bar{flex:1;height:4px;background:var(--surface-2);border-radius:2px;overflow:hidden}
+.dist-bar-row .bf{height:100%;border-radius:2px}
+.dist-bar-row .pct{width:28px;text-align:right;color:var(--text-dim)}
+
+/* LEGEND */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-size:11px;color:var(--text-mute);margin-top:8px;font-family:"JetBrains Mono",monospace;letter-spacing:.02em}
+.leg-i{display:flex;align-items:center;gap:5px}
+.leg-sq{width:10px;height:10px;border-radius:2px;flex-shrink:0}
+
+/* COMPARE TABLE */
+table.cmp{width:100%;border-collapse:collapse;font-size:12px}
+table.cmp thead{position:sticky;top:0;background:var(--surface);z-index:1}
+table.cmp th{text-align:left;padding:8px 10px;font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.06em;font-family:"JetBrains Mono",monospace;font-weight:500;border-bottom:1px solid var(--border);cursor:pointer;user-select:none;white-space:nowrap}
+table.cmp th:hover{color:var(--text-dim)}
+table.cmp th.sorted{color:var(--text)}
+table.cmp th.num{text-align:right}
+table.cmp td{padding:8px 10px;border-bottom:1px solid var(--border)}
+table.cmp td.num{text-align:right;font-family:"JetBrains Mono",monospace;font-size:11px}
+table.cmp tr:hover{background:var(--surface-2)}
+table.cmp tr.row-state{cursor:pointer}
+.st-name{font-weight:500;color:var(--text)}
+.st-abbr{color:var(--text-mute);font-family:"JetBrains Mono",monospace;font-size:10px;margin-left:4px}
+.eg-pill{display:inline-block;padding:2px 7px;border-radius:4px;font-family:"JetBrains Mono",monospace;font-size:10px;font-weight:500}
+.eg-pill.lean-d{background:rgba(59,130,246,.12);color:var(--dem)}
+.eg-pill.lean-r{background:rgba(239,68,68,.12);color:var(--rep)}
+.eg-pill.neutral{background:var(--surface-2);color:var(--text-mute)}
+.eg-pill.severe{box-shadow:inset 0 0 0 1px currentColor}
+
+/* HISTORY SLIDER */
+.hwrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.hslider-context{display:flex;align-items:center;gap:6px;margin-bottom:10px;flex-wrap:wrap;font-size:11px;color:var(--text-mute);font-family:"JetBrains Mono",monospace}
+.ctx-dot{width:8px;height:8px;border-radius:50%;display:inline-block}
+.ctx-dot.d{background:var(--dem)}
+.ctx-dot.r{background:var(--rep)}
+.ctx-dot.even{background:var(--ind)}
+.hyear-label{font-size:24px;font-weight:600;font-family:"JetBrains Mono",monospace;letter-spacing:-.02em}
+.hchart-wrap{position:relative;height:260px;margin-top:10px}
+.hbars{display:flex;gap:3px;align-items:flex-end;height:200px;padding:0 6px}
+.hbar-col{flex:1;display:flex;flex-direction:column;justify-content:flex-end;height:100%;cursor:pointer;position:relative;gap:1px}
+.hbar-col:hover .hbar-tip{opacity:1}
+.hbar-d,.hbar-r{transition:opacity 150ms;border-radius:2px 2px 0 0;min-height:1px}
+.hbar-d{background:var(--dem)}.hbar-r{background:var(--rep)}
+.hbar-col.muted .hbar-d,.hbar-col.muted .hbar-r{opacity:.35}
+.hbar-col.active .hbar-d,.hbar-col.active .hbar-r{outline:1px solid var(--text);outline-offset:1px}
+.hbar-line{height:1px;background:var(--border-hi);position:absolute;width:100%;pointer-events:none}
+.hbar-tip{position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:var(--surface-2);border:1px solid var(--border-hi);border-radius:6px;padding:5px 8px;font-size:10px;white-space:nowrap;opacity:0;transition:opacity 150ms;font-family:"JetBrains Mono",monospace;pointer-events:none;z-index:5}
+.hbar-tip strong{color:var(--text);font-weight:600}
+.hxaxis{display:flex;gap:3px;padding:6px 6px 0;border-top:1px solid var(--border)}
+.hxlabel{flex:1;text-align:center;font-size:9px;color:var(--text-mute);font-family:"JetBrains Mono",monospace}
+.hxlabel.active{color:var(--text);font-weight:500}
+
+/* PROP CURVE */
+.curve-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:6px}
+.curve-svg{width:100%;height:auto;display:block}
+
+/* EDUCATIONAL */
+.edu-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:8px;margin-bottom:10px}
+.edu-card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:14px 16px}
+.edu-icon{width:34px;height:34px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:16px;margin-bottom:10px;font-family:"JetBrains Mono",monospace;font-weight:600}
+.edu-title{font-size:13px;font-weight:500;color:var(--text);margin-bottom:5px}
+.edu-body{font-size:12px;color:var(--text-dim);line-height:1.6}
+.edu-body .term{color:var(--text);font-weight:500}
+
+/* CALLOUT */
+.callout{background:var(--surface-2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text-dim);line-height:1.6;margin:8px 0 14px;display:flex;gap:10px;align-items:flex-start}
+.callout .ci{font-family:"JetBrains Mono",monospace;color:var(--amber);font-size:13px;flex-shrink:0;margin-top:1px}
+.callout strong{color:var(--text);font-weight:500}
+
+/* MOBILE TWEAKS */
+@media (max-width:680px){
+  header{padding-right:0}
+  .top-right{position:static;align-items:flex-start;margin-bottom:8px}
+  h1{font-size:22px}
+  .stat .value{font-size:16px}
+}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="top-right">
+    <div class="ts-line"><span class="dot"></span><span>VOTE GAP ANALYZER — 2024</span></div>
+    <div class="ts-line" style="opacity:.7"><span>119TH CONGRESS</span></div>
+  </div>
+
+  <header>
+    <div class="eyebrow">
+      <span class="pill"></span>
+      <span class="wordmark">Gerrymandering Revealed</span>
+      <span class="eyebrow-sub">Vote Gap Analyzer</span>
+    </div>
+
+    <nav class="site-nav" aria-label="Site navigation">
+      <a class="nav-item" href="index.html">
+        <span class="nav-dot" style="background:var(--text-mute)"></span>
+        District Map
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-dropdown" id="nav-tools-dropdown">
+        <button class="nav-item" onclick="toggleNavDropdown()" aria-expanded="false" aria-haspopup="true" id="nav-tools-btn">
+          Tools &amp; Data
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:2px;opacity:.5" aria-hidden="true">
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-tools-menu" role="menu">
+          <div class="nav-dropdown-header">Gerrymandering Revealed · Suite</div>
+          <a class="nav-dd-item" href="index.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(59,130,246,.12)">🗺</div>
+            <div><div class="nav-dd-title">District Map <span class="nav-dd-tag tag-live">LIVE</span></div><div class="nav-dd-sub">Interactive map of every U.S. congressional district — 119th Congress.</div></div>
+          </a>
+          <a class="nav-dd-item" href="legal-tracker.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(168,85,247,.12)">⚖</div>
+            <div><div class="nav-dd-title">Legal Tracker <span class="nav-dd-tag tag-new">NEW</span></div><div class="nav-dd-sub">Every major redistricting lawsuit — cases, judges, oral arguments, and AI summaries.</div></div>
+          </a>
+          <a class="nav-dd-item" href="vote-gap.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(245,158,11,.12)">📊</div>
+            <div><div class="nav-dd-title">Vote Gap Analyzer <span class="nav-dd-tag tag-live">LIVE</span></div><div class="nav-dd-sub">Compare votes cast vs. seats won in each state.</div></div>
+          </a>
+        </div>
+      </div>
+      <div class="nav-divider"></div>
+      <a class="nav-item active" href="vote-gap.html" aria-current="page">
+        <span class="nav-dot" style="background:var(--amber)"></span>
+        Vote Gap
+      </a>
+    </nav>
+
+    <h1>How votes become seats — or fail to</h1>
+    <p class="lede">When 51% of the votes wins 80% of the seats, that's not democracy doing its job — it's the map doing its job. Pick a state to see where the gap comes from, district by district. Or compare every state by efficiency gap, the canonical measure of partisan gerrymandering.</p>
+  </header>
+
+  <!-- TOP STATS -->
+  <div class="stats-row" id="topstats"></div>
+
+  <div style="margin-bottom:10px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+    <span class="source-tag"><span class="dot"></span>FEC 2024</span>
+    <span class="source-tag"><span class="dot"></span>BROOKINGS 1994–2024</span>
+    <span class="source-tag"><span class="dot"></span>STEPHANOPOULOS &amp; MCGHEE EG</span>
+    <span class="source-tag"><span class="dot"></span>UCLA DISTRICT BOUNDARIES</span>
+  </div>
+
+  <!-- TABS -->
+  <div class="tabs">
+    <button class="tab active" onclick="showTab('state')">◈ STATE DEEP-DIVE</button>
+    <button class="tab" onclick="showTab('rank')">▲ STATE RANKINGS</button>
+    <button class="tab" onclick="showTab('history')">◎ HISTORY 1994–2024</button>
+    <button class="tab" onclick="showTab('curve')">▤ VOTE-TO-SEAT CURVE</button>
+    <button class="tab" onclick="showTab('learn')">✦ LEARN</button>
+  </div>
+
+  <!-- STATE DEEP-DIVE PANE -->
+  <div id="pane-state" class="pane active">
+    <div class="top-bar">
+      <div class="filters">
+        <span class="flabel">STATE</span>
+        <select id="state-select" class="state-pick" onchange="renderState()"></select>
+      </div>
+      <div class="filters">
+        <span class="flabel">VIEW</span>
+        <button class="fbtn active" data-view="districts" onclick="setView('districts')">DISTRICTS</button>
+        <button class="fbtn" data-view="senate" onclick="setView('senate')">SENATE</button>
+      </div>
+    </div>
+
+    <div id="state-body"></div>
+  </div>
+
+  <!-- STATE RANKINGS PANE -->
+  <div id="pane-rank" class="pane">
+    <div class="top-bar">
+      <div class="filters">
+        <span class="flabel">SORT</span>
+        <button class="fbtn active" data-sort="eg-abs" onclick="setSort('eg-abs')">|EG| LARGEST</button>
+        <button class="fbtn" data-sort="eg-d" onclick="setSort('eg-d')">LEAN DEM</button>
+        <button class="fbtn" data-sort="eg-r" onclick="setSort('eg-r')">LEAN REP</button>
+        <button class="fbtn" data-sort="disp" onclick="setSort('disp')">DISPROPORTIONALITY</button>
+        <button class="fbtn" data-sort="state" onclick="setSort('state')">STATE A–Z</button>
+      </div>
+      <div class="filters">
+        <span class="flabel">MIN SEATS</span>
+        <button class="fbtn active" data-min="2" onclick="setMin(2)">ALL</button>
+        <button class="fbtn" data-min="8" onclick="setMin(8)">≥8</button>
+        <button class="fbtn" data-min="15" onclick="setMin(15)">≥15</button>
+      </div>
+    </div>
+    <div class="callout">
+      <span class="ci">▲</span>
+      <div><strong>Efficiency Gap (EG)</strong> measures wasted votes. EG &gt; 7% in either direction is the threshold Stephanopoulos &amp; McGhee proposed as evidence of partisan gerrymandering. The metric is noisier in small states — academic work typically applies it to states with ≥8 districts, which the filter above lets you isolate. Single-district states cannot be gerrymandered and are always excluded.</div>
+    </div>
+    <div id="rank-body"></div>
+  </div>
+
+  <!-- HISTORY PANE -->
+  <div id="pane-history" class="pane">
+    <div class="top-bar">
+      <div class="filters">
+        <span class="flabel">STATE</span>
+        <select id="hist-state-select" class="state-pick" onchange="renderHistory()"></select>
+      </div>
+    </div>
+    <div class="callout">
+      <span class="ci">◎</span>
+      <div>Sixteen House election cycles. Each bar shows that year's seat split. Watch how delegations swing — and how they sometimes stop swinging entirely after a redistricting.</div>
+    </div>
+    <div id="history-body"></div>
+  </div>
+
+  <!-- CURVE PANE -->
+  <div id="pane-curve" class="pane">
+    <div class="callout">
+      <span class="ci">▤</span>
+      <div><strong>The seats-votes curve.</strong> Each dot is one state in 2024. The diagonal is proportional representation — where seat share equals vote share. States far above the line over-elect Democrats; far below, Republicans. The further from the diagonal, the bigger the structural advantage built into the map.</div>
+    </div>
+    <div class="curve-wrap" id="curve-wrap"></div>
+    <div id="curve-stats" style="margin-top:10px"></div>
+  </div>
+
+  <!-- LEARN PANE -->
+  <div id="pane-learn" class="pane">
+    <div class="section-label">HOW MAPS DISTORT REPRESENTATION</div>
+    <div class="edu-grid">
+      <div class="edu-card">
+        <div class="edu-icon" style="background:rgba(168,85,247,.15);color:var(--ind)">PK</div>
+        <div class="edu-title">Packing</div>
+        <div class="edu-body">Concentrate the opposing party's voters into as few districts as possible, where they win by huge margins. A <span class="term">packed district</span> here is any seat won with 75% or more — every extra vote is "wasted" since the seat is already locked.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon" style="background:rgba(245,158,11,.15);color:var(--amber)">CR</div>
+        <div class="edu-title">Cracking</div>
+        <div class="edu-body">Split the opposing party's voters across many districts so they never reach a majority. A <span class="term">cracked district</span> is one where the losing party gets 35–49% — close, but the map ensures they never quite win.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon" style="background:rgba(59,130,246,.15);color:var(--dem)">EG</div>
+        <div class="edu-title">Efficiency Gap</div>
+        <div class="edu-body">The legal-academic metric. Counts every <span class="term">wasted vote</span> — votes for losers, plus winners' votes beyond 50%+1 — and shows which side wasted more. Above ±7% is the gerrymandering red line.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon" style="background:rgba(34,197,94,.15);color:var(--green)">WV</div>
+        <div class="edu-title">Wasted votes</div>
+        <div class="edu-body">A vote is "wasted" when it doesn't help elect anyone. Every vote for the losing candidate is wasted. So is every vote for the winner beyond what they needed to win. Maps with low wasted votes are efficient. Maps where one side wastes far more are gerrymandered.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon" style="background:rgba(239,68,68,.15);color:var(--rep)">DP</div>
+        <div class="edu-title">Disproportionality</div>
+        <div class="edu-body">The simplest measure: how far seat share strays from vote share. A party that gets 51% of votes but 80% of seats has 29 points of disproportionality. This alone doesn't prove gerrymandering — single-member districts naturally amplify majorities — but extreme gaps are a starting flag.</div>
+      </div>
+      <div class="edu-card">
+        <div class="edu-icon" style="background:rgba(168,85,247,.15);color:var(--ind)">SD</div>
+        <div class="edu-title">Single-district states</div>
+        <div class="edu-body">Seven states have only one House seat: <span class="term">AK, DE, MT, ND, SD, VT, WY</span>. They cannot be gerrymandered — the "map" is the state line. Their Senate seats are also statewide, immune to redistricting. They appear here for completeness but never in gerrymandering rankings.</div>
+      </div>
+    </div>
+
+    <div class="section-label">WHY THE SENATE IS DIFFERENT</div>
+    <div class="callout">
+      <span class="ci">⚖</span>
+      <div>Senate seats are <strong>statewide</strong> — every Senator represents the whole state, not a drawn district. So there's no gerrymandering of the Senate. But the Senate's <strong>structural</strong> disproportionality — every state gets 2 Senators regardless of population — is enormous and beyond the scope of redistricting reform. California's 39 million people get the same Senate representation as Wyoming's 580,000.</div>
+    </div>
+
+    <div class="section-label">READING THIS TOOL</div>
+    <div class="callout">
+      <span class="ci">▶</span>
+      <div>The <strong>State Deep-Dive</strong> tab shows every district in one state — color-coded by winner, tagged with packed/cracked patterns where they appear. The <strong>Rankings</strong> tab sorts all multi-district states by efficiency gap, the academic gold standard. <strong>History</strong> walks through 30 years of seat outcomes vs. statewide votes for any state. The <strong>Curve</strong> shows the national picture in one chart.</div>
+    </div>
+  </div>
+
+</div><!-- .page -->
+
+<!-- DATA: extracted from index.html (ELECTION_DATA, HISTORY_DATA, STATE_ABBR) -->
+<script src="vote-gap-data.js"></script>
+<!-- DATA: existing site file with 2024 district vote percentages -->
+<script src="voting-stats-all-states.js"></script>
+
+<script>
+/* =====================================================================
+   VOTE GAP ANALYZER — gerrymandering math + rendering
+   Uses: window.ELECTION_DATA, window.HISTORY_DATA, window.STATE_ABBR,
+         window.votingStatsAll
+   ===================================================================== */
+
+const E = window.ELECTION_DATA, H = window.HISTORY_DATA, ABBR = window.STATE_ABBR;
+const V = window.votingStatsAll;
+
+const SINGLE_DISTRICT = new Set(['Alaska','Delaware','Montana','North Dakota','South Dakota','Vermont','Wyoming']);
+const STATES = Object.keys(V).sort();
+
+/* ── Per-district analysis ──────────────────────────────────────────── */
+// Returns: {dWin, rWin, packed, cracked, wastedD, wastedR, eg, dSeatPct, dVotePct,
+//           districts:[{n, winner, dem, rep, other, margin, tags:[]}]}
+function analyzeState(state) {
+  const dists = V[state];
+  if (!dists) return null;
+  const nums = Object.keys(dists).map(Number).sort((a,b)=>a-b);
+  let dWin=0, rWin=0, dTot=0, rTot=0, wastedD=0, wastedR=0, packed=0, cracked=0;
+  const districts = nums.map(n => {
+    const h = dists[n].house;
+    const p = dists[n].presidential;
+    const dem = h.dem, rep = h.rep, other = h.other || 0;
+    // Normalize to dem+rep two-way for EG math (standard convention)
+    const twoWay = dem + rep;
+    const dShare = dem / twoWay;
+    const rShare = rep / twoWay;
+    // If house data shows an exact tie, the source file is using placeholder
+    // values for that district. Break the tie by the district's presidential
+    // lean, and flag it so the UI can surface that the underlying data is
+    // unconfirmed.
+    const unconfirmed = dem === rep;
+    const winner = unconfirmed
+      ? (p.dem > p.rep ? 'D' : 'R')
+      : (dem > rep ? 'D' : 'R');
+    const margin = Math.abs(dem - rep);
+    // Wasted vote model (Stephanopoulos-McGhee, two-party)
+    // Winner wastes everything above 50%+1; loser wastes everything.
+    let wD = 0, wR = 0;
+    if (winner === 'D') { wD = dShare - 0.5; wR = rShare; }
+    else if (winner === 'R') { wR = rShare - 0.5; wD = dShare; }
+    wastedD += wD; wastedR += wR;
+    if (winner === 'D') dWin++; else if (winner === 'R') rWin++;
+    dTot += dem; rTot += rep;
+    // Tags
+    const tags = [];
+    if (unconfirmed) tags.push({label:'UNCONFIRMED', cls:'split'});
+    if (dem >= 75 || rep >= 75) tags.push({label:'PACKED', cls:'packed'});
+    if (margin <= 6 && !unconfirmed) tags.push({label:'COMPETITIVE', cls:'flip'});
+    if (margin > 6 && margin <= 15) tags.push({label:'CRACKED', cls:'cracked'});
+    if (winner === 'D' && rep >= 35 && rep < 50) cracked++;
+    if (winner === 'R' && dem >= 35 && dem < 50) cracked++;
+    if (dem >= 75 || rep >= 75) packed++;
+    return { n, winner, dem, rep, other, margin, tags, unconfirmed };
+  });
+  const totalSeats = dWin + rWin;
+  const totalVotes = dTot + rTot;
+  // EG = (wasted_R - wasted_D) / total votes (positive = pro-D, negative = pro-R)
+  // Using share-of-two-party totals as the denominator-equivalent.
+  const eg = totalSeats === 0 ? 0 : (wastedR - wastedD) / districts.length;
+  const dVotePct = totalVotes > 0 ? (dTot / totalVotes) * 100 : 0;
+  const dSeatPct = totalSeats > 0 ? (dWin / totalSeats) * 100 : 0;
+  return {
+    state, dWin, rWin, totalSeats, packed, cracked,
+    wastedD, wastedR, eg,            // eg is share, multiply by 100 for percent
+    dVotePct, dSeatPct,
+    districts
+  };
+}
+
+/* ── Top stats row ─────────────────────────────────────────────────── */
+function renderTopStats() {
+  // National roll-up across all states with > 1 district
+  const multi = STATES.filter(s => !SINGLE_DISTRICT.has(s));
+  let nDistricts = 0, nPacked = 0, nCracked = 0, totalEgD = 0, totalEgR = 0, mostExtreme = null;
+  for (const s of multi) {
+    const a = analyzeState(s);
+    if (!a) continue;
+    nDistricts += a.districts.length;
+    nPacked += a.packed;
+    nCracked += a.cracked;
+    if (a.eg > 0) totalEgD++; else if (a.eg < 0) totalEgR++;
+    if (!mostExtreme || Math.abs(a.eg) > Math.abs(mostExtreme.eg)) mostExtreme = a;
+  }
+  document.getElementById('topstats').innerHTML = `
+    <div class="stat"><div class="label">Districts analyzed</div><div class="value">${nDistricts}</div><div class="sub">EXCL. 8 AT-LARGE</div></div>
+    <div class="stat"><div class="label">Packed districts</div><div class="value" style="color:var(--ind)">${nPacked}</div><div class="sub">≥75% MARGIN</div></div>
+    <div class="stat"><div class="label">Cracked districts</div><div class="value" style="color:var(--amber)">${nCracked}</div><div class="sub">35–49% LOSING</div></div>
+    <div class="stat"><div class="label">States lean D</div><div class="value" style="color:var(--dem)">${totalEgD}</div><div class="sub">POSITIVE EG</div></div>
+    <div class="stat"><div class="label">States lean R</div><div class="value" style="color:var(--rep)">${totalEgR}</div><div class="sub">NEGATIVE EG</div></div>
+    <div class="stat"><div class="label">Most extreme</div><div class="value" style="color:${mostExtreme.eg>0?'var(--dem)':'var(--rep)'}">${ABBR[mostExtreme.state]}</div><div class="sub">${(mostExtreme.eg*100).toFixed(1)}% EG</div></div>
+  `;
+}
+
+/* ── State deep-dive ───────────────────────────────────────────────── */
+let currentView = 'districts';
+function setView(v) {
+  currentView = v;
+  document.querySelectorAll('[data-view]').forEach(b => b.classList.toggle('active', b.dataset.view === v));
+  renderState();
+}
+
+function renderState() {
+  const state = document.getElementById('state-select').value;
+  const body = document.getElementById('state-body');
+  if (currentView === 'senate') {
+    body.innerHTML = renderSenateView(state);
+    return;
+  }
+  const a = analyzeState(state);
+  if (!a) { body.innerHTML = '<div style="color:var(--text-mute);padding:20px;font-family:\"JetBrains Mono\",monospace;font-size:11px;letter-spacing:.04em">NO DATA FOR THIS STATE</div>'; return; }
+
+  // Build the state's vote-share totals & seat split
+  const dPctSeats = a.dSeatPct, rPctSeats = a.totalSeats ? (a.rWin / a.totalSeats) * 100 : 0;
+  const dPctVotes = a.dVotePct, rPctVotes = 100 - dPctVotes; // close enough for two-way
+  const dispD = dPctSeats - dPctVotes;
+  const isSingle = SINGLE_DISTRICT.has(state);
+
+  // EG marker position: clamp -20%..+20% to 0..100%
+  const egPct = a.eg * 100;
+  const markerLeft = Math.max(0, Math.min(100, ((egPct + 20) / 40) * 100));
+  const egLean = egPct > 1 ? 'lean-d' : (egPct < -1 ? 'lean-r' : 'neutral');
+  const egLabel = egPct > 7 ? `+${egPct.toFixed(1)}% (LEAN DEM, ABOVE THRESHOLD)`
+              : egPct < -7 ? `${egPct.toFixed(1)}% (LEAN REP, ABOVE THRESHOLD)`
+              : egPct > 0 ? `+${egPct.toFixed(1)}% (slight D lean)`
+              : egPct < 0 ? `${egPct.toFixed(1)}% (slight R lean)`
+              : `${egPct.toFixed(1)}% (neutral)`;
+
+  // Single-district notice
+  const singleNote = isSingle ? `
+    <div class="callout">
+      <span class="ci">◈</span>
+      <div>${state} has a single at-large House district. By definition there is no map to gerrymander — the "district" is the whole state. Vote-to-seat gaps still appear because a single district is winner-take-all, but no redistricting reform can change that.</div>
+    </div>` : '';
+
+  // District grid
+  const grid = a.districts.map(d => {
+    const tagsHtml = d.tags.map(t => `<span class="dist-tag ${t.cls}">${t.label}</span>`).join('');
+    const winnerCls = d.winner === 'D' ? 'win-d' : 'win-r';
+    const winnerWord = d.unconfirmed
+      ? `${d.winner} (lean)`
+      : (d.winner === 'D' ? `D +${d.margin}` : `R +${d.margin}`);
+    return `<div class="dist-cell ${d.tags.length?'tagged':''}">
+      <div class="dist-num">DIST ${d.n}${tagsHtml ? '<span>'+tagsHtml+'</span>' : ''}</div>
+      <div class="dist-result ${winnerCls}">${winnerWord}</div>
+      <div class="dist-bar-stack">
+        <div class="dist-bar-row"><span class="lbl">D</span><span class="bar"><span class="bf" style="width:${d.dem}%;background:var(--dem)"></span></span><span class="pct">${d.dem}%</span></div>
+        <div class="dist-bar-row"><span class="lbl">R</span><span class="bar"><span class="bf" style="width:${d.rep}%;background:var(--rep)"></span></span><span class="pct">${d.rep}%</span></div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Disproportionality summary
+  const summaryCard = `
+    <div class="sum-card">
+      <div class="sum-title">VOTES VS. SEATS · 2024 HOUSE</div>
+      <div class="sum-bar-row">
+        <div class="sum-bar-label">
+          <span>VOTES CAST</span>
+          <span class="l-val">${dPctVotes.toFixed(1)}% D / ${rPctVotes.toFixed(1)}% R</span>
+        </div>
+        <div class="sum-bar-wrap">
+          <div class="sum-bar-d" style="width:${dPctVotes}%"></div>
+          <div class="sum-bar-r" style="width:${rPctVotes}%"></div>
+        </div>
+      </div>
+      <div class="sum-bar-row">
+        <div class="sum-bar-label">
+          <span>SEATS WON</span>
+          <span class="l-val">${a.dWin} D / ${a.rWin} R${dispD >= 1 ? `<span class="delta delta-pos-d">+${dispD.toFixed(1)} D</span>` : dispD <= -1 ? `<span class="delta delta-pos-r">${dispD.toFixed(1)} D</span>` : `<span class="delta delta-neutral">±${Math.abs(dispD).toFixed(1)}</span>`}</span>
+        </div>
+        <div class="sum-bar-wrap">
+          <div class="sum-bar-d" style="width:${dPctSeats}%"></div>
+          <div class="sum-bar-r" style="width:${rPctSeats}%"></div>
+        </div>
+      </div>
+      ${isSingle ? '' : `
+      <div class="eg-gauge">
+        <div style="font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin-bottom:5px">EFFICIENCY GAP</div>
+        <div class="eg-track">
+          <div class="eg-thresh-l" title="-7% threshold"></div>
+          <div class="eg-mid"></div>
+          <div class="eg-thresh-r" title="+7% threshold"></div>
+          <div class="eg-marker ${egLean}" style="left:${markerLeft}%"></div>
+        </div>
+        <div class="eg-scale"><span>-20% LEAN R</span><span>0</span><span>+20% LEAN D</span></div>
+        <div style="font-size:11px;color:var(--text-dim);margin-top:6px;font-family:'JetBrains Mono',monospace">${egLabel}</div>
+      </div>`}
+    </div>
+  `;
+
+  // Pattern callout
+  let pattern = '';
+  if (!isSingle) {
+    const dWinPacked = a.districts.filter(d => d.winner === 'D' && d.dem >= 75).length;
+    const rWinPacked = a.districts.filter(d => d.winner === 'R' && d.rep >= 75).length;
+    const dCrackedSeats = a.districts.filter(d => d.winner === 'R' && d.dem >= 35 && d.dem < 50).length;
+    const rCrackedSeats = a.districts.filter(d => d.winner === 'D' && d.rep >= 35 && d.rep < 50).length;
+    const parts = [];
+    if (dWinPacked >= 1) parts.push(`<strong>${dWinPacked}</strong> heavily Democratic district${dWinPacked>1?'s':''} (≥75%)`);
+    if (rWinPacked >= 1) parts.push(`<strong>${rWinPacked}</strong> heavily Republican district${rWinPacked>1?'s':''} (≥75%)`);
+    if (dCrackedSeats >= 2) parts.push(`<strong>${dCrackedSeats}</strong> seats where Democrats lose with 35–49% (possible cracking)`);
+    if (rCrackedSeats >= 2) parts.push(`<strong>${rCrackedSeats}</strong> seats where Republicans lose with 35–49% (possible cracking)`);
+    if (parts.length) {
+      pattern = `<div class="callout"><span class="ci">▲</span><div>Pattern: ${parts.join('; ')}.</div></div>`;
+    }
+  }
+
+  const patternCard = `
+    <div class="sum-card">
+      <div class="sum-title">DISTRICT PATTERN</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div style="font-size:11px;color:var(--text-mute);font-family:'JetBrains Mono',monospace">PACKED ≥75%<div style="font-size:20px;color:var(--ind);font-weight:600;margin-top:2px">${a.packed}</div></div>
+        <div style="font-size:11px;color:var(--text-mute);font-family:'JetBrains Mono',monospace">CRACKED 35–49%<div style="font-size:20px;color:var(--amber);font-weight:600;margin-top:2px">${a.cracked}</div></div>
+      </div>
+      <div style="font-size:11px;color:var(--text-dim);line-height:1.5">Districts won by ≥75% margin are <span style="color:var(--ind)">packed</span> — the seat is locked, every extra vote is wasted. Districts where the loser gets 35–49% are <span style="color:var(--amber)">cracked</span> — competitive enough to engage voters, never close enough to win.</div>
+    </div>
+  `;
+
+  body.innerHTML = `
+    ${singleNote}
+    <div class="summary-grid">${summaryCard}${patternCard}</div>
+    ${pattern}
+    <div class="section-label">DISTRICTS · 2024 HOUSE RESULTS</div>
+    <div class="district-grid">${grid}</div>
+    <div class="legend">
+      <span class="leg-i"><span class="leg-sq" style="background:var(--dem)"></span>D WIN</span>
+      <span class="leg-i"><span class="leg-sq" style="background:var(--rep)"></span>R WIN</span>
+      <span class="leg-i"><span class="leg-sq" style="background:var(--ind)"></span>PACKED</span>
+      <span class="leg-i"><span class="leg-sq" style="background:var(--amber)"></span>CRACKED</span>
+      <span class="leg-i"><span class="leg-sq" style="background:var(--green)"></span>COMPETITIVE</span>
+    </div>
+  `;
+}
+
+/* ── Senate view ───────────────────────────────────────────────────── */
+function renderSenateView(state) {
+  const e = E[state];
+  if (!e || e.senate == null) {
+    return `<div class="callout"><span class="ci">⚖</span><div>No recent Senate cycle data available for ${state}.</div></div>`;
+  }
+  const senateR = e.senate;       // most recent recorded Republican share
+  const senateD = 100 - senateR;  // simplified two-way
+  const years = Object.entries(e.raw.senate).filter(([y,v]) => v != null).sort((a,b) => b[0]-a[0]);
+  const rows = years.map(([y,v]) => `
+    <tr>
+      <td>${y}</td>
+      <td class="num">${(100-v).toFixed(1)}% D</td>
+      <td class="num">${v.toFixed(1)}% R</td>
+      <td class="num">${v > 50 ? 'R' : 'D'}</td>
+    </tr>
+  `).join('');
+  return `
+    <div class="callout">
+      <span class="ci">⚖</span>
+      <div><strong>Senators are elected statewide.</strong> There is no district map to gerrymander. Both ${state} Senate seats represent the entire state population. Showing recent cycles so you can compare with House gaps.</div>
+    </div>
+    <div class="ccard">
+      <div style="font-size:11px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.08em;font-family:'JetBrains Mono',monospace;margin-bottom:10px">RECENT SENATE CYCLES · ${state.toUpperCase()}</div>
+      <table class="cmp">
+        <thead><tr><th>Year</th><th class="num">D share</th><th class="num">R share</th><th class="num">Winner</th></tr></thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ── State rankings ────────────────────────────────────────────────── */
+let currentSort = 'eg-abs';
+let minSeats = 2;
+function setSort(s) {
+  currentSort = s;
+  document.querySelectorAll('[data-sort]').forEach(b => b.classList.toggle('active', b.dataset.sort === s));
+  renderRank();
+}
+function setMin(n) {
+  minSeats = n;
+  document.querySelectorAll('[data-min]').forEach(b => b.classList.toggle('active', +b.dataset.min === n));
+  renderRank();
+}
+
+function renderRank() {
+  const rows = STATES.filter(s => !SINGLE_DISTRICT.has(s) && V[s]).map(s => {
+    const a = analyzeState(s);
+    if (!a) return null;
+    if (a.totalSeats < minSeats) return null;
+    const disp = a.dSeatPct - a.dVotePct;
+    return { state: s, a, eg: a.eg * 100, disp };
+  }).filter(Boolean);
+
+  if (currentSort === 'eg-abs') rows.sort((a,b) => Math.abs(b.eg) - Math.abs(a.eg));
+  else if (currentSort === 'eg-d') rows.sort((a,b) => b.eg - a.eg);
+  else if (currentSort === 'eg-r') rows.sort((a,b) => a.eg - b.eg);
+  else if (currentSort === 'disp') rows.sort((a,b) => Math.abs(b.disp) - Math.abs(a.disp));
+  else if (currentSort === 'state') rows.sort((a,b) => a.state.localeCompare(b.state));
+
+  const trs = rows.map(r => {
+    const lean = r.eg > 1 ? 'lean-d' : r.eg < -1 ? 'lean-r' : 'neutral';
+    const severe = Math.abs(r.eg) > 7 ? 'severe' : '';
+    const seatPct = r.a.dSeatPct.toFixed(0);
+    const votePct = r.a.dVotePct.toFixed(1);
+    return `<tr class="row-state" onclick="jumpToState('${r.state}')">
+      <td><span class="st-name">${r.state}</span><span class="st-abbr">${ABBR[r.state]}</span></td>
+      <td class="num">${r.a.totalSeats}</td>
+      <td class="num">${r.a.dWin}D · ${r.a.rWin}R</td>
+      <td class="num">${votePct}%</td>
+      <td class="num">${seatPct}%</td>
+      <td class="num">${r.disp >= 0 ? '+' : ''}${r.disp.toFixed(1)}</td>
+      <td class="num"><span class="eg-pill ${lean} ${severe}">${r.eg > 0 ? '+' : ''}${r.eg.toFixed(1)}%</span></td>
+      <td class="num">${r.a.packed}</td>
+      <td class="num">${r.a.cracked}</td>
+    </tr>`;
+  }).join('');
+
+  document.getElementById('rank-body').innerHTML = `
+    <div class="ccard" style="padding:0;overflow-x:auto">
+      <table class="cmp">
+        <thead><tr>
+          <th>State</th>
+          <th class="num">Seats</th>
+          <th class="num">2024 House</th>
+          <th class="num">D vote %</th>
+          <th class="num">D seat %</th>
+          <th class="num">Δ (seat - vote)</th>
+          <th class="num">Efficiency gap</th>
+          <th class="num">Packed</th>
+          <th class="num">Cracked</th>
+        </tr></thead>
+        <tbody>${trs}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+function jumpToState(s) {
+  document.getElementById('state-select').value = s;
+  showTab('state');
+  renderState();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+/* ── History ───────────────────────────────────────────────────────── */
+function renderHistory() {
+  const state = document.getElementById('hist-state-select').value;
+  const body = document.getElementById('history-body');
+  const years = H._meta.years;
+  const cycles = H.cycles;
+
+  // Collect rows for state
+  const data = years.map(y => {
+    const c = cycles[y];
+    const s = c.byState[state];
+    if (!s) return { year: y, d: 0, r: 0, total: 0, control: c.houseControl, popD: c.popularVote ? c.popularVote.houseD : null, popR: c.popularVote ? c.popularVote.houseR : null };
+    return { year: y, d: s.d, r: s.r, total: s.total, control: c.houseControl, popD: c.popularVote ? c.popularVote.houseD : null, popR: c.popularVote ? c.popularVote.houseR : null };
+  });
+
+  // Max total seats over history for shared scale (since some states gained/lost seats)
+  const maxTotal = Math.max(...data.map(d => d.total));
+
+  // Bars
+  const bars = data.map(d => {
+    const dH = maxTotal > 0 ? (d.d / maxTotal) * 100 : 0;
+    const rH = maxTotal > 0 ? (d.r / maxTotal) * 100 : 0;
+    return `<div class="hbar-col" data-year="${d.year}">
+      <div class="hbar-tip"><strong>${d.year}</strong> · ${d.d}D / ${d.r}R · ${d.total} seats</div>
+      <div class="hbar-d" style="height:${dH}%"></div>
+      <div class="hbar-r" style="height:${rH}%"></div>
+    </div>`;
+  }).join('');
+  const xax = data.map(d => `<div class="hxlabel">${String(d.year).slice(2)}</div>`).join('');
+
+  // Stats: how many cycles each party won the delegation
+  let demWins = 0, repWins = 0, ties = 0;
+  data.forEach(d => { if (d.d > d.r) demWins++; else if (d.r > d.d) repWins++; else ties++; });
+
+  // Identify lock-ins: stretches of same party winning the delegation
+  let maxStreak = 1, currentStreak = 1, streakParty = data[0].d > data[0].r ? 'D' : 'R';
+  for (let i=1; i<data.length; i++) {
+    const cur = data[i].d > data[i].r ? 'D' : data[i].r > data[i].d ? 'R' : 'T';
+    const prev = data[i-1].d > data[i-1].r ? 'D' : data[i-1].r > data[i-1].d ? 'R' : 'T';
+    if (cur === prev && cur !== 'T') { currentStreak++; if (currentStreak > maxStreak) { maxStreak = currentStreak; streakParty = cur; } }
+    else currentStreak = 1;
+  }
+
+  body.innerHTML = `
+    <div class="hwrap">
+      <div class="hslider-context">
+        <span><span class="ctx-dot d"></span>D delegation: <strong style="color:var(--text)">${demWins}</strong> cycles</span>
+        <span><span class="ctx-dot r"></span>R delegation: <strong style="color:var(--text)">${repWins}</strong> cycles</span>
+        ${ties ? `<span><span class="ctx-dot even"></span>Even: <strong style="color:var(--text)">${ties}</strong></span>` : ''}
+        <span style="margin-left:auto">Longest run: <strong style="color:${streakParty==='D'?'var(--dem)':'var(--rep)'}">${maxStreak} cycles ${streakParty}</strong></span>
+      </div>
+      <div class="hchart-wrap">
+        <div class="hbars" id="hbars">${bars}</div>
+        <div class="hxaxis">${xax}</div>
+      </div>
+      <div style="display:flex;gap:14px;margin-top:14px;font-size:11px;color:var(--text-mute);font-family:'JetBrains Mono',monospace;letter-spacing:.04em">
+        <span><span class="leg-sq" style="display:inline-block;background:var(--dem);width:10px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px"></span>DEM SEATS</span>
+        <span><span class="leg-sq" style="display:inline-block;background:var(--rep);width:10px;height:10px;border-radius:2px;vertical-align:middle;margin-right:4px"></span>REP SEATS</span>
+      </div>
+    </div>
+
+    <div class="section-label">CYCLE-BY-CYCLE</div>
+    <div class="ccard" style="padding:0;overflow-x:auto">
+      <table class="cmp">
+        <thead><tr>
+          <th>Year</th><th>Congress</th>
+          <th class="num">${ABBR[state]} D</th>
+          <th class="num">${ABBR[state]} R</th>
+          <th class="num">D share</th>
+          <th class="num">Nat. pop. vote D</th>
+          <th class="num">Nat. pop. vote R</th>
+          <th>House control</th>
+        </tr></thead>
+        <tbody>${data.map(d => `<tr>
+          <td>${d.year}</td>
+          <td>${H.cycles[d.year].congress}</td>
+          <td class="num" style="color:var(--dem);font-weight:500">${d.d}</td>
+          <td class="num" style="color:var(--rep);font-weight:500">${d.r}</td>
+          <td class="num">${d.total > 0 ? ((d.d/d.total)*100).toFixed(0)+'%' : '—'}</td>
+          <td class="num">${d.popD != null ? d.popD.toFixed(1)+'%' : '—'}</td>
+          <td class="num">${d.popR != null ? d.popR.toFixed(1)+'%' : '—'}</td>
+          <td>${d.control === 'D' ? '<span style="color:var(--dem)">DEM</span>' : '<span style="color:var(--rep)">REP</span>'}</td>
+        </tr>`).join('')}</tbody>
+      </table>
+    </div>
+  `;
+}
+
+/* ── Seats-votes curve ─────────────────────────────────────────────── */
+function renderCurve() {
+  const wrap = document.getElementById('curve-wrap');
+  const W = 800, Hh = 480, M = {t:20, r:20, b:50, l:55};
+  const iw = W - M.l - M.r, ih = Hh - M.t - M.b;
+
+  // Read theme-aware colors at render time so the chart respects dark/light
+  const cs = getComputedStyle(document.documentElement);
+  const cBorder    = cs.getPropertyValue('--border').trim()    || '#1F1F23';
+  const cBorderHi  = cs.getPropertyValue('--border-hi').trim() || '#2E2E33';
+  const cTextMute  = cs.getPropertyValue('--text-mute').trim() || '#52525B';
+  const cTextDim   = cs.getPropertyValue('--text-dim').trim()  || '#A1A1AA';
+
+  // Build points
+  const pts = STATES.filter(s => V[s]).map(s => {
+    const a = analyzeState(s); if (!a) return null;
+    return { s, x: a.dVotePct, y: a.dSeatPct, total: a.totalSeats, single: SINGLE_DISTRICT.has(s) };
+  }).filter(Boolean);
+
+  const x = v => M.l + (v/100) * iw;
+  const y = v => M.t + ih - (v/100) * ih;
+
+  // Grid lines
+  let grid = '';
+  for (let g = 0; g <= 100; g += 25) {
+    grid += `<line x1="${x(g)}" y1="${M.t}" x2="${x(g)}" y2="${M.t+ih}" stroke="${cBorder}" stroke-width="0.5"/>`;
+    grid += `<line x1="${M.l}" y1="${y(g)}" x2="${M.l+iw}" y2="${y(g)}" stroke="${cBorder}" stroke-width="0.5"/>`;
+    grid += `<text x="${x(g)}" y="${M.t+ih+18}" fill="${cTextMute}" font-size="10" text-anchor="middle" font-family="JetBrains Mono,monospace">${g}%</text>`;
+    grid += `<text x="${M.l-10}" y="${y(g)+3}" fill="${cTextMute}" font-size="10" text-anchor="end" font-family="JetBrains Mono,monospace">${g}%</text>`;
+  }
+
+  // Diagonal (proportional baseline)
+  const diag = `<line x1="${x(0)}" y1="${y(0)}" x2="${x(100)}" y2="${y(100)}" stroke="${cBorderHi}" stroke-width="1" stroke-dasharray="4 3"/>`;
+
+  // Dots
+  const dots = pts.map(p => {
+    const r = p.single ? 3 : Math.max(4, Math.sqrt(p.total) * 2.2);
+    const dev = p.y - p.x;
+    const color = p.single ? cTextMute : (dev > 5 ? '#3B82F6' : dev < -5 ? '#EF4444' : cTextDim);
+    return `<g><title>${p.s}: ${p.x.toFixed(1)}% D vote → ${p.y.toFixed(0)}% D seats (${p.total} seats)</title>
+      <circle cx="${x(p.x)}" cy="${y(p.y)}" r="${r}" fill="${color}" fill-opacity="0.65" stroke="${color}" stroke-width="1"/>
+      ${p.total >= 10 && !p.single ? `<text x="${x(p.x)+r+3}" y="${y(p.y)+3}" font-size="9" fill="${cTextDim}" font-family="JetBrains Mono,monospace">${ABBR[p.s]}</text>` : ''}
+    </g>`;
+  }).join('');
+
+  // Axes
+  const axLabel = `
+    <text x="${M.l + iw/2}" y="${Hh - 8}" text-anchor="middle" fill="${cTextDim}" font-size="11" font-family="JetBrains Mono,monospace" letter-spacing="0.04em">DEMOCRATIC HOUSE VOTE SHARE →</text>
+    <text x="${15}" y="${M.t + ih/2}" text-anchor="middle" fill="${cTextDim}" font-size="11" font-family="JetBrains Mono,monospace" letter-spacing="0.04em" transform="rotate(-90 15 ${M.t + ih/2})">DEMOCRATIC SEAT SHARE ↑</text>
+    <text x="${M.l + iw - 6}" y="${y(95)}" text-anchor="end" fill="${cTextMute}" font-size="10" font-family="JetBrains Mono,monospace">proportional</text>
+  `;
+
+  wrap.innerHTML = `
+    <svg class="curve-svg" viewBox="0 0 ${W} ${Hh}" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Seats-votes curve: each state's 2024 Democratic House vote share vs. seat share. Diagonal shows proportional representation.">
+      ${grid}${diag}${dots}${axLabel}
+    </svg>
+  `;
+
+  // Stats below
+  const aboveLine = pts.filter(p => !p.single && p.y - p.x > 5);
+  const belowLine = pts.filter(p => !p.single && p.y - p.x < -5);
+  document.getElementById('curve-stats').innerHTML = `
+    <div class="summary-grid" style="grid-template-columns:1fr 1fr 1fr">
+      <div class="sum-card"><div class="sum-title">ABOVE THE LINE (D-BIASED)</div><div style="font-size:24px;color:var(--dem);font-weight:600">${aboveLine.length}</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px">${aboveLine.slice(0,5).map(p=>ABBR[p.s]).join(', ')}${aboveLine.length>5?', …':''}</div></div>
+      <div class="sum-card"><div class="sum-title">NEAR THE LINE (PROPORTIONAL ±5)</div><div style="font-size:24px;color:var(--text-mute);font-weight:600">${pts.filter(p=>!p.single&&Math.abs(p.y-p.x)<=5).length}</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px">States where seat share roughly matches vote share.</div></div>
+      <div class="sum-card"><div class="sum-title">BELOW THE LINE (R-BIASED)</div><div style="font-size:24px;color:var(--rep);font-weight:600">${belowLine.length}</div><div style="font-size:11px;color:var(--text-dim);margin-top:4px">${belowLine.slice(0,5).map(p=>ABBR[p.s]).join(', ')}${belowLine.length>5?', …':''}</div></div>
+    </div>
+  `;
+}
+
+/* ── Tabs / nav ─────────────────────────────────────────────────────── */
+function showTab(t) {
+  document.querySelectorAll('.tab').forEach(b => b.classList.toggle('active', b.getAttribute('onclick').includes("'"+t+"'")));
+  document.querySelectorAll('.pane').forEach(p => p.classList.remove('active'));
+  document.getElementById('pane-'+t).classList.add('active');
+  if (t === 'rank' && !document.getElementById('rank-body').children.length) renderRank();
+  if (t === 'history') renderHistory();
+  if (t === 'curve' && !document.getElementById('curve-wrap').children.length) renderCurve();
+}
+
+function toggleNavDropdown() {
+  const m = document.getElementById('nav-tools-menu');
+  const b = document.getElementById('nav-tools-btn');
+  const open = m.classList.toggle('open');
+  b.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+document.addEventListener('click', (e) => {
+  const dd = document.getElementById('nav-tools-dropdown');
+  if (dd && !dd.contains(e.target)) {
+    document.getElementById('nav-tools-menu').classList.remove('open');
+    document.getElementById('nav-tools-btn').setAttribute('aria-expanded','false');
+  }
+});
+
+/* ── Init ───────────────────────────────────────────────────────────── */
+function populateStateSelects() {
+  const opts = STATES.map(s => `<option value="${s}">${s}</option>`).join('');
+  document.getElementById('state-select').innerHTML = opts;
+  document.getElementById('hist-state-select').innerHTML = opts;
+  // Default to Pennsylvania — one of the most studied gerrymandered states historically
+  document.getElementById('state-select').value = 'Pennsylvania';
+  document.getElementById('hist-state-select').value = 'Pennsylvania';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  populateStateSelects();
+  renderTopStats();
+  renderState();
+  // Re-render the curve if the theme changes, since its SVG colors are baked in at render time
+  new MutationObserver(() => {
+    if (document.getElementById('pane-curve').classList.contains('active')) renderCurve();
+  }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+});
+</script>
+
+</body>
+</html>

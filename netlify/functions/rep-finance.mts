@@ -124,10 +124,60 @@ async function findCandidateId(
     return cached.data;
   }
 
+  // Try the full name first; if that returns nothing, retry with just the last
+  // name. Some reps (e.g. Jefferson "Jeff" Van Drew) are registered with FEC
+  // under a short or different first name, so a multi-token full-name search
+  // misses them. State + district pin down the right person on the fallback.
+  let result = await searchFecCandidates(name, state, district, cycle);
+  if (!result) {
+    const lastName = extractLastName(name);
+    if (lastName && lastName.toLowerCase() !== name.toLowerCase()) {
+      console.log(`Retrying FEC search with last name only: "${lastName}"`);
+      result = await searchFecCandidates(lastName, state, district, cycle);
+    }
+  }
+  if (result) {
+    cache.set(cacheKey, { data: result, timestamp: Date.now() });
+  }
+  return result;
+}
+
+/**
+ * Extract the last name (or last two tokens for compound surnames like
+ * "Van Drew", "Watson Coleman", "De La Cruz") from a full name.
+ * Compound-surname particles: van, von, de, del, della, di, da, la, le, du, st, st., saint, mc, mac.
+ */
+function extractLastName(fullName: string): string {
+  // Strip any trailing punctuation/suffix residue
+  const cleaned = fullName.replace(/[,.]+$/, '').trim();
+  const tokens = cleaned.split(/\s+/);
+  if (tokens.length <= 1) return cleaned;
+  const particles = new Set(['van','von','de','del','della','di','da','la','le','du','st','st.','saint','mc','mac']);
+  // If the input is already just a particle+surname (e.g. "Van Drew"), return it whole
+  if (tokens.length === 2 && particles.has(tokens[0].toLowerCase())) {
+    return cleaned;
+  }
+  // If the second-to-last token is a particle, keep two tokens
+  const secondLast = tokens[tokens.length - 2].toLowerCase();
+  if (particles.has(secondLast) && tokens.length >= 3) {
+    return tokens.slice(-2).join(' ');
+  }
+  return tokens[tokens.length - 1];
+}
+
+/**
+ * Single FEC /candidates/search/ call. Returns the first matching candidate,
+ * or null on miss/error. Caching is handled by the caller.
+ */
+async function searchFecCandidates(
+  q: string,
+  state: string,
+  district: number,
+  cycle: number
+): Promise<{ candidateId: string; candidateName: string; principalCommitteeId?: string } | null> {
   try {
-    // Search candidates by name + state + district
     const url = fecUrl('/candidates/search/', {
-      q: name,
+      q,
       state: state,
       district: district === 0 ? '00' : String(district).padStart(2, '0'),
       cycle: cycle,
@@ -136,7 +186,7 @@ async function findCandidateId(
       per_page: 5,
     });
     
-    console.log(`FEC candidate search: name="${name}", state=${state}, district=${district}, cycle=${cycle}`);
+    console.log(`FEC candidate search: name="${q}", state=${state}, district=${district}, cycle=${cycle}`);
     console.log(`Request URL: ${url.replace(/api_key=[^&]+/, 'api_key=***')}`);
     
     const response = await fetchWithTimeout(url, 8000);
@@ -159,7 +209,7 @@ async function findCandidateId(
     console.log(`FEC returned ${data.results?.length || 0} results`);
     
     if (!data.results || data.results.length === 0) {
-      console.log(`No candidates found for "${name}" in ${state}-${district}`);
+      console.log(`No candidates found for "${q}" in ${state}-${district}`);
       return null;
     }
 
@@ -177,7 +227,6 @@ async function findCandidateId(
     };
     
     console.log(`✓ Selected: ${result.candidateId}, committee: ${result.principalCommitteeId || 'NONE'}`);
-    cache.set(cacheKey, { data: result, timestamp: Date.now() });
     return result;
   } catch (error) {
     console.error('Error finding candidate:', error);
