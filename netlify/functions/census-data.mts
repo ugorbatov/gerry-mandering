@@ -1,11 +1,7 @@
-import type { Context, Config } from "@netlify/functions";
-
-// Version: 2 - Fixed response parsing (May 28, 2026)
-// Tested with: https://api.census.gov/data/2023/pep/charv?get=POP&for=state:34&YEAR=2023
-// Response: [["POP","YEAR","state"],["9290841","2023","34"]]
+﻿import type { Context, Config } from "@netlify/functions";
 
 const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
+const CACHE_TTL = 1000 * 60 * 60 * 24;
 
 function getStateFips(stateAbbr: string): string {
   const fipsMap: Record<string, string> = {
@@ -21,8 +17,8 @@ function getStateFips(stateAbbr: string): string {
   return fipsMap[stateAbbr.toUpperCase()] || "";
 }
 
-async function fetchCensusPopulationData(state: string, censusApiKey: string) {
-  const cacheKey = `census-pop-${state}`;
+async function fetchStatePopulation(state: string, censusApiKey: string) {
+  const cacheKey = `census-state-${state}`;
   const cached = cache.get(cacheKey);
   if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
     return cached.data;
@@ -32,13 +28,10 @@ async function fetchCensusPopulationData(state: string, censusApiKey: string) {
     const fips = getStateFips(state);
     if (!fips) throw new Error(`Invalid state code: ${state}`);
 
-    // Census Bureau PEP API - TESTED ENDPOINT
     const url = `https://api.census.gov/data/2023/pep/charv?get=POP&for=state:${fips}&YEAR=2023&key=${censusApiKey}`;
-
-    console.log(`[census-data] Fetching for ${state} (FIPS: ${fips}) from: ${url}`);
+    console.log(`[census-data] Fetching state population for ${state}`);
 
     const response = await fetch(url);
-    
     if (!response.ok) {
       const errorText = await response.text();
       console.error(`[census-data] API error ${response.status}: ${errorText}`);
@@ -46,33 +39,68 @@ async function fetchCensusPopulationData(state: string, censusApiKey: string) {
     }
 
     const rawData = await response.json() as any[];
-    console.log(`[census-data] Raw response:`, rawData);
-
     if (!Array.isArray(rawData) || rawData.length < 2) {
       throw new Error("Invalid response format");
     }
 
     const header = rawData[0];
     const dataRow = rawData[1];
-    
     const popIndex = header.indexOf("POP");
-    if (popIndex === -1) throw new Error("POP field not found in response");
+    if (popIndex === -1) throw new Error("POP field not found");
 
     const population = parseInt(dataRow[popIndex], 10);
     if (isNaN(population)) throw new Error("Could not parse population value");
 
-    const data = [{
-      year: 2023,
-      state: state,
-      population: population
-    }];
-
-    console.log(`[census-data] Successfully got population for ${state}: ${population}`);
-
+    const data = { year: 2023, state, population };
     cache.set(cacheKey, { data, timestamp: Date.now() });
     return data;
   } catch (error) {
-    console.error(`[census-data] Error:`, error);
+    console.error(`[census-data] Error fetching state population:`, error);
+    throw error;
+  }
+}
+
+async function fetchDistrictPopulation(state: string, district: number, censusApiKey: string) {
+  const cacheKey = `census-district-${state}-${district}`;
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const fips = getStateFips(state);
+    if (!fips) throw new Error(`Invalid state code: ${state}`);
+
+    const districtStr = String(district).padStart(2, '0');
+    const url = `https://api.census.gov/data/2024/acs/acs1?get=NAME,B01003_001E&for=congressional%20district:${districtStr}&in=state:${fips}&key=${censusApiKey}`;
+    
+    console.log(`[census-data] Fetching district population for ${state} District ${district}`);
+
+    const response = await fetch(url);
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[census-data] API error ${response.status}: ${errorText}`);
+      throw new Error(`Census API error: ${response.status}`);
+    }
+
+    const rawData = await response.json() as any[];
+    if (!Array.isArray(rawData) || rawData.length < 2) {
+      throw new Error("Invalid response format");
+    }
+
+    const header = rawData[0];
+    const dataRow = rawData[1];
+    const popIndex = header.indexOf("B01003_001E");
+    if (popIndex === -1) throw new Error("B01003_001E field not found");
+
+    const population = parseInt(dataRow[popIndex], 10);
+    if (isNaN(population)) throw new Error("Could not parse population value");
+
+    const data = { year: 2024, state, district, population, source: "ACS 2024" };
+    cache.set(cacheKey, { data, timestamp: Date.now() });
+    return data;
+  } catch (error) {
+    console.error(`[census-data] Error fetching district population:`, error);
     throw error;
   }
 }
@@ -92,6 +120,7 @@ export default async (req: Request, context: Context) => {
 
   const url = new URL(req.url);
   const state = url.searchParams.get("state")?.toUpperCase() || "";
+  const district = url.searchParams.get("district");
 
   if (!state || state.length !== 2) {
     return new Response(
@@ -104,7 +133,31 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    const populationData = await fetchCensusPopulationData(state, censusApiKey);
+    if (district) {
+      const districtNum = parseInt(district, 10);
+      if (isNaN(districtNum) || districtNum < 0 || districtNum > 98) {
+        return new Response(
+          JSON.stringify({
+            error: "Invalid district number. Must be 0-98",
+            code: "INVALID_PARAMS"
+          }),
+          { status: 400, headers: { "Content-Type": "application/json" } }
+        );
+      }
+
+      const populationData = await fetchDistrictPopulation(state, districtNum, censusApiKey);
+      return new Response(JSON.stringify({
+        state,
+        district: districtNum,
+        data: populationData,
+        timestamp: new Date().toISOString(),
+      }, null, 2), {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      });
+    }
+
+    const populationData = await fetchStatePopulation(state, censusApiKey);
     return new Response(JSON.stringify({
       state,
       data: populationData,
