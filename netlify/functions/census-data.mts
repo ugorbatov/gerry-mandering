@@ -1,7 +1,7 @@
-﻿import type { Context, Config } from "@netlify/functions";
+import type { Context, Config } from "@netlify/functions";
 
 const cache = new Map<string, { data: any; timestamp: number }>();
-const CACHE_TTL = 1000 * 60 * 60 * 24;
+const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 
 function getStateFips(stateAbbr: string): string {
   const fipsMap: Record<string, string> = {
@@ -17,6 +17,7 @@ function getStateFips(stateAbbr: string): string {
   return fipsMap[stateAbbr.toUpperCase()] || "";
 }
 
+// Fetch state-level population from PEP
 async function fetchStatePopulation(state: string, censusApiKey: string) {
   const cacheKey = `census-state-${state}`;
   const cached = cache.get(cacheKey);
@@ -28,6 +29,7 @@ async function fetchStatePopulation(state: string, censusApiKey: string) {
     const fips = getStateFips(state);
     if (!fips) throw new Error(`Invalid state code: ${state}`);
 
+    // Fetch 2023 population
     const url = `https://api.census.gov/data/2023/pep/charv?get=POP&for=state:${fips}&YEAR=2023&key=${censusApiKey}`;
     console.log(`[census-data] Fetching state population for ${state}`);
 
@@ -60,6 +62,81 @@ async function fetchStatePopulation(state: string, censusApiKey: string) {
   }
 }
 
+// Fetch multi-year population for calculating shifts (2020-2023)
+async function fetchPopulationShifts(state: string, censusApiKey: string) {
+  const cacheKey = `census-shifts-${state}`;
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
+
+  try {
+    const fips = getStateFips(state);
+    if (!fips) throw new Error(`Invalid state code: ${state}`);
+
+    console.log(`[census-data] Fetching population shifts for ${state}`);
+
+    // Fetch multiple years to calculate shifts
+    const years = [2020, 2021, 2022, 2023];
+    const populationByYear: Record<number, number> = {};
+
+    for (const year of years) {
+      const url = `https://api.census.gov/data/${year}/pep/charv?get=POP&for=state:${fips}&YEAR=${year}&key=${censusApiKey}`;
+      const response = await fetch(url);
+      
+      if (!response.ok) {
+        console.warn(`[census-data] Could not fetch year ${year}`);
+        continue;
+      }
+
+      const rawData = await response.json() as any[];
+      if (!Array.isArray(rawData) || rawData.length < 2) continue;
+
+      const header = rawData[0];
+      const dataRow = rawData[1];
+      const popIndex = header.indexOf("POP");
+      if (popIndex === -1) continue;
+
+      const population = parseInt(dataRow[popIndex], 10);
+      if (!isNaN(population)) {
+        populationByYear[year] = population;
+      }
+    }
+
+    if (Object.keys(populationByYear).length < 2) {
+      throw new Error("Not enough years of data to calculate shifts");
+    }
+
+    const yearsSorted = Object.keys(populationByYear).map(Number).sort((a, b) => a - b);
+    const startYear = yearsSorted[0];
+    const endYear = yearsSorted[yearsSorted.length - 1];
+    const startPop = populationByYear[startYear];
+    const endPop = populationByYear[endYear];
+
+    const totalChange = endPop - startPop;
+    const changePercent = (totalChange / startPop) * 100;
+    const yearsSpan = endYear - startYear;
+    const avgAnnualGrowth = yearsSpan > 0 ? changePercent / yearsSpan : 0;
+
+    const data = {
+      startYear,
+      endYear,
+      startPop,
+      endPop,
+      totalChange,
+      changePercent: Number(changePercent.toFixed(2)),
+      avgAnnualGrowth: Number(avgAnnualGrowth.toFixed(3))
+    };
+
+    cache.set(cacheKey, { data, timestamp: Date.now() });
+    return data;
+  } catch (error) {
+    console.error(`[census-data] Error calculating shifts:`, error);
+    throw error;
+  }
+}
+
+// Fetch district-level population from ACS 2024
 async function fetchDistrictPopulation(state: string, district: number, censusApiKey: string) {
   const cacheKey = `census-district-${state}-${district}`;
   const cached = cache.get(cacheKey);
@@ -121,6 +198,7 @@ export default async (req: Request, context: Context) => {
   const url = new URL(req.url);
   const state = url.searchParams.get("state")?.toUpperCase() || "";
   const district = url.searchParams.get("district");
+  const includeShifts = url.searchParams.get("shifts") === "true";
 
   if (!state || state.length !== 2) {
     return new Response(
@@ -133,6 +211,7 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
+    // If district is requested, fetch district population
     if (district) {
       const districtNum = parseInt(district, 10);
       if (isNaN(districtNum) || districtNum < 0 || districtNum > 98) {
@@ -157,12 +236,26 @@ export default async (req: Request, context: Context) => {
       });
     }
 
+    // Fetch state population
     const populationData = await fetchStatePopulation(state, censusApiKey);
-    return new Response(JSON.stringify({
+    
+    const response: any = {
       state,
       data: populationData,
       timestamp: new Date().toISOString(),
-    }, null, 2), {
+    };
+
+    // Optionally include shifts
+    if (includeShifts) {
+      try {
+        response.shifts = await fetchPopulationShifts(state, censusApiKey);
+      } catch (err) {
+        console.warn(`[census-data] Could not calculate shifts:`, err);
+        response.shifts = null;
+      }
+    }
+
+    return new Response(JSON.stringify(response, null, 2), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
