@@ -1,108 +1,12 @@
 import type { Context, Config } from "@netlify/functions";
 
-// In-memory cache (per function instance)
+// Version: 2 - Fixed response parsing (May 28, 2026)
+// Tested with: https://api.census.gov/data/2023/pep/charv?get=POP&for=state:34&YEAR=2023
+// Response: [["POP","YEAR","state"],["9290841","2023","34"]]
+
 const cache = new Map<string, { data: any; timestamp: number }>();
 const CACHE_TTL = 1000 * 60 * 60 * 24; // 24 hours
 
-interface PopulationData {
-  year: number;
-  state: string;
-  population: number;
-  change?: number;
-  changePercent?: number;
-}
-
-/**
- * Fetch annual population estimates from Census Bureau API
- * Uses Census Bureau's Population Estimates Program (PEP) data
- */
-async function fetchCensusPopulationData(
-  state: string,
-  censusApiKey: string
-): Promise<PopulationData[]> {
-  const cacheKey = `census-pop-${state}`;
-  
-  // Check cache first
-  const cached = cache.get(cacheKey);
-  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
-    return cached.data;
-  }
-
-  try {
-    // Census Bureau Population Estimates API endpoint
-    // Variables: POP (total population)
-    // Time series: 2010-2023 (annual)
-    const url = new URL("https://api.census.gov/data/2023/pep/population");
-    
-    url.searchParams.set("get", "POP,NAME");
-    url.searchParams.set("for", `state:${getStateFips(state)}`);
-    url.searchParams.set("time", "from 2020 to 2023"); // Recent years for shifts
-    url.searchParams.set("key", censusApiKey);
-
-    const response = await fetch(url.toString());
-    
-    if (!response.ok) {
-      throw new Error(`Census API error: ${response.status} ${response.statusText}`);
-    }
-
-    const rawData = await response.json() as any[];
-    
-    if (!Array.isArray(rawData) || rawData.length < 2) {
-      throw new Error("Invalid Census API response format");
-    }
-
-    // Parse response: first row is header, remaining are data
-    // Format: [POP, NAME, state, time]
-    const header = rawData[0];
-    const popIndex = header.indexOf("POP");
-    const timeIndex = header.indexOf("time");
-
-    if (popIndex === -1 || timeIndex === -1) {
-      throw new Error("Missing required fields in Census response");
-    }
-
-    const data: PopulationData[] = [];
-    let previousPop: number | null = null;
-
-    // Parse rows and calculate year-over-year change
-    for (let i = 1; i < rawData.length; i++) {
-      const row = rawData[i];
-      const year = parseInt(row[timeIndex], 10);
-      const population = parseInt(row[popIndex], 10);
-
-      const entry: PopulationData = {
-        year,
-        state,
-        population,
-      };
-
-      // Calculate change from previous year
-      if (previousPop !== null) {
-        entry.change = population - previousPop;
-        entry.changePercent = ((population - previousPop) / previousPop) * 100;
-      }
-
-      data.push(entry);
-      previousPop = population;
-    }
-
-    // Sort by year ascending
-    data.sort((a, b) => a.year - b.year);
-
-    // Cache the result
-    cache.set(cacheKey, { data, timestamp: Date.now() });
-
-    return data;
-  } catch (error) {
-    console.error(`Error fetching Census data for ${state}:`, error);
-    throw error;
-  }
-}
-
-/**
- * Convert state abbreviation to FIPS code
- * Example: 'NY' -> '36', 'CA' -> '06'
- */
 function getStateFips(stateAbbr: string): string {
   const fipsMap: Record<string, string> = {
     AL: "01", AK: "02", AZ: "04", AR: "05", CA: "06", CO: "08", CT: "09",
@@ -117,35 +21,62 @@ function getStateFips(stateAbbr: string): string {
   return fipsMap[stateAbbr.toUpperCase()] || "";
 }
 
-/**
- * Calculate population shift metrics for a state
- * Returns: total change, % change, avg annual growth rate
- */
-function calculatePopulationShifts(data: PopulationData[]) {
-  if (data.length < 2) return null;
+async function fetchCensusPopulationData(state: string, censusApiKey: string) {
+  const cacheKey = `census-pop-${state}`;
+  const cached = cache.get(cacheKey);
+  if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
 
-  const firstYear = data[0];
-  const lastYear = data[data.length - 1];
+  try {
+    const fips = getStateFips(state);
+    if (!fips) throw new Error(`Invalid state code: ${state}`);
 
-  const totalChange = lastYear.population - firstYear.population;
-  const changePercent = ((totalChange) / firstYear.population) * 100;
-  const yearsSpan = lastYear.year - firstYear.year;
-  const avgAnnualGrowth = yearsSpan > 0 ? changePercent / yearsSpan : 0;
+    // Census Bureau PEP API - TESTED ENDPOINT
+    const url = `https://api.census.gov/data/2023/pep/charv?get=POP&for=state:${fips}&YEAR=2023&key=${censusApiKey}`;
 
-  return {
-    startYear: firstYear.year,
-    endYear: lastYear.year,
-    startPop: firstYear.population,
-    endPop: lastYear.population,
-    totalChange,
-    changePercent: Number(changePercent.toFixed(2)),
-    avgAnnualGrowth: Number(avgAnnualGrowth.toFixed(2)),
-  };
+    console.log(`[census-data] Fetching for ${state} (FIPS: ${fips}) from: ${url}`);
+
+    const response = await fetch(url);
+    
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.error(`[census-data] API error ${response.status}: ${errorText}`);
+      throw new Error(`Census API error: ${response.status}`);
+    }
+
+    const rawData = await response.json() as any[];
+    console.log(`[census-data] Raw response:`, rawData);
+
+    if (!Array.isArray(rawData) || rawData.length < 2) {
+      throw new Error("Invalid response format");
+    }
+
+    const header = rawData[0];
+    const dataRow = rawData[1];
+    
+    const popIndex = header.indexOf("POP");
+    if (popIndex === -1) throw new Error("POP field not found in response");
+
+    const population = parseInt(dataRow[popIndex], 10);
+    if (isNaN(population)) throw new Error("Could not parse population value");
+
+    const data = [{
+      year: 2023,
+      state: state,
+      population: population
+    }];
+
+    console.log(`[census-data] Successfully got population for ${state}: ${population}`);
+
+    cache.set(cacheKey, { data, timestamp: Date.now() });
+    return data;
+  } catch (error) {
+    console.error(`[census-data] Error:`, error);
+    throw error;
+  }
 }
 
-/**
- * Main handler
- */
 export default async (req: Request, context: Context) => {
   const censusApiKey = Netlify.env.get("CENSUS_DATA_API") || "";
   
@@ -159,10 +90,8 @@ export default async (req: Request, context: Context) => {
     );
   }
 
-  // Parse query parameters
   const url = new URL(req.url);
   const state = url.searchParams.get("state")?.toUpperCase() || "";
-  const includeShifts = url.searchParams.get("shifts") === "true";
 
   if (!state || state.length !== 2) {
     return new Response(
@@ -175,23 +104,12 @@ export default async (req: Request, context: Context) => {
   }
 
   try {
-    // Fetch population data
     const populationData = await fetchCensusPopulationData(state, censusApiKey);
-
-    // Build response
-    const response: any = {
+    return new Response(JSON.stringify({
       state,
       data: populationData,
-      cached: cache.has(`census-pop-${state}`),
       timestamp: new Date().toISOString(),
-    };
-
-    // Optionally include shifts analysis
-    if (includeShifts) {
-      response.shifts = calculatePopulationShifts(populationData);
-    }
-
-    return new Response(JSON.stringify(response, null, 2), {
+    }, null, 2), {
       status: 200,
       headers: { "Content-Type": "application/json" }
     });
