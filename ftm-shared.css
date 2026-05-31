@@ -160,22 +160,40 @@ table.money tbody tr:hover{background:var(--surface-2)}
 .sources .src-link{color:var(--text-dim);text-decoration:underline;text-decoration-color:var(--border-hi);word-break:break-word}
 .sources .src-link:hover{color:var(--text)}
 
+/* TABLE SCROLL — wrap any table in overflow container on all viewports */
+.table-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch}
+
 /* MOBILE */
 @media (max-width:680px){
   header{padding-right:0}
   .top-right{position:static;align-items:flex-start;margin-bottom:8px}
   h1{font-size:22px}
   .case-title{font-size:18px}
+  .site-nav{max-width:100%;overflow-x:auto;width:auto}
   .cast-row{grid-template-columns:1fr;gap:2px}
   .cast-role{padding-top:0}
+  /* Spending bars: stack label above bar */
   .spend-row{grid-template-columns:1fr;gap:4px}
   .spend-bar{height:8px}
+  .spend-val{text-align:left}
+  /* Source list: stacked */
   .sources li{flex-direction:column;gap:2px}
   .sources .src-pub{width:auto}
+  /* Money table: horizontal scroll */
+  .sankey-wrap{padding:12px 10px}
+  table.money{min-width:480px}
+  /* State grid: 2 cols on phone */
+  .state-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr))}
+  /* Donor map: full width */
+  .usmap-wrap{padding:10px}
+  /* Case grid: single col */
+  .case-grid{grid-template-columns:1fr}
+  /* Lede: slightly smaller */
+  .lede{font-size:12px}
 }
 
 /* ─── SANKEY / FLOW DIAGRAM ─── */
-.sankey-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;overflow-x:auto}
+.sankey-wrap{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:16px 18px;margin-bottom:10px;overflow-x:auto;-webkit-overflow-scrolling:touch}
 .sankey-svg{width:100%;height:auto;display:block;min-width:580px}
 .sankey-node-label{font-family:'JetBrains Mono',monospace;font-size:11px;fill:var(--text)}
 .sankey-node-sub{font-family:'JetBrains Mono',monospace;font-size:9px;fill:var(--text-mute);letter-spacing:.04em}

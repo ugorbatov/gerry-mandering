@@ -192,6 +192,29 @@ select.full option{background:var(--surface-2)}
 input.full{width:100%;background:var(--surface-2);border:1px solid var(--border-hi);border-radius:6px;color:var(--text);padding:7px 10px;font-size:12px;font-family:inherit;outline:none;margin-bottom:8px}
 input.full:focus{border-color:var(--dem)}
 .section-label{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-weight:500;font-family:"JetBrains Mono",monospace;margin-bottom:8px}
+
+/* ── MOBILE ── */
+@media (max-width:680px){
+  header{padding-right:0}
+  .top-right{position:static;align-items:flex-start;margin-bottom:8px}
+  h1{font-size:22px}
+  .lede{font-size:12px}
+  .stat .value{font-size:16px}
+  .site-nav{max-width:100%;overflow-x:auto;width:auto}
+  .top-bar{flex-direction:column;align-items:flex-start;gap:10px}
+  .filters{flex-wrap:wrap;gap:4px}
+  .search-wrap{width:100%}
+  .search-wrap input{width:100%;box-sizing:border-box}
+  .ch{flex-direction:column;gap:6px}
+  .badges{flex-wrap:wrap}
+  .jgrid{grid-template-columns:1fr}
+  .demo-panel{grid-template-columns:1fr}
+  .imp-g{grid-template-columns:1fr;gap:6px}
+  .imp-c{display:flex;align-items:center;gap:10px}
+  .imp-b{flex:1}
+  .form-row{flex-direction:column}
+  .form-row input,.form-row select{width:100%}
+}
 </style>
 <link rel="stylesheet" href="theme.css" />
 <script src="theme-toggle.js"></script>

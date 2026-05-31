@@ -1323,6 +1323,12 @@
   }
   footer .footer-sources { margin-top: 6px; }
 
+  /* Narrow desktop / tablet: reduce header padding so top-right doesn't overlap */
+  @media (min-width: 761px) and (max-width: 900px) {
+    header { padding-right: 0; }
+    .top-right { position: static; align-items: flex-start; margin-bottom: 6px; }
+  }
+
   /* === SHORT VIEWPORT (laptops, small windows) === */
   /* When the viewport is short, every pixel above the map matters.
      Shrink the header, slider, and footer so the map gets more space.
@@ -1371,6 +1377,7 @@
 
     /* Hide all non-map chrome on mobile */
     header, footer, #summary-block, aside.detail { display: none !important; }
+    #history-slider-block, #state-history-slider-block { display: none !important; }
     .top-right { display: none; }     /* "View data sources" link, only relevant on desktop */
     .badge { display: none; }
 
@@ -1478,6 +1485,8 @@
   body.simulate-mobile footer,
   body.simulate-mobile #summary-block,
   body.simulate-mobile aside.detail { display: none !important; }
+  body.simulate-mobile #history-slider-block,
+  body.simulate-mobile #state-history-slider-block { display: none !important; }
   body.simulate-mobile .top-right { display: none; }
   body.simulate-mobile .badge { display: none; }
   body.simulate-mobile .grid { display: block; height: 100vh; }

@@ -238,6 +238,24 @@ table.cmp tr.row-state{cursor:pointer}
   .top-right{position:static;align-items:flex-start;margin-bottom:8px}
   h1{font-size:22px}
   .stat .value{font-size:16px}
+  /* Nav: scrollable on narrow screens */
+  .site-nav{max-width:100%;overflow-x:auto;width:auto}
+  /* Filters: allow full-width wrapping */
+  .top-bar{flex-direction:column;align-items:flex-start}
+  .filters{gap:4px}
+  /* State select: full width */
+  select.state-pick{min-width:0;width:100%}
+  /* District grid: 2 cols on phone */
+  .district-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr))}
+  /* Summary grid & curve stats: single column */
+  .summary-grid{grid-template-columns:1fr !important}
+  /* History chart: shorter bars on small screen */
+  .hchart-wrap{height:200px}
+  .hbars{height:140px}
+  /* Table container: horizontal scroll */
+  .ccard[style*="overflow-x"]{overflow-x:auto}
+  /* Explicit table scroll wrappers (added via JS inline style) */
+  [style*="overflow-x:auto"]{-webkit-overflow-scrolling:touch}
 }
 </style>
 </head>
