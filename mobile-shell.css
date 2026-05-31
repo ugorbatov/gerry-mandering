@@ -1,0 +1,266 @@
+/* ============================================================================
+   MOBILE APP SHELL  (index.html)
+   ----------------------------------------------------------------------------
+   A self-contained, app-like mobile experience layered on top of the existing
+   desktop map. EVERYTHING here is gated behind `.ms-on` — a class added to
+   <body> by mobile-shell.js only when isMobile() is true. Desktop never sees
+   any of it. Mirrors the same dark tokens used site-wide.
+   ============================================================================ */
+
+/* The shell only renders when body.ms-on is present. */
+.ms-root { display: none; }
+body.ms-on .ms-root { display: block; }
+
+/* Reserve space at the bottom of the fixed map for the tab bar so the map's
+   own controls (zoom/legend/source) don't hide under it. */
+body.ms-on .map-card { bottom: 56px !important; }
+body.ms-on.simulate-mobile .map-card { bottom: 56px !important; }
+
+/* When a non-map tab is active, hide the map entirely and show a scrolling
+   content surface in its place. */
+body.ms-on.ms-tab-districts .map-card,
+body.ms-on.ms-tab-data .map-card,
+body.ms-on.ms-tab-news .map-card { display: none !important; }
+
+/* ── BOTTOM TAB BAR ──────────────────────────────────────────────────────── */
+.ms-tabbar {
+  position: fixed; left: 0; right: 0; bottom: 0; height: 56px;
+  background: rgba(10,10,11,.92);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border-top: 1px solid var(--border);
+  display: flex; z-index: 40;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+body.simulate-mobile .ms-tabbar { position: absolute; }
+.ms-tab {
+  flex: 1; display: flex; flex-direction: column; align-items: center;
+  justify-content: center; gap: 3px; border: none; background: none;
+  color: var(--text-mute); font-family: "Inter", system-ui, sans-serif;
+  font-size: 10px; font-weight: 500; letter-spacing: .02em; cursor: pointer;
+  -webkit-tap-highlight-color: transparent; transition: color 150ms; padding: 0;
+}
+.ms-tab svg { width: 22px; height: 22px; stroke-width: 2; }
+.ms-tab.active { color: var(--text); }
+.ms-tab.active .ms-tab-ico { color: var(--ind); }
+.ms-tab-ico { display: flex; color: var(--text-mute); transition: color 150ms; }
+.ms-tab.active .ms-tab-ico svg { stroke: var(--ind); }
+
+/* ── DOCKED STATE OVERVIEW CARD (Map tab) ────────────────────────────────── */
+.ms-overview {
+  position: fixed; left: 0; right: 0; bottom: 56px; z-index: 35;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  border-radius: 16px 16px 0 0;
+  box-shadow: 0 -8px 32px rgba(0,0,0,.5);
+  padding: 14px 16px 16px;
+  transform: translateY(0); transition: transform 280ms cubic-bezier(.4,0,.2,1);
+  max-height: 46vh; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+body.simulate-mobile .ms-overview { position: absolute; }
+body.ms-on:not(.ms-tab-map) .ms-overview { display: none; }
+.ms-overview.collapsed { transform: translateY(calc(100% - 52px)); }
+.ms-ov-handle {
+  width: 36px; height: 4px; border-radius: 2px; background: var(--border-hi);
+  margin: 0 auto 12px; cursor: grab;
+}
+.ms-ov-title { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 2px; }
+.ms-ov-sub { font-size: 11px; color: var(--text-mute); margin-bottom: 12px; }
+
+/* Seat summary trio (shared by overview + data tab) */
+.ms-seats { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-bottom: 14px; }
+.ms-seat {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: 10px; padding: 10px 6px; text-align: center;
+}
+.ms-seat .n { font-size: 22px; font-weight: 700; font-family: "JetBrains Mono", monospace; line-height: 1; }
+.ms-seat .l { font-size: 10px; color: var(--text-mute); margin-top: 4px; letter-spacing: .02em; }
+.ms-seat.d .n { color: var(--dem); }
+.ms-seat.r .n { color: var(--rep); }
+.ms-seat.i .n { color: var(--ind); }
+
+/* Popular-vote bar */
+.ms-pv-label { font-size: 11px; color: var(--text-mute); margin-bottom: 6px; text-transform: uppercase; letter-spacing: .06em; font-family: "JetBrains Mono", monospace; }
+.ms-pv-vals { display: flex; justify-content: space-between; font-size: 13px; font-weight: 600; font-family: "JetBrains Mono", monospace; margin-bottom: 6px; }
+.ms-pv-vals .d { color: var(--dem); } .ms-pv-vals .r { color: var(--rep); }
+.ms-pv-bar { height: 8px; border-radius: 4px; overflow: hidden; display: flex; background: var(--surface-2); }
+.ms-pv-bar .d { background: var(--dem); height: 100%; } .ms-pv-bar .r { background: var(--rep); height: 100%; }
+
+.ms-btn {
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; padding: 11px; margin-top: 12px; border-radius: 10px;
+  background: var(--surface-2); border: 1px solid var(--border-hi);
+  color: var(--text); font-family: "Inter", system-ui, sans-serif; font-size: 13px;
+  font-weight: 500; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.ms-btn:active { transform: scale(.99); }
+.ms-btn.primary { background: var(--ind); border-color: var(--ind); color: #fff; }
+.ms-btn svg { width: 15px; height: 15px; }
+
+/* ── FLOATING MAP CONTROLS (top of map tab) ──────────────────────────────── */
+.ms-mapbar {
+  position: fixed; top: 10px; left: 10px; right: 10px; z-index: 30;
+  display: flex; align-items: center; gap: 8px; pointer-events: none;
+}
+body.simulate-mobile .ms-mapbar { position: absolute; }
+body.ms-on:not(.ms-tab-map) .ms-mapbar { display: none; }
+.ms-mapbar > * { pointer-events: auto; }
+.ms-cycle-pill, .ms-filter-btn {
+  background: rgba(17,17,19,.9); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+  border: 1px solid var(--border-hi); border-radius: 9px; color: var(--text);
+  font-family: "JetBrains Mono", monospace; font-size: 12px; cursor: pointer;
+  display: flex; align-items: center; gap: 6px; height: 36px;
+}
+.ms-cycle-pill { padding: 0 12px; flex: 1; justify-content: space-between; }
+.ms-cycle-pill .yr { font-weight: 600; }
+.ms-cycle-pill .cong { color: var(--text-mute); font-size: 10px; }
+.ms-filter-btn { width: 40px; justify-content: center; }
+.ms-filter-btn svg { width: 16px; height: 16px; }
+
+/* ── GENERIC BOTTOM SHEET (district / cycle / filters) ───────────────────── */
+.ms-sheet-scrim {
+  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 45;
+  opacity: 0; pointer-events: none; transition: opacity 220ms;
+}
+body.simulate-mobile .ms-sheet-scrim { position: absolute; }
+.ms-sheet-scrim.open { opacity: 1; pointer-events: auto; }
+.ms-sheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 46;
+  background: var(--surface); border-radius: 18px 18px 0 0;
+  border-top: 1px solid var(--border-hi);
+  box-shadow: 0 -10px 40px rgba(0,0,0,.6);
+  transform: translateY(100%); transition: transform 300ms cubic-bezier(.32,.72,0,1);
+  max-height: 88vh; display: flex; flex-direction: column;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+}
+body.simulate-mobile .ms-sheet { position: absolute; }
+.ms-sheet.open { transform: translateY(0); }
+.ms-sheet-handle { width: 36px; height: 4px; border-radius: 2px; background: var(--border-hi); margin: 10px auto 0; flex-shrink: 0; }
+.ms-sheet-head {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 10px 16px 12px; flex-shrink: 0;
+}
+.ms-sheet-head h3 { font-size: 18px; font-weight: 600; color: var(--text); margin: 0; }
+.ms-sheet-head .ms-reset { background: none; border: none; color: var(--ind); font-size: 13px; font-family: inherit; cursor: pointer; padding: 4px 8px; }
+.ms-sheet-close {
+  width: 30px; height: 30px; border-radius: 8px; border: none;
+  background: var(--surface-2); color: var(--text-dim); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.ms-sheet-close svg { width: 16px; height: 16px; }
+.ms-sheet-body { padding: 0 16px 20px; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+
+/* ── DISTRICT SHEET internals ────────────────────────────────────────────── */
+.ms-rep-row { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.ms-rep-photo { width: 56px; height: 56px; border-radius: 50%; object-fit: cover; background: var(--surface-2); flex-shrink: 0; }
+.ms-rep-photo-fb {
+  width: 56px; height: 56px; border-radius: 50%; background: var(--surface-2);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-dim); font-size: 18px;
+}
+.ms-rep-name { font-size: 16px; font-weight: 600; color: var(--ind); }
+.ms-rep-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.ms-rep-link { font-size: 12px; color: var(--text-mute); margin-top: 4px; display: inline-flex; align-items: center; gap: 4px; text-decoration: none; }
+.ms-rep-link svg { width: 11px; height: 11px; }
+
+.ms-sec-label { font-size: 10px; color: var(--text-mute); text-transform: uppercase; letter-spacing: .1em; font-family: "JetBrains Mono", monospace; margin: 16px 0 10px; }
+.ms-demo-list { display: flex; flex-direction: column; gap: 8px; }
+.ms-demo-item { display: flex; align-items: center; gap: 8px; font-size: 12px; }
+.ms-demo-dot { width: 9px; height: 9px; border-radius: 2px; flex-shrink: 0; }
+.ms-demo-name { color: var(--text-dim); }
+.ms-demo-pct { margin-left: auto; color: var(--text); font-weight: 600; font-family: "JetBrains Mono", monospace; }
+
+.ms-stat-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.ms-stat-cell { background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; }
+.ms-stat-cell .l { font-size: 11px; color: var(--text-mute); margin-bottom: 3px; }
+.ms-stat-cell .v { font-size: 15px; font-weight: 600; color: var(--text); font-family: "JetBrains Mono", monospace; }
+
+/* ── DISTRICTS LIST tab ──────────────────────────────────────────────────── */
+.ms-content {
+  position: fixed; left: 0; right: 0; top: 0; bottom: 56px; z-index: 20;
+  overflow-y: auto; -webkit-overflow-scrolling: touch; background: var(--bg);
+  display: none;
+}
+body.simulate-mobile .ms-content { position: absolute; }
+body.ms-on.ms-tab-districts #ms-content-districts,
+body.ms-on.ms-tab-data #ms-content-data,
+body.ms-on.ms-tab-news #ms-content-news { display: block; }
+.ms-content-head { padding: 16px 16px 8px; position: sticky; top: 0; background: var(--bg); z-index: 2; border-bottom: 1px solid var(--border); }
+.ms-content-title { font-size: 18px; font-weight: 600; color: var(--text); }
+.ms-content-sub { font-size: 11px; color: var(--text-mute); margin-top: 2px; }
+.ms-content-pad { padding: 14px 16px 24px; }
+
+.ms-dist-row {
+  display: flex; align-items: center; gap: 12px; padding: 12px 16px;
+  border-bottom: 1px solid var(--border); cursor: pointer;
+  -webkit-tap-highlight-color: transparent; border-left: 3px solid transparent;
+}
+.ms-dist-row:active { background: var(--surface-2); }
+.ms-dist-row.d { border-left-color: var(--dem); }
+.ms-dist-row.r { border-left-color: var(--rep); }
+.ms-dist-row.i { border-left-color: var(--ind); }
+.ms-dist-num { font-size: 18px; font-weight: 700; font-family: "JetBrains Mono", monospace; color: var(--text-mute); width: 28px; flex-shrink: 0; }
+.ms-dist-info { flex: 1; min-width: 0; }
+.ms-dist-dno { font-size: 13px; font-weight: 600; color: var(--text); }
+.ms-dist-rep { font-size: 12px; color: var(--text-dim); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.ms-dist-badge {
+  width: 26px; height: 26px; border-radius: 7px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 700; font-family: "JetBrains Mono", monospace;
+}
+.ms-dist-badge.d { background: rgba(59,130,246,.15); color: var(--dem); }
+.ms-dist-badge.r { background: rgba(239,68,68,.15); color: var(--rep); }
+.ms-dist-badge.i { background: rgba(168,85,247,.15); color: var(--ind); }
+
+/* ── DATA tab cards ──────────────────────────────────────────────────────── */
+.ms-card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; margin-bottom: 12px; }
+.ms-card-label { font-size: 10px; color: var(--text-mute); text-transform: uppercase; letter-spacing: .1em; font-family: "JetBrains Mono", monospace; margin-bottom: 12px; }
+.ms-gov-row { display: flex; align-items: center; gap: 12px; }
+.ms-gov-photo-fb { width: 46px; height: 46px; border-radius: 50%; background: var(--surface-2); display: flex; align-items: center; justify-content: center; font-family: "JetBrains Mono", monospace; font-weight: 600; color: var(--text-dim); flex-shrink: 0; }
+.ms-gov-name { font-size: 15px; font-weight: 600; color: var(--text); }
+.ms-gov-meta { font-size: 12px; color: var(--text-dim); margin-top: 2px; }
+.ms-gov-badge { display: inline-flex; align-items: center; gap: 5px; font-size: 11px; margin-top: 4px; }
+.ms-gov-badge .dot { width: 7px; height: 7px; border-radius: 50%; }
+.ms-kv { display: flex; justify-content: space-between; font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.ms-kv:last-child { border-bottom: none; }
+.ms-kv .k { color: var(--text-dim); }
+.ms-kv .v { color: var(--text); font-weight: 600; font-family: "JetBrains Mono", monospace; }
+
+/* ── NEWS tab ────────────────────────────────────────────────────────────── */
+.ms-news-item { display: block; padding: 12px 0; border-bottom: 1px solid var(--border); text-decoration: none; }
+.ms-news-title { font-size: 13px; line-height: 1.4; color: var(--text); margin-bottom: 4px; }
+.ms-news-meta { font-size: 10px; color: var(--text-mute); font-family: "JetBrains Mono", monospace; }
+.ms-loading { text-align: center; padding: 30px 0; color: var(--text-mute); font-size: 12px; font-family: "JetBrains Mono", monospace; }
+
+/* ── CYCLE drawer ────────────────────────────────────────────────────────── */
+.ms-cycle-track { position: relative; padding: 18px 4px 8px; }
+.ms-cycle-range { width: 100%; -webkit-appearance: none; appearance: none; height: 4px; border-radius: 2px; background: var(--border-hi); outline: none; }
+.ms-cycle-range::-webkit-slider-thumb { -webkit-appearance: none; width: 22px; height: 22px; border-radius: 50%; background: var(--ind); cursor: pointer; border: 3px solid var(--surface); }
+.ms-cycle-range::-moz-range-thumb { width: 22px; height: 22px; border-radius: 50%; background: var(--ind); cursor: pointer; border: 3px solid var(--surface); }
+.ms-cycle-ticks { display: flex; justify-content: space-between; margin-top: 8px; font-size: 9px; color: var(--text-mute); font-family: "JetBrains Mono", monospace; }
+.ms-cycle-quick { display: grid; grid-template-columns: repeat(3,1fr); gap: 8px; margin-top: 16px; }
+.ms-cycle-card {
+  background: var(--surface-2); border: 1px solid var(--border); border-radius: 10px;
+  padding: 12px 8px; text-align: center; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.ms-cycle-card.active { border-color: var(--ind); background: rgba(168,85,247,.12); }
+.ms-cycle-card .yr { font-size: 17px; font-weight: 700; font-family: "JetBrains Mono", monospace; color: var(--text); }
+.ms-cycle-card .cong { font-size: 9px; color: var(--text-mute); margin-top: 3px; }
+
+/* ── FILTERS drawer ──────────────────────────────────────────────────────── */
+.ms-filter-group { margin-bottom: 18px; }
+.ms-filter-group > .lbl { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 10px; }
+.ms-chip-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.ms-chip {
+  padding: 8px 14px; border-radius: 9px; border: 1px solid var(--border-hi);
+  background: var(--surface-2); color: var(--text-dim); font-size: 13px;
+  font-family: "Inter", system-ui, sans-serif; cursor: pointer; -webkit-tap-highlight-color: transparent;
+}
+.ms-chip.active { background: var(--ind); border-color: var(--ind); color: #fff; }
+.ms-chip.d.active { background: var(--dem); border-color: var(--dem); }
+.ms-chip.r.active { background: var(--rep); border-color: var(--rep); }
+.ms-toggle-row { display: flex; align-items: center; justify-content: space-between; }
+.ms-toggle { width: 44px; height: 26px; border-radius: 13px; background: var(--border-hi); position: relative; cursor: pointer; transition: background 200ms; flex-shrink: 0; border: none; }
+.ms-toggle.on { background: var(--ind); }
+.ms-toggle::after { content: ''; position: absolute; top: 3px; left: 3px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: transform 200ms; }
+.ms-toggle.on::after { transform: translateX(18px); }
+.ms-select { width: 100%; background: var(--surface-2); border: 1px solid var(--border-hi); border-radius: 9px; color: var(--text); padding: 10px 12px; font-size: 13px; font-family: inherit; outline: none; }

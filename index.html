@@ -4894,6 +4894,13 @@ async function renderNationalMap() {
       const idFor = (d) => 'state:' + d.properties.name;
       const onSingle = function(d) {
         const name = d.properties.name;
+        // With the mobile shell, a single tap drills straight into the state
+        // (matches the app mockup). The state overview then appears docked.
+        if (window.MobileShell) {
+          mobilePopupHide();
+          showStateView(name);
+          return;
+        }
         const ownerId = 'state:' + name;
         if (mobilePopupIsOwnedBy(ownerId)) {
           mobilePopupHide();
@@ -5940,6 +5947,9 @@ async function showStateView(stateName) {
 
     renderStateMap();
     renderStateDetail(legResult.status === 'rejected' ? legResult.reason : null);
+
+    // Mobile shell: refresh tabs/overview now that legislators are loaded.
+    if (window.MobileShell) window.MobileShell.onStateEnter();
   } catch (err) {
     // Hide tooltip in case it's stuck visible
     document.getElementById('tooltip').classList.remove('visible');
@@ -6476,6 +6486,12 @@ function renderStateMap() {
     const onSingle = function(d, pathEl) {
       const districtNum = d.properties.district;
       const rep = repByDistrict[districtNum];
+      // New mobile shell: open the polished district bottom sheet.
+      if (window.MobileShell) {
+        window.MobileShell.openDistrict(districtNum, rep);
+        return;
+      }
+      // Fallback (shell unavailable): legacy popup.
       const ownerId = 'district:' + (d.properties.state || '') + '-' + districtNum;
       if (mobilePopupIsOwnedBy(ownerId)) {
         mobilePopupHide();
@@ -6485,6 +6501,16 @@ function renderStateMap() {
       }
     };
     const onDouble = function(d, pathEl) {
+      // With the shell active, single-tap already opens the rich sheet; keep
+      // double-tap as a shortcut straight to the full profile modal.
+      const districtNum = d.properties.district;
+      const rep = repByDistrict[districtNum];
+      if (window.MobileShell && typeof openRepDetailModal === 'function') {
+        selectDistrict(d, pathEl);
+        activeRep = rep;
+        openRepDetailModal(districtNum, rep);
+        return;
+      }
       selectDistrict(d, pathEl);
       const profileHtml = document.getElementById('detail-panel').innerHTML;
       const ownerId = 'district-full:' + (d.properties.state || '') + '-' + d.properties.district;
@@ -7629,6 +7655,9 @@ function showNationalView() {
 
   renderNationalMap();
   renderNationalDetail();
+
+  // Mobile shell: reset to national overview.
+  if (window.MobileShell) window.MobileShell.onNationalEnter();
 }
 
 document.getElementById('back-btn').addEventListener('click', showNationalView);
@@ -8166,9 +8195,44 @@ function init() {
   });
 }
 
+// ----------------------------------------------------------------------------
+// MOBILE SHELL BRIDGE
+// The mobile shell lives in a separate file (mobile-shell.js) loaded after this
+// inline script. Top-level `let`/`const` here are NOT attached to window, so we
+// publish the references the shell needs. Data objects are stable references
+// (safe to share directly); the mutable view-state values are exposed via live
+// getters so the shell always reads the current value.
+window.__gerry = {
+  get viewMode() { return viewMode; },
+  get activeState() { return activeState; },
+  get activeRep() { return activeRep; },
+  set activeRep(v) { activeRep = v; },
+  get stateLegislators() { return stateLegislators; },
+  get selectedYear() { return selectedYear; },
+  get _historyControls() { return _historyControls; },
+  ELECTION_DATA: ELECTION_DATA,
+  STATE_DEMOGRAPHICS: STATE_DEMOGRAPHICS,
+  DISTRICT_DEMOGRAPHICS: DISTRICT_DEMOGRAPHICS,
+  STATE_POPULATION: STATE_POPULATION,
+  STATE_ABBR: STATE_ABBR,
+  RACE_BUCKETS: RACE_BUCKETS,
+  HISTORY_DATA: HISTORY_DATA,
+  HISTORY_LATEST_YEAR: HISTORY_LATEST_YEAR,
+  isMobile: isMobile,
+  showStateView: showStateView,
+  showNationalView: showNationalView,
+  openRepDetailModal: openRepDetailModal,
+  findStateLegislators: findStateLegislators,
+  getDelegation: getDelegation,
+  buildRaceBar: buildRaceBar,
+  formatIncomeCompact: formatIncomeCompact,
+  escapeHtml: escapeHtml
+};
+
 init();
 </script>
 <link rel="stylesheet" href="rep-styles.css">
+<link rel="stylesheet" href="mobile-shell.css">
 <script src="governors.js"></script>
 <script src="rep-integration.js"></script>
 <script>
@@ -8198,5 +8262,6 @@ document.addEventListener('keydown', function(e) {
 });
 </script>
 <script src="population-estimates-display.js"></script>
+<script src="mobile-shell.js"></script>
 </body>
 </html>
