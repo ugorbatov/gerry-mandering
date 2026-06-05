@@ -705,6 +705,7 @@
       if (!mobileOn()) return;
       build();
       document.body.classList.add('ms-on');
+      document.body.classList.toggle('ms-national', !inState());
       if (!document.body.className.match(/ms-tab-/)) setTab('map');
       renderOverview();
       syncCyclePill();
@@ -717,6 +718,7 @@
       if (!mobileOn()) return;
       build();
       document.body.classList.add('ms-on');
+      document.body.classList.remove('ms-national');
       setTab('map');
       shell.newsLoadedFor = null;
       renderOverview();
@@ -726,6 +728,7 @@
       if (!mobileOn()) return;
       build();
       document.body.classList.add('ms-on');
+      document.body.classList.add('ms-national');
       setTab('map');
       shell.newsLoadedFor = null;
       renderOverview();
@@ -743,6 +746,7 @@
     if (!mobileOn()) return;   // desktop: do nothing at all
     build();
     document.body.classList.add('ms-on');
+    document.body.classList.toggle('ms-national', !inState());
     setTab('map');
     renderOverview();
     syncCyclePill();

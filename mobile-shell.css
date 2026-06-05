@@ -16,6 +16,38 @@ body.ms-on .ms-root { display: block; }
 body.ms-on .map-card { bottom: 56px !important; }
 body.ms-on.simulate-mobile .map-card { bottom: 56px !important; }
 
+/* ── NATIONAL FRONT PAGE: 70% map / 30% specs ──────────────────────────────
+   On the national Map tab the overview panel is DOCKED at a fixed 30% of the
+   viewport (not a floating/collapsible sheet), and the map fills the top 70%
+   above it. State view keeps the floating-card behavior (no ms-national class). */
+body.ms-on.ms-national.ms-tab-map .map-card {
+  bottom: calc(30% + 56px) !important;   /* 30% panel + 56px tab bar */
+}
+body.ms-on.ms-national.ms-tab-map .ms-overview {
+  height: 30%;
+  max-height: 30%;
+  transform: none !important;            /* never collapses */
+  border-radius: 18px 18px 0 0;
+  overflow-y: auto;
+}
+/* Hide the drag handle on the national docked panel — it doesn't drag. */
+body.ms-on.ms-national.ms-tab-map .ms-ov-handle { display: none; }
+/* National map shows the zoomed continental view; the in-map source credit
+   would collide with the docked panel, so hide it there. */
+body.ms-on.ms-national.ms-tab-map .map-source { display: none; }
+
+/* Zoom buttons are removed on the national front page — pinch-to-zoom and
+   double-tap-to-recenter replace them. (State view keeps its controls.) */
+body.ms-on.ms-national.ms-tab-map .zoom-controls,
+body.ms-on.ms-national.ms-tab-map #zoom-controls { display: none !important; }
+
+/* The legend normally sits at bottom:14px, which would hide behind the docked
+   30% panel. Lift it just above the panel on the national front page. */
+body.ms-on.ms-national.ms-tab-map .legend {
+  bottom: calc(30% + 66px) !important;
+  z-index: 36;
+}
+
 /* When a non-map tab is active, hide the map entirely and show a scrolling
    content surface in its place. */
 body.ms-on.ms-tab-districts .map-card,

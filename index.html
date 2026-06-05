@@ -5282,6 +5282,32 @@ async function renderNationalMap() {
     });
 
     document.getElementById('map-source').textContent = 'BOUNDARIES · U.S. CENSUS TIGER 2024';
+
+    // ── MOBILE NATIONAL FRONT PAGE ──
+    // Start the map zoomed in to continental scale so it fills the tall 70%
+    // map band (rather than a small whole-country thumbnail), and bleeds off
+    // the edges so it reads as a draggable canvas. Pinch/drag use the existing
+    // d3.zoom; double-tapping empty map recenters to this default view.
+    if (isMobile()) {
+      // Scale up and keep centered. translateExtent above is [[0,0],[W,H]];
+      // a centered scale keeps the continental US in frame while allowing pan.
+      const k0 = 1.9;
+      const initial = d3.zoomIdentity
+        .translate(W / 2, H / 2).scale(k0).translate(-W / 2, -H / 2);
+      svg.call(nationalZoom.transform, initial);
+
+      // Double-tap empty map → recenter to the default zoomed view.
+      let lastTap = 0;
+      svg.on('dblclick.recenter', null); // disable default dblclick-zoom
+      svg.on('touchend.recenter', function (event) {
+        const now = Date.now();
+        if (now - lastTap < 320 && (!event.touches || event.touches.length === 0)) {
+          svg.transition().duration(300).call(nationalZoom.transform, initial);
+          event.preventDefault();
+        }
+        lastTap = now;
+      });
+    }
   } catch (err) {
     container.innerHTML = '<div class="loading" style="color:var(--text-dim)">Couldn\'t load map: ' + escapeHtml(err.message) + '</div>';
   }
