@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+<title>Redistricting Tracker · Gerrymandering Revealed</title>
+<meta name="description" content="The 2025–26 mid-decade redistricting wave, state by state — which maps were redrawn, who benefits, the seat impact, and what's still in court." />
+<meta name="theme-color" content="#0A0A0B" />
+<meta name="robots" content="index, follow, max-image-preview:large" />
+<link rel="canonical" href="https://gerrymandering-revealed.netlify.app/redistricting-tracker.html" />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Gerrymandering Revealed" />
+<meta property="og:title" content="Redistricting Tracker · Gerrymandering Revealed" />
+<meta property="og:description" content="The 2025–26 mid-decade redistricting wave, state by state — which maps changed, who benefits, the seat impact, and what's still in court." />
+<meta property="og:url" content="https://gerrymandering-revealed.netlify.app/redistricting-tracker.html" />
+<meta property="og:image" content="https://gerrymandering-revealed.netlify.app/og-image.png" />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Redistricting Tracker · Gerrymandering Revealed" />
+<meta name="twitter:description" content="The 2025–26 mid-decade redistricting wave, state by state — who benefits and what's still in court." />
+<meta name="twitter:image" content="https://gerrymandering-revealed.netlify.app/og-image.png" />
+<meta name="twitter:url" content="https://gerrymandering-revealed.netlify.app/redistricting-tracker.html" />
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#0A0A0B; --surface:#111113; --surface-2:#18181B; --border:#1F1F23;
+  --border-hi:#2E2E33; --text:#F4F4F5; --text-dim:#A1A1AA; --text-mute:#52525B;
+  --dem:#3B82F6; --rep:#EF4444; --ind:#A855F7; --green:#22C55E; --amber:#F59E0B; --orange:#F97316;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:14px}
+a{color:var(--text-dim);text-decoration:underline;text-decoration-color:var(--border-hi);text-underline-offset:2px;transition:color 150ms}
+a:hover{color:var(--text);text-decoration-color:var(--text-dim)}
+.page{padding:16px 20px 40px;min-height:100vh;max-width:1280px;margin:0 auto}
+
+/* ── TOP RIGHT ── */
+.top-right{position:absolute;top:18px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:5}
+.ts-line{font-size:10px;color:var(--text-mute);letter-spacing:.04em;font-family:"JetBrains Mono",monospace;display:flex;align-items:center;gap:6px}
+.ts-line .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6)}
+
+/* ── EYEBROW / HEADER ── */
+header{margin-bottom:18px;padding-right:220px;position:relative}
+.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.eyebrow .pill{width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,var(--dem) 0%,var(--rep) 100%)}
+.eyebrow span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);font-weight:500}
+.eyebrow .wordmark{color:var(--text);font-weight:600;letter-spacing:.08em}
+.eyebrow .eyebrow-sub{color:var(--text-mute);font-weight:500;letter-spacing:.1em;padding-left:10px;border-left:1px solid var(--border-hi)}
+h1{font-size:28px;font-weight:600;margin:0;letter-spacing:-.02em;line-height:1.15}
+.lede{font-size:13px;color:var(--text-dim);margin-top:6px;max-width:680px;line-height:1.5}
+
+/* ── NAV ── */
+.site-nav{display:flex;align-items:center;gap:2px;margin-top:10px;margin-bottom:16px;padding:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;width:fit-content;position:relative;z-index:10}
+.nav-item{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:5px;font-size:11px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--text-mute);text-decoration:none;cursor:pointer;border:none;background:none;transition:all 150ms;white-space:nowrap}
+.nav-item:hover{color:var(--text-dim);background:var(--surface-2);text-decoration:none}
+.nav-item.active{color:var(--text);background:var(--surface-2);border:1px solid var(--border-hi)}
+.nav-item .nav-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.nav-divider{width:1px;height:16px;background:var(--border-hi);flex-shrink:0;margin:0 2px}
+.nav-dropdown{position:relative}
+.nav-dropdown-menu{display:none;position:absolute;top:calc(100% + 6px);left:0;min-width:260px;background:var(--surface);border:1px solid var(--border-hi);border-radius:8px;overflow:hidden;box-shadow:0 16px 40px rgba(0,0,0,.6);z-index:100}
+.nav-dropdown-menu.open{display:block}
+.nav-dropdown-header{padding:8px 12px 6px;font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-family:"JetBrains Mono",monospace;border-bottom:1px solid var(--border)}
+.nav-dd-item{display:flex;align-items:flex-start;gap:10px;padding:10px 12px;text-decoration:none;cursor:pointer;transition:background 150ms;border-bottom:1px solid var(--border)}
+.nav-dd-item:last-child{border-bottom:none}
+.nav-dd-item:hover{background:var(--surface-2)}
+.nav-dd-icon{width:28px;height:28px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:13px;flex-shrink:0;margin-top:1px}
+.nav-dd-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:2px}
+.nav-dd-sub{font-size:11px;color:var(--text-mute);line-height:1.4}
+.nav-dd-tag{font-size:9px;padding:1px 5px;border-radius:3px;margin-left:4px;font-family:"JetBrains Mono",monospace;vertical-align:middle}
+.tag-live{background:rgba(34,197,94,.15);color:var(--green)}
+.tag-soon{background:rgba(245,158,11,.15);color:var(--amber)}
+.tag-new{background:rgba(59,130,246,.15);color:var(--dem)}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-bottom:16px}
+.stat{background:var(--surface);padding:9px 13px}
+.stat .label{font-size:10px;color:var(--text-dim);text-transform:uppercase;letter-spacing:.08em;font-weight:500;margin-bottom:3px}
+.stat .value{font-size:20px;font-weight:600;font-family:"JetBrains Mono",monospace;letter-spacing:-.02em}
+
+/* ── LAYOUT: MAP + DETAIL ── */
+.rt-grid{display:grid;grid-template-columns:1.55fr 1fr;gap:16px;align-items:start}
+@media (max-width:860px){ .rt-grid{grid-template-columns:1fr} }
+
+.map-wrap{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 14px 8px;position:relative}
+#rt-map{width:100%}
+#rt-map svg{width:100%;height:auto;display:block}
+#rt-map path{transition:opacity 140ms, stroke 140ms}
+#rt-map path.dimmed{opacity:.18}
+#rt-map path.sel{stroke:var(--text);stroke-width:1.6}
+
+/* ── LEGEND ── */
+.legend{display:flex;flex-wrap:wrap;gap:10px 16px;padding:10px 4px 4px;border-top:1px solid var(--border);margin-top:8px}
+.legend-col{display:flex;flex-direction:column;gap:7px}
+.legend-h{font-size:9px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-family:"JetBrains Mono",monospace;margin-bottom:1px}
+.legend-item{display:flex;align-items:center;gap:7px;font-size:11px;color:var(--text-dim);cursor:pointer;user-select:none}
+.legend-item:hover{color:var(--text)}
+.legend-sw{width:16px;height:12px;border-radius:3px;flex-shrink:0;border:1px solid var(--border-hi)}
+.legend-item.off{opacity:.4}
+
+/* ── DETAIL PANEL ── */
+.detail{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;min-height:300px;position:sticky;top:16px}
+.detail-empty{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;height:280px;color:var(--text-mute);gap:8px}
+.detail-empty svg{opacity:.4}
+.detail-empty .t{font-size:13px;color:var(--text-dim);font-weight:500}
+.detail-empty .s{font-size:11px;max-width:220px;line-height:1.5}
+
+.d-state{font-size:20px;font-weight:600;letter-spacing:-.01em}
+.d-statusrow{display:flex;align-items:center;gap:8px;margin-top:8px;flex-wrap:wrap}
+.d-badge{font-size:10px;font-weight:600;padding:3px 9px;border-radius:5px;font-family:"JetBrains Mono",monospace;letter-spacing:.04em;display:inline-flex;align-items:center;gap:5px}
+.d-badge .bdot{width:6px;height:6px;border-radius:50%}
+.b-enacted{background:rgba(34,197,94,.15);color:var(--green)}
+.b-contested{background:rgba(245,158,11,.15);color:var(--amber)}
+.b-court{background:rgba(168,85,247,.15);color:var(--ind)}
+.b-failed{background:rgba(82,82,91,.2);color:var(--text-dim)}
+.b-considering{background:rgba(59,130,246,.12);color:var(--dem)}
+.d-favors{font-size:10px;font-weight:600;padding:3px 9px;border-radius:5px;font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+.fav-R{background:rgba(239,68,68,.15);color:var(--rep)}
+.fav-D{background:rgba(59,130,246,.15);color:var(--dem)}
+.fav-none{background:rgba(82,82,91,.2);color:var(--text-dim)}
+
+.d-seat{display:flex;align-items:center;gap:12px;margin-top:14px;padding:12px;background:var(--surface-2);border:1px solid var(--border);border-radius:9px}
+.d-seat .big{font-size:26px;font-weight:700;font-family:"JetBrains Mono",monospace;line-height:1}
+.d-seat .cap{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.06em;margin-top:3px}
+.d-seat .old{font-size:11px;color:var(--text-dim);font-family:"JetBrains Mono",monospace}
+
+.d-sec{font-size:10px;color:var(--text-mute);text-transform:uppercase;letter-spacing:.1em;font-family:"JetBrains Mono",monospace;margin:16px 0 8px}
+.d-summary{font-size:12.5px;color:var(--text-dim);line-height:1.6}
+
+.d-timeline{display:flex;flex-direction:column;gap:0}
+.d-tli{display:flex;gap:10px;padding:6px 0;font-size:12px;color:var(--text-dim);line-height:1.45}
+.d-tli .dt{color:var(--text-mute);font-family:"JetBrains Mono",monospace;font-size:10px;flex-shrink:0;width:78px;padding-top:1px}
+
+.d-sources{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.d-src{font-size:10px;padding:3px 8px;background:var(--surface-2);border:1px solid var(--border-hi);border-radius:4px;font-family:"JetBrains Mono",monospace;color:var(--text-mute);text-decoration:none}
+.d-src:hover{color:var(--text);border-color:var(--text-mute)}
+
+.disclaimer{font-size:11px;color:var(--text-mute);line-height:1.55;background:var(--surface);border:1px solid var(--border);border-left:2px solid var(--amber);border-radius:8px;padding:11px 14px;margin-top:16px}
+
+/* ── FOOTER ── */
+footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);font-size:12px;color:var(--text-mute)}
+.footer-sources{font-size:11px;color:var(--text-mute);line-height:1.6}
+.footer-sources a{color:var(--text-dim)}
+
+@media (max-width:680px){
+  header{padding-right:0}
+  .top-right{position:static;align-items:flex-start;margin-bottom:8px}
+  h1{font-size:22px}
+  .lede{font-size:12px}
+  .stat .value{font-size:16px}
+  .site-nav{max-width:100%;overflow-x:auto;width:auto}
+  .detail{position:static}
+}
+</style>
+<link rel="stylesheet" href="theme.css" />
+<script src="theme-toggle.js"></script>
+</head>
+<body>
+<div class="page" style="position:relative">
+
+  <div class="top-right">
+    <div class="ts-line"><span class="dot"></span><span id="ts-updated">REDISTRICTING TRACKER</span></div>
+  </div>
+
+  <header>
+    <div class="eyebrow">
+      <span class="pill"></span>
+      <span class="wordmark">Gerrymandering Revealed</span>
+      <span class="eyebrow-sub">Redistricting Tracker</span>
+    </div>
+
+    <nav class="site-nav" aria-label="Site navigation">
+      <a class="nav-item" href="index.html">
+        <span class="nav-dot" style="background:var(--text-mute)"></span>
+        District Map
+      </a>
+      <div class="nav-divider"></div>
+      <div class="nav-dropdown" id="nav-tools-dropdown">
+        <button class="nav-item" onclick="toggleNavDropdown()" aria-expanded="false" aria-haspopup="true" id="nav-tools-btn">
+          Tools &amp; Data
+          <svg width="10" height="10" viewBox="0 0 10 10" fill="none" style="margin-left:2px;opacity:.5" aria-hidden="true">
+            <path d="M2 3.5L5 6.5L8 3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <div class="nav-dropdown-menu" id="nav-tools-menu" role="menu">
+          <div class="nav-dropdown-header">Gerrymandering Revealed · Suite</div>
+          <a class="nav-dd-item" href="index.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(59,130,246,.12)">🗺</div>
+            <div><div class="nav-dd-title">District Map <span class="nav-dd-tag tag-live">LIVE</span></div><div class="nav-dd-sub">Interactive map of every U.S. congressional district — 119th Congress.</div></div>
+          </a>
+          <a class="nav-dd-item" href="redistricting-tracker.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(34,197,94,.12)">🧭</div>
+            <div><div class="nav-dd-title">Redistricting Tracker <span class="nav-dd-tag tag-new">NEW</span></div><div class="nav-dd-sub">The 2025–26 mid-decade wave — which maps changed, who benefits, what's in court.</div></div>
+          </a>
+          <a class="nav-dd-item" href="legal-tracker.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(168,85,247,.12)">⚖</div>
+            <div><div class="nav-dd-title">Legal Tracker <span class="nav-dd-tag tag-new">NEW</span></div><div class="nav-dd-sub">Every major redistricting lawsuit — cases, judges, oral arguments, and AI summaries.</div></div>
+          </a>
+          <a class="nav-dd-item" href="vote-gap.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(245,158,11,.12)">📊</div>
+            <div><div class="nav-dd-title">Vote Gap Analyzer <span class="nav-dd-tag tag-live">LIVE</span></div><div class="nav-dd-sub">Compare votes cast vs. seats won in each state.</div></div>
+          </a>
+          <a class="nav-dd-item" href="follow-the-money.html" role="menuitem">
+            <div class="nav-dd-icon" style="background:rgba(239,68,68,.12)">💰</div>
+            <div><div class="nav-dd-title">Follow the Money <span class="nav-dd-tag tag-new">NEW</span></div><div class="nav-dd-sub">Donor-to-politician networks funding redistricting battles.</div></div>
+          </a>
+        </div>
+      </div>
+      <div class="nav-divider"></div>
+      <a class="nav-item active" href="redistricting-tracker.html" aria-current="page">
+        <span class="nav-dot" style="background:var(--green)"></span>
+        Redistricting Tracker
+      </a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="about.html">About</a>
+    </nav>
+
+    <h1>The 2025–26 Redistricting Wave</h1>
+    <p class="lede">For the first time since the 1800s, states are redrawing congressional maps mid-decade — outside the normal once-every-ten-years cycle. Tap a state to see what changed, who it helps, the seat impact, and what's still in court. Non-partisan.</p>
+  </header>
+
+  <div class="stats-row" id="stats-row"></div>
+
+  <div class="rt-grid">
+    <div class="map-wrap">
+      <div id="rt-map"></div>
+      <div class="legend" id="legend"></div>
+    </div>
+
+    <div class="detail" id="detail">
+      <div class="detail-empty" id="detail-empty">
+        <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 20l-5.4 2.7A1 1 0 0 1 2 21.8V6.2a1 1 0 0 1 .6-.9L9 2m0 18 6-3m-6 3V2m6 15 5.4 2.7a1 1 0 0 0 1.6-.9V3.2a1 1 0 0 0-.6-.9L15 0m0 17V0m0 2L9 5"/></svg>
+        <div class="t">Select a state</div>
+        <div class="s">Tap any highlighted state on the map to see its redistricting status and seat impact.</div>
+      </div>
+      <div id="detail-body" style="display:none"></div>
+    </div>
+  </div>
+
+  <div class="disclaimer" id="disclaimer"></div>
+
+  <footer>
+    <div style="display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:6px;">
+      <strong style="color:var(--text-dim);font-weight:500;letter-spacing:0.04em;">Gerrymandering Revealed</strong>
+      <span style="font-size:10px;color:var(--text-mute);font-family:'JetBrains Mono',ui-monospace,monospace;letter-spacing:0.04em;">A NON-PARTISAN DATA PROJECT</span>
+    </div>
+    <div class="footer-sources">
+      Redistricting status compiled from <a href="https://ballotpedia.org/Redistricting_ahead_of_the_2026_elections" target="_blank" rel="noopener">Ballotpedia</a>,
+      the <a href="https://www.congress.gov/crs-product/IF13082" target="_blank" rel="noopener">Congressional Research Service</a>,
+      <a href="https://www.cookpolitical.com/redistricting/2025-26-mid-decade-map" target="_blank" rel="noopener">Cook Political Report</a>, and
+      <a href="https://redistricting.lls.edu/national-overview/" target="_blank" rel="noopener">All About Redistricting (LLS)</a>.
+      Boundaries from <a href="https://github.com/topojson/us-atlas" target="_blank" rel="noopener">us-atlas</a>.
+      Seat projections assume past voting patterns hold and are inherently uncertain.
+    </div>
+  </footer>
+
+</div><!-- .page -->
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.8.5/d3.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+<script src="redistricting-data.js"></script>
+<script src="redistricting-tracker.js"></script>
+</body>
+</html>
