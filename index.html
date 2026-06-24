@@ -5292,16 +5292,20 @@ async function renderNationalMap() {
     document.getElementById('map-source').textContent = 'BOUNDARIES · U.S. CENSUS TIGER 2024';
 
     // ── MOBILE NATIONAL FRONT PAGE ──
-    // Start the map zoomed in to continental scale so it fills the tall 70%
-    // map band (rather than a small whole-country thumbnail), and bleeds off
-    // the edges so it reads as a draggable canvas. Pinch/drag use the existing
-    // d3.zoom; double-tapping empty map recenters to this default view.
+    // Start the map zoomed in so it fills the tall 70% map band and bleeds off
+    // the side edges, reading as a draggable canvas. We focus on the
+    // CONTINENTAL US (not the whole composite): geoAlbersUsa tucks Alaska and
+    // Hawaii into the lower-left, which weights the picture downward and made
+    // the map sit low with empty space on top. Centering a point slightly
+    // above the geometric middle lifts the lower-48 into the centre of the band
+    // and lets the AK/HI insets fall toward the bottom edge. Pinch/drag use the
+    // existing d3.zoom; double-tapping empty map recenters to this default.
     if (isMobile()) {
-      // Scale up and keep centered. translateExtent above is [[0,0],[W,H]];
-      // a centered scale keeps the continental US in frame while allowing pan.
-      const k0 = 1.9;
+      const k0 = 2.1;                 // fills the band vertically; tune if needed
+      const focusX = W * 0.50;        // horizontal centre
+      const focusY = H * 0.44;        // just above middle → lifts the lower-48
       const initial = d3.zoomIdentity
-        .translate(W / 2, H / 2).scale(k0).translate(-W / 2, -H / 2);
+        .translate(W / 2, H / 2).scale(k0).translate(-focusX, -focusY);
       svg.call(nationalZoom.transform, initial);
 
       // Double-tap empty map → recenter to the default zoomed view.

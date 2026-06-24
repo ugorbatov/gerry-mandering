@@ -41,6 +41,26 @@ body.ms-on.ms-national.ms-tab-map .map-source { display: none; }
 body.ms-on.ms-national.ms-tab-map .zoom-controls,
 body.ms-on.ms-national.ms-tab-map #zoom-controls { display: none !important; }
 
+/* ── TOUCH MAP behaviour (national + state) ───────────────────────────────
+   The +/- /reset buttons are removed on mobile entirely — pinch zooms,
+   one finger pans, double-tap recenters. Hiding them on every map tab. */
+body.ms-on.ms-tab-map .zoom-controls,
+body.ms-on.ms-tab-map #zoom-controls { display: none !important; }
+
+/* Critical: without touch-action:none the browser swallows the drag/pinch as
+   a page-scroll gesture and d3-zoom never receives it, so the map feels dead
+   to touch. This hands all gestures over the map straight to d3-zoom. */
+body.ms-on .map-card svg.usa,
+body.ms-on #map-container svg.usa {
+  touch-action: none;
+  -ms-touch-action: none;
+}
+
+/* The in-map title strip ("U.S. House delegations") overlays the top of the
+   map and duplicates the shell's own cycle pill — and pushed the map's framing
+   down. Hide it whenever the shell is active. */
+body.ms-on .mobile-title-strip { display: none !important; }
+
 /* The legend normally sits at bottom:14px, which would hide behind the docked
    30% panel. Lift it just above the panel on the national front page. */
 body.ms-on.ms-national.ms-tab-map .legend {
