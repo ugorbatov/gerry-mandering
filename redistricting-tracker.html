@@ -52,6 +52,8 @@ header{margin-bottom:18px;padding-right:220px;position:relative}
 .eyebrow .eyebrow-sub{color:var(--text-mute);font-weight:500;letter-spacing:.1em;padding-left:10px;border-left:1px solid var(--border-hi)}
 h1{font-size:28px;font-weight:600;margin:0;letter-spacing:-.02em;line-height:1.15}
 .lede{font-size:13px;color:var(--text-dim);margin-top:6px;max-width:680px;line-height:1.5}
+.updated-line{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:4px 11px;background:var(--surface);border:1px solid var(--border);border-radius:999px;font-size:11px;font-family:"JetBrains Mono",monospace;letter-spacing:.04em;color:var(--text-dim)}
+.updated-line .updated-dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6);flex-shrink:0}
 
 /* ── NAV ── */
 .site-nav{display:flex;align-items:center;gap:2px;margin-top:10px;margin-bottom:16px;padding:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;width:fit-content;position:relative;z-index:10}
@@ -219,6 +221,9 @@ footer{margin-top:30px;padding-top:16px;border-top:1px solid var(--border);font-
     </nav>
 
     <h1>The 2025–26 Redistricting Wave</h1>
+    <div class="updated-line" id="updated-line" hidden>
+      <span class="updated-dot"></span><span id="updated-text">Updated</span>
+    </div>
     <p class="lede">For the first time since the 1800s, states are redrawing congressional maps mid-decade — outside the normal once-every-ten-years cycle. Tap a state to see what changed, who it helps, the seat impact, and what's still in court. Non-partisan.</p>
   </header>
 

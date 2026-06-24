@@ -261,7 +261,17 @@
     }
   });
 
+  // ---- UPDATED BADGE (near headline) ----
+  function renderUpdatedBadge() {
+    var el = document.getElementById('updated-text');
+    var line = document.getElementById('updated-line');
+    if (!el || !line) return;
+    el.textContent = 'Updated ' + RT_LAST_UPDATED;
+    line.hidden = false;
+  }
+
   // ---- INIT ----
+  renderUpdatedBadge();
   renderStats();
   renderLegend();
   renderMap();
