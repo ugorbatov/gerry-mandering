@@ -1,27 +1,8 @@
-# robots.txt for Gerrymandering Revealed
-# Tells search engines which pages to crawl
-
+# Allow all well-behaved crawlers; point them at the sitemap.
 User-agent: *
 Allow: /
-Allow: /index.html
-Allow: /historical/
-Allow: /netlify/functions/
 
-# Block internal files and directories
-Disallow: /.netlify/
-Disallow: /.git/
-Disallow: /node_modules/
+# Don't waste crawl budget on Netlify functions.
+Disallow: /api/
 
-# Specify sitemap location
 Sitemap: https://gerrymandering-revealed.netlify.app/sitemap.xml
-
-# Crawl delay (be nice to servers)
-Crawl-delay: 1
-Request-rate: 30/60
-
-# Additional search engine directives
-User-agent: Googlebot
-Allow: /
-
-User-agent: Bingbot
-Allow: /

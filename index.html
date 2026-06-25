@@ -1938,7 +1938,7 @@
     <nav class="site-nav" aria-label="Site navigation">
 
       <!-- Active page -->
-      <a class="nav-item active" href="index.html" aria-current="page">
+      <a class="nav-item active" href="/" aria-current="page">
         <span class="nav-dot" style="background:var(--green)"></span>
         District Map
       </a>
@@ -1956,7 +1956,7 @@
         <div class="nav-dropdown-menu" id="nav-tools-menu" role="menu">
           <div class="nav-dropdown-header">Gerrymandering Revealed · Suite</div>
 
-          <a class="nav-dd-item" href="index.html" role="menuitem">
+          <a class="nav-dd-item" href="/" role="menuitem">
             <div class="nav-dd-icon" style="background:rgba(59,130,246,.12)">🗺</div>
             <div class="nav-dd-text">
               <div class="nav-dd-title">District Map <span class="nav-dd-tag tag-live">LIVE</span></div>
@@ -1964,7 +1964,7 @@
             </div>
           </a>
 
-          <a class="nav-dd-item" href="redistricting-tracker.html" role="menuitem">
+          <a class="nav-dd-item" href="/redistricting-tracker" role="menuitem">
             <div class="nav-dd-icon" style="background:rgba(34,197,94,.12)">🧭</div>
             <div class="nav-dd-text">
               <div class="nav-dd-title">New Redistricting</div>
@@ -1972,7 +1972,7 @@
             </div>
           </a>
 
-          <a class="nav-dd-item" href="legal-tracker.html" role="menuitem">
+          <a class="nav-dd-item" href="/legal-tracker" role="menuitem">
             <div class="nav-dd-icon" style="background:rgba(168,85,247,.12)">⚖</div>
             <div class="nav-dd-text">
               <div class="nav-dd-title">Legal Tracker <span class="nav-dd-tag tag-new">NEW</span></div>
@@ -1980,7 +1980,7 @@
             </div>
           </a>
 
-          <a class="nav-dd-item" href="vote-gap.html" role="menuitem">
+          <a class="nav-dd-item" href="/vote-gap" role="menuitem">
             <div class="nav-dd-icon" style="background:rgba(245,158,11,.12)">📊</div>
             <div class="nav-dd-text">
               <div class="nav-dd-title">Vote Gap Analyzer <span class="nav-dd-tag tag-new">NEW</span></div>
@@ -1988,7 +1988,7 @@
             </div>
           </a>
 
-          <a class="nav-dd-item" href="follow-the-money.html" role="menuitem">
+          <a class="nav-dd-item" href="/follow-the-money" role="menuitem">
             <div class="nav-dd-icon" style="background:rgba(239,68,68,.12)">💰</div>
             <div class="nav-dd-text">
               <div class="nav-dd-title">Follow the Money <span class="nav-dd-tag tag-new">NEW</span></div>
@@ -2002,7 +2002,7 @@
       <div class="nav-divider"></div>
 
       <!-- About link -->
-      <a class="nav-item" href="about.html">About</a>
+      <a class="nav-item" href="/about">About</a>
 
     </nav>
 
@@ -3464,21 +3464,102 @@ function slugToStateName(slug) {
 // or search engines treat every state as a duplicate of the home page. Resets
 // to the home-page defaults on the national view.
 const SEO_ORIGIN = 'https://gerrymandering-revealed.netlify.app';
+
+// Hand-curated, per-state SEO copy: page title, meta description, and primary
+// keyword for each state. Used by updateSeoMeta below when a state view loads.
+// If a state isn't listed here, updateSeoMeta falls back to the generic template.
+// Edit this table to refine SEO; nothing else needs to change.
+const STATE_SEO = {
+  "Alabama":              { title: "Alabama Congressional District Map, Election Results & Redistricting",     desc: "Explore Alabama congressional districts, election results, district boundaries, representation, and the latest redistricting analysis.", keyword: "Alabama congressional districts" },
+  "Alaska":               { title: "Alaska Congressional District Map, Elections & Representation",            desc: "Explore Alaska's at-large congressional district, election results, voting trends, and representation through interactive maps.", keyword: "Alaska congressional district" },
+  "Arizona":              { title: "Arizona Redistricting Maps, Congressional Districts & Elections",          desc: "Analyze Arizona congressional districts, independent redistricting commission maps, election results, and district boundaries.", keyword: "Arizona redistricting commission" },
+  "Arkansas":             { title: "Arkansas Congressional District Maps and Election Analysis",               desc: "View Arkansas congressional district maps, voting trends, election results, and representation across the state.", keyword: "Arkansas congressional map" },
+  "California":           { title: "California Congressional District Maps, Elections & Redistricting",        desc: "Explore California congressional districts, demographic shifts, election data, and representation across the state's congressional delegation.", keyword: "California congressional districts" },
+  "Colorado":             { title: "Colorado Congressional Maps, Redistricting & Election Results",            desc: "Analyze Colorado district maps, election trends, congressional representation, and recent redistricting changes.", keyword: "Colorado redistricting" },
+  "Connecticut":          { title: "Connecticut Congressional District Maps & Representation",                 desc: "Explore Connecticut congressional districts, election results, district boundaries, and representation trends.", keyword: "Connecticut congressional districts" },
+  "Delaware":             { title: "Delaware Congressional District Map and Election Results",                 desc: "View Delaware's congressional district, election history, voting patterns, and congressional representation.", keyword: "Delaware congressional district" },
+  "Florida":              { title: "Florida Redistricting, Congressional Maps & Election Results",             desc: "Explore Florida congressional district maps, court challenges, election results, and representation trends.", keyword: "Florida redistricting" },
+  "Georgia":              { title: "Georgia Congressional District Maps, Elections & Representation",          desc: "Analyze Georgia congressional districts, election results, district boundaries, and voting trends.", keyword: "Georgia congressional districts" },
+  "Hawaii":               { title: "Hawaii Congressional District Maps and Election Results",                  desc: "Explore Hawaii congressional districts, election outcomes, district maps, and congressional representation.", keyword: "Hawaii congressional districts" },
+  "Idaho":                { title: "Idaho Congressional District Maps & Election Analysis",                    desc: "View Idaho congressional district boundaries, election results, and representation across the state.", keyword: "Idaho congressional districts" },
+  "Illinois":             { title: "Illinois Gerrymandering, Congressional District Maps & Elections",         desc: "Analyze Illinois congressional district maps, election results, voting trends, and representation fairness.", keyword: "Illinois gerrymandering" },
+  "Indiana":              { title: "Indiana Congressional District Maps, Elections & Representation",          desc: "Explore Indiana district boundaries, election results, and congressional representation.", keyword: "Indiana congressional districts" },
+  "Iowa":                 { title: "Iowa Congressional District Maps & Election Results",                     desc: "Analyze Iowa congressional districts, voting patterns, election outcomes, and district boundaries.", keyword: "Iowa congressional districts" },
+  "Kansas":               { title: "Kansas Congressional Maps, District Boundaries & Elections",               desc: "Explore Kansas congressional districts, election data, and representation trends.", keyword: "Kansas congressional districts" },
+  "Kentucky":             { title: "Kentucky Congressional District Maps and Representation",                  desc: "Review Kentucky congressional districts, election results, voting trends, and district boundaries.", keyword: "Kentucky congressional districts" },
+  "Louisiana":            { title: "Louisiana Congressional District Maps and Voting Rights Analysis",         desc: "Explore Louisiana congressional districts, Voting Rights Act cases, election results, and representation.", keyword: "Louisiana Voting Rights Act" },
+  "Maine":                { title: "Maine Congressional District Maps, Elections & Voting Trends",             desc: "Analyze Maine congressional districts, election results, ranked-choice voting, and representation.", keyword: "Maine congressional districts" },
+  "Maryland":             { title: "Maryland Gerrymandering, Congressional Maps & Elections",                  desc: "Explore Maryland congressional district maps, redistricting history, election results, and representation fairness.", keyword: "Maryland gerrymandering" },
+  "Massachusetts":        { title: "Massachusetts Congressional District Maps & Election Results",             desc: "View Massachusetts congressional districts, voting trends, and congressional representation.", keyword: "Massachusetts congressional districts" },
+  "Michigan":             { title: "Michigan Independent Redistricting Commission Maps",                      desc: "Explore Michigan congressional districts, independent commission maps, election results, and representation.", keyword: "Michigan redistricting commission" },
+  "Minnesota":            { title: "Minnesota Congressional District Maps and Election Analysis",              desc: "Explore Minnesota district boundaries, election results, and representation trends.", keyword: "Minnesota congressional districts" },
+  "Mississippi":          { title: "Mississippi Congressional District Maps & Representation",                 desc: "Review Mississippi congressional districts, election results, and voting patterns.", keyword: "Mississippi congressional districts" },
+  "Missouri":             { title: "Missouri Congressional Maps, Elections & District Boundaries",             desc: "Analyze Missouri congressional districts, election data, and congressional representation.", keyword: "Missouri congressional districts" },
+  "Montana":              { title: "Montana Congressional District Maps and Election Results",                 desc: "Explore Montana congressional districts, district boundaries, elections, and representation.", keyword: "Montana congressional districts" },
+  "Nebraska":             { title: "Nebraska Congressional District Maps & Voting Analysis",                   desc: "View Nebraska congressional districts, election results, and district boundaries.", keyword: "Nebraska congressional districts" },
+  "Nevada":               { title: "Nevada Congressional Maps, Redistricting & Elections",                     desc: "Analyze Nevada congressional district maps, election outcomes, and representation.", keyword: "Nevada redistricting" },
+  "New Hampshire":        { title: "New Hampshire Congressional District Maps & Elections",                    desc: "Explore New Hampshire congressional districts, election results, and voting trends.", keyword: "New Hampshire congressional districts" },
+  "New Jersey":           { title: "New Jersey Congressional District Maps, Elections & Representation",       desc: "Analyze New Jersey district boundaries, election results, congressional representation, and voting trends.", keyword: "New Jersey congressional districts" },
+  "New Mexico":           { title: "New Mexico Congressional Maps & Election Analysis",                        desc: "Explore New Mexico congressional districts, election data, and district boundaries.", keyword: "New Mexico congressional districts" },
+  "New York":             { title: "New York Congressional District Maps, Redistricting & Elections",          desc: "Explore New York congressional districts, court battles, election results, and representation.", keyword: "New York redistricting" },
+  "North Carolina":       { title: "North Carolina Gerrymandering Cases, District Maps & Elections",           desc: "Analyze North Carolina congressional districts, court rulings, election outcomes, and district boundaries.", keyword: "North Carolina gerrymandering" },
+  "North Dakota":         { title: "North Dakota Congressional District Map & Election Results",               desc: "View North Dakota's congressional district, election results, and representation.", keyword: "North Dakota congressional district" },
+  "Ohio":                 { title: "Ohio Congressional Maps, Redistricting & Election Results",                desc: "Explore Ohio congressional districts, election trends, district maps, and representation.", keyword: "Ohio redistricting" },
+  "Oklahoma":             { title: "Oklahoma Congressional District Maps & Elections",                         desc: "Analyze Oklahoma district boundaries, election data, and congressional representation.", keyword: "Oklahoma congressional districts" },
+  "Oregon":               { title: "Oregon Congressional District Maps, Elections & Representation",           desc: "Explore Oregon congressional districts, election results, and voting trends.", keyword: "Oregon congressional districts" },
+  "Pennsylvania":         { title: "Pennsylvania Congressional District Maps, Redistricting & Elections",      desc: "Analyze Pennsylvania district maps, court rulings, election results, and representation.", keyword: "Pennsylvania redistricting" },
+  "Rhode Island":         { title: "Rhode Island Congressional District Maps & Election Results",              desc: "View Rhode Island congressional districts, elections, and representation.", keyword: "Rhode Island congressional districts" },
+  "South Carolina":       { title: "South Carolina Congressional Maps & Election Analysis",                    desc: "Explore South Carolina congressional districts, election results, and district boundaries.", keyword: "South Carolina congressional districts" },
+  "South Dakota":         { title: "South Dakota Congressional District Map & Representation",                 desc: "View South Dakota's congressional district, election data, and representation.", keyword: "South Dakota congressional district" },
+  "Tennessee":            { title: "Tennessee Congressional District Maps, Elections & Voting Trends",         desc: "Analyze Tennessee congressional districts, election outcomes, and district boundaries.", keyword: "Tennessee congressional districts" },
+  "Texas":                { title: "Texas Congressional District Maps, Redistricting & Election Results",     desc: "Explore Texas congressional districts, election results, district boundaries, population changes, and redistricting analysis.", keyword: "Texas congressional districts" },
+  "Utah":                 { title: "Utah Congressional District Maps and Election Analysis",                   desc: "Explore Utah congressional districts, election data, and representation trends.", keyword: "Utah congressional districts" },
+  "Vermont":              { title: "Vermont Congressional District Map & Election Results",                    desc: "View Vermont's at-large congressional district, election results, and representation.", keyword: "Vermont congressional district" },
+  "Virginia":             { title: "Virginia Congressional Maps, Redistricting & Elections",                   desc: "Analyze Virginia congressional district maps, election results, district boundaries, and representation.", keyword: "Virginia redistricting" },
+  "Washington":           { title: "Washington Congressional District Maps & Election Results",                desc: "Explore Washington congressional districts, election data, voting trends, and representation.", keyword: "Washington congressional districts" },
+  "West Virginia":        { title: "West Virginia Congressional Maps & Representation",                        desc: "Review West Virginia congressional districts, election results, and district boundaries.", keyword: "West Virginia congressional districts" },
+  "Wisconsin":            { title: "Wisconsin Gerrymandering, Congressional Maps & Election Analysis",         desc: "Explore Wisconsin congressional district maps, vote-to-seat fairness, election results, and representation trends.", keyword: "Wisconsin gerrymandering" },
+  "Wyoming":              { title: "Wyoming Congressional District Map & Election Results",                    desc: "Explore Wyoming's at-large congressional district, election results, district boundaries, and congressional representation.", keyword: "Wyoming congressional district" }
+};
+
 function updateSeoMeta(stateName) {
   const set = function (sel, attr, val) {
     const el = document.querySelector(sel); if (el) el.setAttribute(attr, val);
   };
-  let title, url, desc;
+  // Also keep the meta-keywords tag in sync (mostly inert with Google but used
+  // by some smaller engines / social-share previews).
+  const setOrCreate = function (sel, attrs) {
+    let el = document.querySelector(sel);
+    if (!el) {
+      el = document.createElement('meta');
+      Object.keys(attrs).forEach(function (k) { if (k !== 'content') el.setAttribute(k, attrs[k]); });
+      document.head.appendChild(el);
+    }
+    el.setAttribute('content', attrs.content);
+  };
+
+  let title, url, desc, keyword;
   if (stateName) {
     url = SEO_ORIGIN + '/' + stateNameToSlug(stateName);
-    title = stateName + ' Congressional Districts · Gerrymandering Revealed';
-    desc = 'Congressional districts for ' + stateName + ' in the 119th Congress — '
-         + 'representatives, party breakdown, district maps, and recent election results. Non-partisan.';
+    const seo = STATE_SEO[stateName];
+    if (seo) {
+      // Hand-curated per-state copy. Title appends the brand for recognition.
+      title = seo.title + ' · Gerrymandering Revealed';
+      desc = seo.desc;
+      keyword = seo.keyword;
+    } else {
+      // Fallback for any state not in STATE_SEO (defensive).
+      title = stateName + ' Congressional Districts · Gerrymandering Revealed';
+      desc = 'Congressional districts for ' + stateName + ' in the 119th Congress — '
+           + 'representatives, party breakdown, district maps, and recent election results. Non-partisan.';
+      keyword = stateName + ' congressional districts';
+    }
   } else {
     url = SEO_ORIGIN + '/';
     title = 'Gerrymandering Revealed · How Votes Become Seats';
     desc = 'An interactive, non-partisan map of every U.S. congressional district in the '
          + '119th Congress — representatives, party breakdowns, district shapes, and recent election results.';
+    keyword = null;
   }
   document.title = title;
   set('link[rel="canonical"]', 'href', url);
@@ -3489,6 +3570,9 @@ function updateSeoMeta(stateName) {
   set('meta[name="description"]', 'content', desc);
   set('meta[property="og:description"]', 'content', desc);
   set('meta[name="twitter:description"]', 'content', desc);
+  if (keyword) {
+    setOrCreate('meta[name="keywords"]', { name: 'keywords', content: keyword });
+  }
 }
 
 // State population — U.S. Census Bureau Vintage 2025 estimates (resident
