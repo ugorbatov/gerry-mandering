@@ -146,18 +146,51 @@ def load_legislators():
 legislators = load_legislators()
 
 def reps_for_state(abbr):
+    """Return current House reps for a state, sorted by district number.
+
+    "Current" = any term of type 'rep' in this state whose date range covers
+    today. We do NOT just use terms[-1]: some legislator records aren't in
+    strict chronological order (e.g. a rep with a service gap or special
+    election can have older terms after newer ones), and some current terms
+    have no 'end' field set in the source data. We pick the latest-starting
+    qualifying term per person to handle reps who switched districts.
+    """
+    import datetime
+    today = datetime.date.today().isoformat()  # 'YYYY-MM-DD'
     out = []
     for L in legislators:
         terms = L.get("terms") or []
-        if not terms: continue
-        last = terms[-1]
-        if last.get("type") != "rep" or last.get("state") != abbr: continue
-        end = last.get("end") or ""
-        if end and end < "2025-01-03": continue
-        nb = L.get("name") or {}
-        official = nb.get("official_full") or ((nb.get("first") or "") + " " + (nb.get("last") or "")).strip()
-        out.append({"name": official, "party": (last.get("party") or "").strip(),
-                    "district": last.get("district")})
+        if not terms:
+            continue
+        # Find any current rep term in this state.
+        current = None
+        for t in terms:
+            if t.get("type") != "rep":
+                continue
+            if t.get("state") != abbr:
+                continue
+            start = t.get("start") or ""
+            end = t.get("end") or ""
+            # A term covers today if start <= today AND (end empty OR end > today).
+            # End dates are inclusive of the last serving day, so > today is correct.
+            if start and start > today:
+                continue
+            if end and end < today:
+                continue
+            # Keep the latest-starting matching term (handles mid-term district changes)
+            if current is None or (t.get("start") or "") > (current.get("start") or ""):
+                current = t
+        if current is None:
+            continue
+        name_block = L.get("name") or {}
+        official = name_block.get("official_full") or (
+            (name_block.get("first") or "") + " " + (name_block.get("last") or "")
+        ).strip()
+        out.append({
+            "name": official,
+            "party": (current.get("party") or "").strip(),
+            "district": current.get("district"),
+        })
     out.sort(key=lambda r: 999 if r["district"] is None else r["district"])
     return out
 
@@ -168,12 +201,76 @@ def party_short(p):
     return (p[:1].upper() or "I")
 
 # ── 5. Build the collapsible "About this state" block ────────────────────
+# Compute fresh delegation counts from the live rep list. The hardcoded
+# HOUSE_DELEGATION in index.html is a first-paint fallback for the live JS
+# (which fetches legislators and overwrites it anyway); at BUILD time we
+# should use the same authoritative data the rep list comes from, so the
+# summary count and the rep list can't disagree.
+def compute_delegation():
+    out = {}
+    for name in STATE_ABBR:
+        abbr = STATE_ABBR[name]
+        reps = reps_for_state(abbr)
+        d = sum(1 for r in reps if party_short(r["party"]) == "D")
+        r = sum(1 for r in reps if party_short(r["party"]) == "R")
+        i = sum(1 for r in reps if party_short(r["party"]) not in ("D", "R"))
+        out[name] = {"d": d, "r": r, "i": i, "total": len(reps)}
+    return out
+
+LIVE_DELEGATION = compute_delegation()
+
+# Audit: compare hardcoded HOUSE_DELEGATION in index.html against fresh counts
+# and report any discrepancies. Doesn't modify index.html — just tells you.
+print("\n--- delegation audit (hardcoded vs live) ---")
+mismatches = []
+for name in STATE_ABBR:
+    hard = DELEGATION.get(name) or {"d": 0, "r": 0}
+    live = LIVE_DELEGATION.get(name) or {"d": 0, "r": 0, "i": 0, "total": 0}
+    hard_total = hard.get("d", 0) + hard.get("r", 0)
+    if hard.get("d") != live["d"] or hard.get("r") != live["r"] or hard_total != live["total"]:
+        mismatches.append((name, hard, live))
+if mismatches:
+    print("  {} states with stale delegation counts in index.html:".format(len(mismatches)))
+    for name, hard, live in mismatches:
+        ind = " ({}i)".format(live["i"]) if live.get("i") else ""
+        print("    - {:<22} hardcoded {}D/{}R={} | actual {}D/{}R={}{}".format(
+            name, hard.get("d", 0), hard.get("r", 0),
+            hard.get("d", 0) + hard.get("r", 0),
+            live["d"], live["r"], live["total"], ind))
+    print("  → the SEO sections use ACTUAL counts; consider updating index.html.")
+    # Also emit a corrected HOUSE_DELEGATION line for paste-in. Independents
+    # collapse into the existing schema by adding them to whatever caucus they
+    # vote with — but since we don't know caucus here, we omit them from the
+    # hardcoded fallback. Live JS picks them up correctly anyway.
+    pairs = []
+    for name in DELEGATION:  # preserve original order in index.html
+        if name in LIVE_DELEGATION:
+            live = LIVE_DELEGATION[name]
+            pairs.append('"{}":{{"d":{},"r":{}}}'.format(name, live["d"], live["r"]))
+        else:
+            # state not in live data (shouldn't happen) — keep hardcoded
+            d = DELEGATION[name]
+            pairs.append('"{}":{{"d":{},"r":{}}}'.format(name, d["d"], d["r"]))
+    corrected_line = "const HOUSE_DELEGATION = {" + ",".join(pairs) + "};"
+    with io.open(os.path.join(ROOT, "house-delegation-corrected.txt"), "w", encoding="utf-8") as f:
+        f.write(
+            "# Generated by build-state-pages.py — paste this line into index.html\n"
+            "# to replace the existing 'const HOUSE_DELEGATION = ...' line.\n"
+            "# This fixes the first-paint count flash on state pages.\n\n"
+            + corrected_line + "\n"
+        )
+    print("  → wrote house-delegation-corrected.txt for paste-in.")
+else:
+    print("  all states match.")
+print("")
 def build_seo_section(state_name):
     abbr = STATE_ABBR.get(state_name)
     reps = reps_for_state(abbr) if abbr else []
-    deleg = DELEGATION.get(state_name) or {}
-    d_count, r_count = deleg.get("d", 0), deleg.get("r", 0)
-    total = d_count + r_count
+    # Use LIVE counts (computed from the rep list above), not the hardcoded
+    # HOUSE_DELEGATION which can be stale — see the audit output above.
+    live = LIVE_DELEGATION.get(state_name) or {"d": 0, "r": 0, "i": 0, "total": 0}
+    d_count, r_count, i_count = live["d"], live["r"], live.get("i", 0)
+    total = live["total"]
     redis = REDISTRICTING.get(state_name)
 
     # Opening paragraph
@@ -181,7 +278,10 @@ def build_seo_section(state_name):
     if total == 1:
         parts.append("{n} has one at-large U.S. House district covering the entire state in the 119th Congress.".format(n=state_name))
     else:
-        parts.append("{n} has {t} U.S. House congressional districts \u2014 {d} held by Democrats and {r} held by Republicans in the 119th Congress (2025-2027).".format(n=state_name, t=total, d=d_count, r=r_count))
+        breakdown = "{d} held by Democrats and {r} held by Republicans".format(d=d_count, r=r_count)
+        if i_count:
+            breakdown += " (plus {} independent{})".format(i_count, "" if i_count == 1 else "s")
+        parts.append("{n} has {t} U.S. House congressional districts \u2014 {b} in the 119th Congress (2025-2027).".format(n=state_name, t=total, b=breakdown))
 
     # Redistricting note for affected states
     if redis and redis.get("status") in ("enacted", "contested", "court"):
