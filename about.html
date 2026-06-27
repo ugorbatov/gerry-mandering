@@ -642,7 +642,17 @@ footer {
     
     <div class="form-success" id="successMsg">✓ Message sent! Thanks for reaching out.</div>
     
-    <form id="contactForm" method="POST" action="https://formspree.io/f/xyzqvwvu">
+    <!-- Netlify Forms: data-netlify="true" tells Netlify's build process to
+         detect the form and start capturing submissions. The hidden form-name
+         input is required for JS-submitted forms. netlify-honeypot adds a
+         hidden field that real users never fill in but bots usually do — Netlify
+         drops anything where the bot-field has a value. -->
+    <form id="contactForm" name="contact" method="POST"
+          data-netlify="true" netlify-honeypot="bot-field">
+      <input type="hidden" name="form-name" value="contact">
+      <p style="display:none">
+        <label>Don't fill this out if you're human: <input name="bot-field"></label>
+      </p>
       <div class="form-group">
         <label for="name">Your Name</label>
         <input type="text" id="name" name="name" required>
@@ -669,23 +679,19 @@ footer {
 </div>
 
 <script>
+// Netlify Forms expects a URL-encoded POST to the page itself ("/"), not
+// JSON. Building the body as URLSearchParams matches that contract. The
+// hidden form-name field in the markup tells Netlify which form this is.
 document.getElementById('contactForm').addEventListener('submit', function(e) {
   e.preventDefault();
-  
+
   const formData = new FormData(this);
-  const data = {
-    name: formData.get('name'),
-    email: formData.get('email'),
-    message: formData.get('message'),
-  };
-  
-  fetch('https://formspree.io/f/xyzqvwvu', {
+  const body = new URLSearchParams(formData).toString();
+
+  fetch('/', {
     method: 'POST',
-    headers: {
-      'Accept': 'application/json',
-      'Content-Type': 'application/json'
-    },
-    body: JSON.stringify(data)
+    headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+    body: body
   }).then(response => {
     if (response.ok) {
       document.getElementById('successMsg').style.display = 'block';
