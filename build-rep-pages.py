@@ -610,6 +610,8 @@ def build_one_page(rep):
     )
 
     # Output path: states/<state-slug>/district-<n>/<rep-slug>.html
+    # Folder matches the URL segment exactly so a simple splat rule works:
+    #   /state/*  →  /states/:splat.html
     out_dir = os.path.join(OUTPUT_BASE, state_slug, "district-{}".format(district))
     os.makedirs(out_dir, exist_ok=True)
     out_path = os.path.join(out_dir, rs + ".html")

@@ -1,64 +1,15 @@
-# ── 0. Rep deep-links → pre-rendered rep HTML ──
-# Placeholders (:state, :n, :rep) each capture a single path segment.
-# /state/tennessee/district-9/steve-cohen  →
-#   /states/tennessee/district-9/steve-cohen.html
-/state/:state/district-:n/:rep  /states/:state/district-:n/:rep.html  200
+# ── DC special case: not pre-rendered, served by index.html ──
+/state/district-of-columbia  /index.html  200
 
-# ── 1. Canonical state URLs → serve pre-rendered state HTML ──
-# These are the NEW canonical state URLs (post-migration).
-/state/alabama                  /states/alabama.html   200
-/state/alaska                   /states/alaska.html   200
-/state/arizona                  /states/arizona.html   200
-/state/arkansas                 /states/arkansas.html   200
-/state/california               /states/california.html   200
-/state/colorado                 /states/colorado.html   200
-/state/connecticut              /states/connecticut.html   200
-/state/delaware                 /states/delaware.html   200
-/state/florida                  /states/florida.html   200
-/state/georgia                  /states/georgia.html   200
-/state/hawaii                   /states/hawaii.html   200
-/state/idaho                    /states/idaho.html   200
-/state/illinois                 /states/illinois.html   200
-/state/indiana                  /states/indiana.html   200
-/state/iowa                     /states/iowa.html   200
-/state/kansas                   /states/kansas.html   200
-/state/kentucky                 /states/kentucky.html   200
-/state/louisiana                /states/louisiana.html   200
-/state/maine                    /states/maine.html   200
-/state/maryland                 /states/maryland.html   200
-/state/massachusetts            /states/massachusetts.html   200
-/state/michigan                 /states/michigan.html   200
-/state/minnesota                /states/minnesota.html   200
-/state/mississippi              /states/mississippi.html   200
-/state/missouri                 /states/missouri.html   200
-/state/montana                  /states/montana.html   200
-/state/nebraska                 /states/nebraska.html   200
-/state/nevada                   /states/nevada.html   200
-/state/new-hampshire            /states/new-hampshire.html   200
-/state/new-jersey               /states/new-jersey.html   200
-/state/new-mexico               /states/new-mexico.html   200
-/state/new-york                 /states/new-york.html   200
-/state/north-carolina           /states/north-carolina.html   200
-/state/north-dakota             /states/north-dakota.html   200
-/state/ohio                     /states/ohio.html   200
-/state/oklahoma                 /states/oklahoma.html   200
-/state/oregon                   /states/oregon.html   200
-/state/pennsylvania             /states/pennsylvania.html   200
-/state/rhode-island             /states/rhode-island.html   200
-/state/south-carolina           /states/south-carolina.html   200
-/state/south-dakota             /states/south-dakota.html   200
-/state/tennessee                /states/tennessee.html   200
-/state/texas                    /states/texas.html   200
-/state/utah                     /states/utah.html   200
-/state/vermont                  /states/vermont.html   200
-/state/virginia                 /states/virginia.html   200
-/state/washington               /states/washington.html   200
-/state/west-virginia            /states/west-virginia.html   200
-/state/wisconsin                /states/wisconsin.html   200
-/state/wyoming                  /states/wyoming.html   200
-/state/district-of-columbia     /index.html   200
+# ── State + rep deep-links → pre-rendered HTML ──
+# A single splat rule serves both:
+#   /state/<slug>                          → /states/<slug>.html
+#   /state/<slug>/district-<n>/<rep-slug>  → /states/<slug>/district-<n>/<rep-slug>.html
+# Filename on disk always ends with ".html"; splat captures everything
+# after /state/ (one level or three) and we append .html.
+/state/*  /states/:splat.html  200
 
-# ── 2. Page clean URLs → .html (200 rewrite) ────────────
+# ── Page clean URLs → .html (200 rewrite) ────────────
 /legal-tracker          /legal-tracker.html   200
 /redistricting-tracker  /redistricting-tracker.html   200
 /vote-gap               /vote-gap.html   200
@@ -67,7 +18,7 @@
 /ftm-wi                 /ftm-wi.html   200
 /about                  /about.html   200
 
-# ── 3. Page .html → clean URL (301 redirect) ──────────
+# ── Page .html → clean URL (301 redirect) ──────────
 /legal-tracker.html      /legal-tracker   301
 /redistricting-tracker.html /redistricting-tracker   301
 /vote-gap.html           /vote-gap   301
@@ -76,10 +27,9 @@
 /ftm-wi.html             /ftm-wi   301
 /about.html              /about   301
 
-# ── 4. Legacy /<slug> state URLs → /state/<slug> (301) ──
+# ── Legacy /<slug> state URLs → /state/<slug> (301) ──
 # Old shared/indexed links keep working but bounce to the canonical form.
-# IMPORTANT: must come AFTER the page rules above, or e.g. /about would
-#            mistakenly redirect (no "about" state exists, but defensive).
+# Must come AFTER the page rules so e.g. /about doesn't match here.
 /alabama                /state/alabama   301
 /alaska                 /state/alaska   301
 /arizona                /state/arizona   301
