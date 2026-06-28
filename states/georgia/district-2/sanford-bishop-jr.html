@@ -39,6 +39,14 @@
 }
 </script>
 
+<!-- Config for rep-page.js: bioguide drives bills lookup; name/state/district
+     drive finance & news lookups. Read once at page load. -->
+<meta name="rep-bioguide" content="B000490" />
+<meta name="rep-name" content="Sanford D. Bishop, Jr." />
+<meta name="rep-state-abbr" content="GA" />
+<meta name="rep-district" content="2" />
+<script defer src="/rep-page.js"></script>
+
 <style>
   :root {
     --bg: #0A0A0B; --surface: #111113; --surface-2: #18181B;
@@ -116,6 +124,104 @@
     .facts-row { grid-template-columns: repeat(2, 1fr); }
     .body-grid { grid-template-columns: 1fr; }
   }
+
+  /* ── District demographics block (static, baked in at build time) ── */
+  .demo-block {
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 22px; margin: 0 0 28px;
+  }
+  .demo-block h2 {
+    font-size: 11px; font-weight: 500; color: var(--text-mute);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    margin: 0 0 16px;
+  }
+  .demo-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 18px;
+  }
+  .demo-stat { background: var(--surface); padding: 12px 14px; }
+  .demo-stat .label {
+    font-size: 10px; letter-spacing: 0.1em; color: var(--text-mute);
+    text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin-bottom: 4px;
+  }
+  .demo-stat .value {
+    font-size: 16px; color: var(--text); font-weight: 500;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+  .demo-race {
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    font-size: 12px; color: var(--text-dim);
+  }
+  .demo-race span strong { color: var(--text); font-weight: 500; margin-right: 4px;
+    font-family: "JetBrains Mono", ui-monospace, monospace; }
+  @media (max-width: 720px) { .demo-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  /* ── Dynamic sections (bills, news, finance) filled by rep-page.js ── */
+  .dyn-section { margin: 28px 0; padding-top: 24px; border-top: 1px solid var(--border); }
+  .dyn-section h2 {
+    font-size: 11px; font-weight: 500; color: var(--text-mute);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin: 0 0 14px;
+  }
+  .dyn-section h3 {
+    font-size: 11px; font-weight: 500; color: var(--text-dim);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin: 18px 0 10px;
+  }
+  .dyn-list { display: flex; flex-direction: column; gap: 10px; }
+  .dyn-item {
+    padding: 12px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-left: 2px solid var(--border-hi);
+  }
+  .dyn-item-title { font-size: 14px; color: var(--text); line-height: 1.45; margin-bottom: 4px; }
+  .dyn-item-meta {
+    font-size: 11px; color: var(--text-mute);
+    font-family: "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.04em;
+  }
+  a.dyn-item { display: block; text-decoration: none; color: inherit; transition: border-color 150ms; }
+  a.dyn-item:hover { border-left-color: var(--dem); }
+  .fin-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border); margin-bottom: 18px;
+  }
+  .fin-stat { background: var(--bg); padding: 14px 16px; }
+  .fin-stat .label {
+    font-size: 10px; letter-spacing: 0.1em; color: var(--text-mute);
+    text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin-bottom: 4px;
+  }
+  .fin-stat .value {
+    font-size: 18px; color: var(--text); font-weight: 500;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+  .fin-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
+  .fin-list { list-style: none; padding: 0; margin: 0; counter-reset: rank; font-size: 13px; }
+  .fin-list li {
+    counter-increment: rank;
+    display: grid; grid-template-columns: 24px 1fr auto;
+    padding: 8px 0; border-bottom: 1px solid var(--border); align-items: baseline;
+  }
+  .fin-list li::before {
+    content: counter(rank); color: var(--text-mute);
+    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11px;
+  }
+  .fin-list .donor-name { color: var(--text); }
+  .fin-list .donor-amt {
+    color: var(--text-dim); font-size: 12px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }
+  .fin-list a { display: contents; color: inherit; text-decoration: none; }
+  .fin-list a:hover .donor-name { color: var(--dem); }
+  @media (max-width: 720px) {
+    .fin-grid { grid-template-columns: repeat(2, 1fr); }
+    .fin-detail-grid { grid-template-columns: 1fr; }
+  }
 </style>
 </head>
 <body>
@@ -169,6 +275,8 @@
     </aside>
   </div>
 
+  <section class="demo-block"><h2>District demographics</h2><div class="demo-grid"><div class="demo-stat"><div class="label">Population</div><div class="value">748,921</div></div><div class="demo-stat"><div class="label">Median income</div><div class="value">$50,799</div></div><div class="demo-stat"><div class="label">Poverty rate</div><div class="value">22.1%</div></div><div class="demo-stat"><div class="label">Bachelor's+</div><div class="value">31.1%</div></div><div class="demo-stat"><div class="label">Median age</div><div class="value">34.9</div></div><div class="demo-stat"><div class="label">Foreign-born</div><div class="value">10.2%</div></div><div class="demo-stat"><div class="label">Unemployment</div><div class="value">3.5%</div></div><div class="demo-stat"><div class="label">Uninsured</div><div class="value">10.7%</div></div></div><h3 style="font-size:11px;font-weight:500;color:var(--text-dim);letter-spacing:0.08em;text-transform:uppercase;font-family:'JetBrains Mono',ui-monospace,monospace;margin:6px 0 10px;">Racial composition</h3><div class="demo-race"><span><strong>49.6%</strong> Black</span><span><strong>39.3%</strong> White</span><span><strong>6.1%</strong> Hispanic</span><span><strong>3.5%</strong> Other</span><span><strong>1.3%</strong> Asian</span><span><strong>0.2%</strong> Native</span></div><p style="font-size:11px;color:var(--text-mute);margin:12px 0 0;font-family:'JetBrains Mono',ui-monospace,monospace;">Source: U.S. Census ACS 5-Year Estimates</p></section>
+
   <details class="state-context">
     <summary>About Georgia's congressional districts</summary>
     <div>
@@ -178,6 +286,12 @@
       </p>
     </div>
   </details>
+
+  <!-- Dynamic sections: filled by rep-page.js using the same API endpoints
+       the modal uses on the home page. Empty until the script runs. -->
+  <section class="dyn-section" id="rep-bills" style="display:none;"></section>
+  <section class="dyn-section" id="rep-news" style="display:none;"></section>
+  <section class="dyn-section" id="rep-finance" style="display:none;"></section>
 
   <footer class="rep-footer">
     <div class="nav-row">

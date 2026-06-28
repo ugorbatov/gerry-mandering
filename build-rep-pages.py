@@ -82,6 +82,52 @@ ABBR_TO_NAME = {v: k for k, v in STATE_ABBR.items()}
 
 
 # ─────────────────────────────────────────────────────────────────────────
+# Extract DISTRICT_DEMOGRAPHICS (a large JS object literal with unquoted
+# keys, so json.loads can't parse it). Each line is one district entry of
+# the form:
+#   "AL-1": {race:{white: 64.4, ...}, income: 61488, poverty:14.8, ...},
+# We grab numeric values directly with regex rather than building a JS parser.
+# ─────────────────────────────────────────────────────────────────────────
+def extract_district_demographics(src):
+    block = re.search(r"const DISTRICT_DEMOGRAPHICS = \{(.*?)\n\};", src, re.S)
+    if not block:
+        return {}
+    out = {}
+    # One entry per line. The line starts with "ABBR-N":
+    for line in block.group(1).split("\n"):
+        m = re.match(r'\s*"([A-Z]{2}-\d+)":\s*\{(.*)\}\s*,?\s*$', line)
+        if not m:
+            continue
+        key, body = m.group(1), m.group(2)
+        def num(field):
+            mm = re.search(r"\b" + field + r":\s*(-?[\d.]+)", body)
+            if not mm: return None
+            try: return float(mm.group(1)) if "." in mm.group(1) else int(mm.group(1))
+            except ValueError: return None
+        race = {}
+        for k in ("white", "black", "hispanic", "asian", "native", "other"):
+            v = re.search(r"\b" + k + r":\s*([\d.]+)", body)
+            if v:
+                try: race[k] = float(v.group(1))
+                except ValueError: pass
+        out[key] = {
+            "race": race,
+            "income": num("income") or num("medianIncome"),
+            "poverty": num("poverty"),
+            "population": num("population"),
+            "bachelorsPlus": num("bachelorsPlus"),
+            "medianAge": num("medianAge"),
+            "foreignBorn": num("foreignBorn"),
+            "unemployment": num("unemployment"),
+            "uninsured": num("uninsured"),
+        }
+    return out
+
+DISTRICT_DEMO = extract_district_demographics(src)
+print("  parsed demographics for {} districts".format(len(DISTRICT_DEMO)))
+
+
+# ─────────────────────────────────────────────────────────────────────────
 # 2. Fetch / cache legislator data (same approach as build-state-pages.py)
 # ─────────────────────────────────────────────────────────────────────────
 LEG_URLS = [
@@ -276,6 +322,14 @@ TEMPLATE = u'''<!DOCTYPE html>
 {jsonld}
 </script>
 
+<!-- Config for rep-page.js: bioguide drives bills lookup; name/state/district
+     drive finance & news lookups. Read once at page load. -->
+<meta name="rep-bioguide" content="{bioguide}" />
+<meta name="rep-name" content="{name_attr}" />
+<meta name="rep-state-abbr" content="{state_abbr}" />
+<meta name="rep-district" content="{district}" />
+<script defer src="/rep-page.js"></script>
+
 <style>
   :root {{
     --bg: #0A0A0B; --surface: #111113; --surface-2: #18181B;
@@ -353,6 +407,104 @@ TEMPLATE = u'''<!DOCTYPE html>
     .facts-row {{ grid-template-columns: repeat(2, 1fr); }}
     .body-grid {{ grid-template-columns: 1fr; }}
   }}
+
+  /* ── District demographics block (static, baked in at build time) ── */
+  .demo-block {{
+    background: var(--surface); border: 1px solid var(--border);
+    padding: 22px; margin: 0 0 28px;
+  }}
+  .demo-block h2 {{
+    font-size: 11px; font-weight: 500; color: var(--text-mute);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+    margin: 0 0 16px;
+  }}
+  .demo-grid {{
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1px;
+    background: var(--border);
+    border: 1px solid var(--border);
+    margin-bottom: 18px;
+  }}
+  .demo-stat {{ background: var(--surface); padding: 12px 14px; }}
+  .demo-stat .label {{
+    font-size: 10px; letter-spacing: 0.1em; color: var(--text-mute);
+    text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin-bottom: 4px;
+  }}
+  .demo-stat .value {{
+    font-size: 16px; color: var(--text); font-weight: 500;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }}
+  .demo-race {{
+    display: flex; flex-wrap: wrap; gap: 8px 16px;
+    font-size: 12px; color: var(--text-dim);
+  }}
+  .demo-race span strong {{ color: var(--text); font-weight: 500; margin-right: 4px;
+    font-family: "JetBrains Mono", ui-monospace, monospace; }}
+  @media (max-width: 720px) {{ .demo-grid {{ grid-template-columns: repeat(2, 1fr); }} }}
+
+  /* ── Dynamic sections (bills, news, finance) filled by rep-page.js ── */
+  .dyn-section {{ margin: 28px 0; padding-top: 24px; border-top: 1px solid var(--border); }}
+  .dyn-section h2 {{
+    font-size: 11px; font-weight: 500; color: var(--text-mute);
+    letter-spacing: 0.12em; text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin: 0 0 14px;
+  }}
+  .dyn-section h3 {{
+    font-size: 11px; font-weight: 500; color: var(--text-dim);
+    letter-spacing: 0.08em; text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin: 18px 0 10px;
+  }}
+  .dyn-list {{ display: flex; flex-direction: column; gap: 10px; }}
+  .dyn-item {{
+    padding: 12px 14px; background: var(--surface); border: 1px solid var(--border);
+    border-left: 2px solid var(--border-hi);
+  }}
+  .dyn-item-title {{ font-size: 14px; color: var(--text); line-height: 1.45; margin-bottom: 4px; }}
+  .dyn-item-meta {{
+    font-size: 11px; color: var(--text-mute);
+    font-family: "JetBrains Mono", ui-monospace, monospace; letter-spacing: 0.04em;
+  }}
+  a.dyn-item {{ display: block; text-decoration: none; color: inherit; transition: border-color 150ms; }}
+  a.dyn-item:hover {{ border-left-color: var(--dem); }}
+  .fin-grid {{
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 1px;
+    background: var(--border); border: 1px solid var(--border); margin-bottom: 18px;
+  }}
+  .fin-stat {{ background: var(--bg); padding: 14px 16px; }}
+  .fin-stat .label {{
+    font-size: 10px; letter-spacing: 0.1em; color: var(--text-mute);
+    text-transform: uppercase;
+    font-family: "JetBrains Mono", ui-monospace, monospace; margin-bottom: 4px;
+  }}
+  .fin-stat .value {{
+    font-size: 18px; color: var(--text); font-weight: 500;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }}
+  .fin-detail-grid {{ display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }}
+  .fin-list {{ list-style: none; padding: 0; margin: 0; counter-reset: rank; font-size: 13px; }}
+  .fin-list li {{
+    counter-increment: rank;
+    display: grid; grid-template-columns: 24px 1fr auto;
+    padding: 8px 0; border-bottom: 1px solid var(--border); align-items: baseline;
+  }}
+  .fin-list li::before {{
+    content: counter(rank); color: var(--text-mute);
+    font-family: "JetBrains Mono", ui-monospace, monospace; font-size: 11px;
+  }}
+  .fin-list .donor-name {{ color: var(--text); }}
+  .fin-list .donor-amt {{
+    color: var(--text-dim); font-size: 12px;
+    font-family: "JetBrains Mono", ui-monospace, monospace;
+  }}
+  .fin-list a {{ display: contents; color: inherit; text-decoration: none; }}
+  .fin-list a:hover .donor-name {{ color: var(--dem); }}
+  @media (max-width: 720px) {{
+    .fin-grid {{ grid-template-columns: repeat(2, 1fr); }}
+    .fin-detail-grid {{ grid-template-columns: 1fr; }}
+  }}
 </style>
 </head>
 <body>
@@ -403,6 +555,8 @@ TEMPLATE = u'''<!DOCTYPE html>
     </aside>
   </div>
 
+  {demographics_html}
+
   <details class="state-context">
     <summary>About {state_name}'s congressional districts</summary>
     <div>
@@ -412,6 +566,12 @@ TEMPLATE = u'''<!DOCTYPE html>
       </p>
     </div>
   </details>
+
+  <!-- Dynamic sections: filled by rep-page.js using the same API endpoints
+       the modal uses on the home page. Empty until the script runs. -->
+  <section class="dyn-section" id="rep-bills" style="display:none;"></section>
+  <section class="dyn-section" id="rep-news" style="display:none;"></section>
+  <section class="dyn-section" id="rep-finance" style="display:none;"></section>
 
   <footer class="rep-footer">
     <div class="nav-row">
@@ -438,6 +598,79 @@ TEMPLATE = u'''<!DOCTYPE html>
 # ─────────────────────────────────────────────────────────────────────────
 # 7. Per-rep state delegation summary (used in the "in the X delegation" panel)
 # ─────────────────────────────────────────────────────────────────────────
+def build_demographics_html(state_abbr, district):
+    """Render the static demographics block for this district, or empty string
+    if we don't have data (e.g. at-large states keyed differently)."""
+    if state_abbr is None or district is None:
+        return ""
+    key = "{}-{}".format(state_abbr, district)
+    d = DISTRICT_DEMO.get(key)
+    if not d:
+        return ""
+
+    def fmt_money(n):
+        return "${:,.0f}".format(n) if isinstance(n, (int, float)) else "—"
+    def fmt_pct(n):
+        return "{:.1f}%".format(n) if isinstance(n, (int, float)) else "—"
+    def fmt_num(n):
+        return "{:,}".format(int(n)) if isinstance(n, (int, float)) else "—"
+
+    # Top-line stats
+    stat_cells = []
+    if d.get("population"):
+        stat_cells.append(('Population', fmt_num(d["population"])))
+    if d.get("income"):
+        stat_cells.append(('Median income', fmt_money(d["income"])))
+    if d.get("poverty") is not None:
+        stat_cells.append(('Poverty rate', fmt_pct(d["poverty"])))
+    if d.get("bachelorsPlus") is not None:
+        stat_cells.append(("Bachelor's+", fmt_pct(d["bachelorsPlus"])))
+    if d.get("medianAge") is not None:
+        stat_cells.append(('Median age', "{:.1f}".format(d["medianAge"])))
+    if d.get("foreignBorn") is not None:
+        stat_cells.append(('Foreign-born', fmt_pct(d["foreignBorn"])))
+    if d.get("unemployment") is not None:
+        stat_cells.append(('Unemployment', fmt_pct(d["unemployment"])))
+    if d.get("uninsured") is not None:
+        stat_cells.append(('Uninsured', fmt_pct(d["uninsured"])))
+
+    # Limit to 8, render as 2 rows of 4
+    stat_cells = stat_cells[:8]
+    stats_html = "".join(
+        '<div class="demo-stat"><div class="label">{}</div><div class="value">{}</div></div>'.format(label, val)
+        for label, val in stat_cells
+    )
+
+    # Race composition: show top 3 groups by percentage
+    race = d.get("race") or {}
+    if race:
+        top = sorted(race.items(), key=lambda kv: -(kv[1] or 0))[:6]
+        race_html = "".join(
+            '<span><strong>{:.1f}%</strong> {}</span>'.format(v, k.capitalize())
+            for k, v in top if v and v > 0
+        )
+        race_block = (
+            '<h3 style="font-size:11px;font-weight:500;color:var(--text-dim);'
+            'letter-spacing:0.08em;text-transform:uppercase;'
+            'font-family:\'JetBrains Mono\',ui-monospace,monospace;'
+            'margin:6px 0 10px;">Racial composition</h3>'
+            '<div class="demo-race">' + race_html + '</div>'
+        )
+    else:
+        race_block = ""
+
+    return (
+        '<section class="demo-block">'
+        '<h2>District demographics</h2>'
+        '<div class="demo-grid">' + stats_html + '</div>'
+        + race_block +
+        '<p style="font-size:11px;color:var(--text-mute);margin:12px 0 0;font-family:\'JetBrains Mono\',ui-monospace,monospace;">'
+        'Source: U.S. Census ACS 5-Year Estimates'
+        '</p>'
+        '</section>'
+    )
+
+
 def state_delegation_text(state_name):
     abbr = STATE_ABBR.get(state_name)
     if not abbr:
@@ -596,9 +829,12 @@ def build_one_page(rep):
         jsonld=json.dumps(jsonld, indent=2),
         state_slug=state_slug,
         state_name=html_escape(state_name),
+        state_abbr=rep["state_abbr"],
         district=district,
         district_label=district_label,
         name=html_escape(rep["name"]),
+        name_attr=html_escape(rep["name"]),
+        bioguide=html_escape(rep.get("bioguide") or ""),
         party_class=party_class(rep["party"]),
         party_full=party_full(rep["party"]),
         summary=html_escape(summary),
@@ -607,6 +843,7 @@ def build_one_page(rep):
         district_paragraph=html_escape(district_paragraph),
         delegation_paragraph=html_escape(delegation_paragraph),
         state_seo_paragraph=html_escape(state_seo_paragraph),
+        demographics_html=build_demographics_html(rep["state_abbr"], district),
     )
 
     # Output path: states/<state-slug>/district-<n>/<rep-slug>.html
