@@ -1,3 +1,9 @@
+# ── 0. Rep deep-links → pre-rendered rep HTML ──
+# Placeholders (:state, :n, :rep) each capture a single path segment.
+# /state/tennessee/district-9/steve-cohen  →
+#   /states/tennessee/district-9/steve-cohen.html
+/state/:state/district-:n/:rep  /states/:state/district-:n/:rep.html  200
+
 # ── 1. Canonical state URLs → serve pre-rendered state HTML ──
 # These are the NEW canonical state URLs (post-migration).
 /state/alabama                  /states/alabama.html   200
