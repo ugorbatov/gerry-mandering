@@ -23,14 +23,14 @@
 <meta name="robots" content="index, follow, max-image-preview:large" />
 <meta name="theme-color" content="#0A0A0B" />
 
-<link rel="canonical" href="https://gerrymandering-revealed.netlify.app/new-york" />
+<link rel="canonical" href="https://gerrymandering-revealed.netlify.app/state/new-york" />
 
 <!-- Open Graph (Facebook, LinkedIn, Slack, Discord) -->
 <meta property="og:type" content="website" />
 <meta property="og:site_name" content="Gerrymandering Revealed" />
 <meta property="og:title" content="New York Congressional District Maps, Redistricting & Elections · Gerrymandering Revealed" />
 <meta property="og:description" content="Explore New York congressional districts, court battles, election results, and representation." />
-<meta property="og:url" content="https://gerrymandering-revealed.netlify.app/new-york" />
+<meta property="og:url" content="https://gerrymandering-revealed.netlify.app/state/new-york" />
 <meta property="og:locale" content="en_US" />
 <!-- og:image: replace this with a 1200x630 PNG once you have one -->
 <meta property="og:image" content="https://gerrymandering-revealed.example/og-image.png" />
@@ -40,7 +40,7 @@
 
 <!-- Twitter / X cards -->
 <meta name="twitter:card" content="summary_large_image" />
-<meta name="twitter:url" content="https://gerrymandering-revealed.netlify.app/new-york" />
+<meta name="twitter:url" content="https://gerrymandering-revealed.netlify.app/state/new-york" />
 <meta name="twitter:title" content="New York Congressional District Maps, Redistricting & Elections · Gerrymandering Revealed" />
 <meta name="twitter:description" content="Explore New York congressional districts, court battles, election results, and representation." />
 <meta name="twitter:image" content="https://gerrymandering-revealed.example/og-image.png" />
@@ -3627,7 +3627,7 @@ function updateSeoMeta(stateName) {
 
   let title, url, desc, keyword;
   if (stateName) {
-    url = SEO_ORIGIN + '/' + stateNameToSlug(stateName);
+    url = SEO_ORIGIN + '/state/' + stateNameToSlug(stateName);
     const seo = STATE_SEO[stateName];
     if (seo) {
       // Hand-curated per-state copy. Title appends the brand for recognition.
@@ -6164,7 +6164,7 @@ async function showStateView(stateName) {
 
   // Update URL path so refresh / share / SEO works (e.g. /new-jersey).
   // Slug is derived from the state name; see stateNameToSlug below.
-  history.replaceState(null, '', '/' + stateNameToSlug(stateName));
+  history.replaceState(null, '', '/state/' + stateNameToSlug(stateName));
   updateSeoMeta(stateName);
 
   // Hide any lingering tooltip from the national view
@@ -8421,12 +8421,20 @@ function init() {
       'Each state colored by majority party. Tap a state for the breakdown.';
   }
 
-  // Deep-link: read the state from the URL path, e.g. /new-jersey.
-  // (Netlify rewrites every /state-slug to index.html with a 200, so the path
-  // survives a direct visit or refresh.) Falls back to legacy #NJ hashes so old
-  // shared links still resolve.
-  const pathSlug = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
-  let deepState = slugToStateName(pathSlug);
+  // Deep-link: read the state from the URL path. The canonical form is
+  // /state/<slug> (e.g. /state/new-jersey). We also accept the legacy /<slug>
+  // pattern (from the pre-migration era) — Netlify 301-redirects those to the
+  // canonical form at the server, but reading them here is defensive: if the
+  // 301 ever fails or someone hits a fresh Netlify cache, the JS still works.
+  // The oldest legacy form (#NJ hash) is still handled at the bottom.
+  const rawPath = window.location.pathname.replace(/^\/+|\/+$/g, '').toLowerCase();
+  let pathSlug = null;
+  if (rawPath.indexOf('state/') === 0) {
+    pathSlug = rawPath.substring(6);  // strip 'state/' prefix
+  } else if (rawPath && !rawPath.includes('/')) {
+    pathSlug = rawPath;  // legacy /<slug> form
+  }
+  let deepState = pathSlug ? slugToStateName(pathSlug) : null;
   if (!deepState && window.location.hash) {
     const legacy = window.location.hash.replace('#', '').toUpperCase();
     if (Object.values(STATE_ABBR).includes(legacy)) {

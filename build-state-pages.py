@@ -492,7 +492,7 @@ written, all_misses = [], {}
 
 for name, seo in SEO.items():
     slug = state_slug(name)
-    page_url = ORIGIN + "/" + slug
+    page_url = ORIGIN + "/state/" + slug
     brand_title = seo["title"] + " \u00b7 Gerrymandering Revealed"
 
     values = [brand_title, page_url, seo["desc"],
