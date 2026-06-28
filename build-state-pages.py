@@ -219,8 +219,103 @@ def compute_delegation():
 
 LIVE_DELEGATION = compute_delegation()
 
-# Audit: compare hardcoded HOUSE_DELEGATION in index.html against fresh counts
-# and report any discrepancies. Doesn't modify index.html — just tells you.
+# ─────────────────────────────────────────────────────────────────────────
+# Ground truth: 2020 census apportionment. The legal number of House seats
+# each state has for 2023-2033. Hardcoded because it doesn't change between
+# census cycles and is rock-solid public record. Source: U.S. Census Bureau
+# 2020 Apportionment Results. This is the authoritative seat count.
+# ─────────────────────────────────────────────────────────────────────────
+APPORTIONMENT_2020 = {
+    "Alabama": 7, "Alaska": 1, "Arizona": 9, "Arkansas": 4, "California": 52,
+    "Colorado": 8, "Connecticut": 5, "Delaware": 1, "Florida": 28, "Georgia": 14,
+    "Hawaii": 2, "Idaho": 2, "Illinois": 17, "Indiana": 9, "Iowa": 4,
+    "Kansas": 4, "Kentucky": 6, "Louisiana": 6, "Maine": 2, "Maryland": 8,
+    "Massachusetts": 9, "Michigan": 13, "Minnesota": 8, "Mississippi": 4,
+    "Missouri": 8, "Montana": 2, "Nebraska": 3, "Nevada": 4, "New Hampshire": 2,
+    "New Jersey": 12, "New Mexico": 3, "New York": 26, "North Carolina": 14,
+    "North Dakota": 1, "Ohio": 15, "Oklahoma": 5, "Oregon": 6, "Pennsylvania": 17,
+    "Rhode Island": 2, "South Carolina": 7, "South Dakota": 1, "Tennessee": 9,
+    "Texas": 38, "Utah": 4, "Vermont": 1, "Virginia": 11, "Washington": 10,
+    "West Virginia": 2, "Wisconsin": 8, "Wyoming": 1,
+    "District of Columbia": 0,  # non-voting delegate, not a House seat
+}
+
+# ─────────────────────────────────────────────────────────────────────────
+# AUDIT 1 — three-way ground-truth check.
+# Compare 2020 apportionment (truth) vs hardcoded HOUSE_DELEGATION (template)
+# vs live rep list (currently seated). Highlight any state where things
+# don't line up cleanly.
+# ─────────────────────────────────────────────────────────────────────────
+print("\n--- three-way audit (apportionment / hardcoded / live) ---")
+suspicious = []
+print("  {:<22} {:>5} {:>5} {:>5}  notes".format("STATE", "APP.", "HARD", "LIVE"))
+print("  " + "-" * 60)
+for name in APPORTIONMENT_2020:
+    if name == "District of Columbia":
+        continue  # not a House seat; skip from this table
+    app = APPORTIONMENT_2020[name]
+    hard = DELEGATION.get(name) or {"d": 0, "r": 0}
+    hard_t = hard["d"] + hard["r"]
+    live = LIVE_DELEGATION.get(name) or {"d": 0, "r": 0, "i": 0, "total": 0}
+    live_t = live["total"]
+    notes = []
+    # The expectations:
+    #   apportionment should match hardcoded exactly
+    #   live should equal apportionment (full delegation) or be lower (vacancy)
+    if hard_t != app:
+        notes.append("HARDCODED WRONG")
+    if live_t > app:
+        notes.append("LIVE > APP (extra seat?)")
+    elif live_t < app:
+        gap = app - live_t
+        notes.append("{} vacant".format(gap))
+    if notes:
+        suspicious.append((name, app, hard_t, live_t, ", ".join(notes)))
+    flag = "  ⚠ " if "WRONG" in " ".join(notes) or "extra" in " ".join(notes) else "    "
+    note_str = (" — " + ", ".join(notes)) if notes else ""
+    print("  {}{:<20} {:>5} {:>5} {:>5}{}".format(flag, name, app, hard_t, live_t, note_str))
+
+structural_issues = [s for s in suspicious if "WRONG" in s[4] or "extra" in s[4]]
+if structural_issues:
+    print("\n  STRUCTURAL ISSUES (need fixing in code):")
+    for name, app, hard, live, notes in structural_issues:
+        print("    - {}: {}".format(name, notes))
+else:
+    print("\n  No structural issues. Apportionment matches hardcoded for all 50 states.")
+
+# ─────────────────────────────────────────────────────────────────────────
+# AUDIT 2 — district-number gap check.
+# If a state has reps in districts 1, 2, 3, 5, 6 — district 4 is missing.
+# That could be a vacancy (legitimate) or a filter bug (like the Tony
+# Gonzales / District 23 disappearance). We flag it for human review.
+# Skipped for at-large states (1 district).
+# ─────────────────────────────────────────────────────────────────────────
+print("\n--- district-number gap check ---")
+gap_findings = []
+for name, abbr in STATE_ABBR.items():
+    app = APPORTIONMENT_2020.get(name, 0)
+    if app <= 1:
+        continue  # at-large, no gaps possible
+    reps = reps_for_state(abbr)
+    have = sorted(set(r["district"] for r in reps if isinstance(r["district"], int) and r["district"] > 0))
+    expected = list(range(1, app + 1))
+    missing = [d for d in expected if d not in have]
+    if missing:
+        gap_findings.append((name, missing, len(have), app))
+if gap_findings:
+    print("  States with missing district numbers (vacancy OR filter bug):")
+    for name, missing, have_count, app in gap_findings:
+        missing_str = ", ".join(str(m) for m in missing)
+        print("    - {:<20} missing District(s) {}  ({}/{} reps found)".format(name, missing_str, have_count, app))
+    print("\n  These are either real vacancies (fine — SEO will say 'X seats currently")
+    print("  vacant') or filter bugs (a rep is in the data but the script isn't")
+    print("  matching them). Cross-check by hand with congress.gov if uncertain.")
+else:
+    print("  All states have continuous district numbering. No filter bugs detected.")
+
+# ─────────────────────────────────────────────────────────────────────────
+# AUDIT 3 — original D-vs-R drift audit (kept from before, slightly simpler).
+# ─────────────────────────────────────────────────────────────────────────
 print("\n--- delegation audit (hardcoded vs live) ---")
 mismatches = []
 for name in STATE_ABBR:
@@ -238,25 +333,44 @@ if mismatches:
             hard.get("d", 0) + hard.get("r", 0),
             live["d"], live["r"], live["total"], ind))
     print("  → the SEO sections use ACTUAL counts; consider updating index.html.")
-    # Also emit a corrected HOUSE_DELEGATION line for paste-in. Independents
-    # collapse into the existing schema by adding them to whatever caucus they
-    # vote with — but since we don't know caucus here, we omit them from the
-    # hardcoded fallback. Live JS picks them up correctly anyway.
+    # Emit a corrected HOUSE_DELEGATION line for paste-in. The rule:
+    # if hardcoded total == live total → it's a party flip → update D/R
+    # if hardcoded total >  live total → there's a vacancy → KEEP hardcoded
+    #   (the constitutional total is the truth; live count is temporary)
+    # if hardcoded total <  live total → live data has more seats than the
+    #   hardcoded table → trust live (probably a redistricting added a seat)
     pairs = []
+    kept_for_vacancy = []
     for name in DELEGATION:  # preserve original order in index.html
+        hard = DELEGATION[name]
+        hard_total = hard["d"] + hard["r"]
         if name in LIVE_DELEGATION:
             live = LIVE_DELEGATION[name]
-            pairs.append('"{}":{{"d":{},"r":{}}}'.format(name, live["d"], live["r"]))
+            live_total = live["total"]
+            if live_total < hard_total:
+                # vacancy — keep hardcoded so the constitutional total holds
+                pairs.append('"{}":{{"d":{},"r":{}}}'.format(name, hard["d"], hard["r"]))
+                if hard["d"] != live["d"] or hard["r"] != live["r"]:
+                    kept_for_vacancy.append(name)
+            else:
+                pairs.append('"{}":{{"d":{},"r":{}}}'.format(name, live["d"], live["r"]))
         else:
-            # state not in live data (shouldn't happen) — keep hardcoded
-            d = DELEGATION[name]
-            pairs.append('"{}":{{"d":{},"r":{}}}'.format(name, d["d"], d["r"]))
+            pairs.append('"{}":{{"d":{},"r":{}}}'.format(name, hard["d"], hard["r"]))
     corrected_line = "const HOUSE_DELEGATION = {" + ",".join(pairs) + "};"
     with io.open(os.path.join(ROOT, "house-delegation-corrected.txt"), "w", encoding="utf-8") as f:
+        note = ""
+        if kept_for_vacancy:
+            note = (
+                "# Note: kept original D/R counts for {} (vacancy in live data).\n"
+                "# The SEO sections will mention 'X seats currently vacant' in the\n"
+                "# summary paragraph; the hardcoded total preserves the constitutional\n"
+                "# seat count for first-paint correctness.\n"
+            ).format(", ".join(kept_for_vacancy))
         f.write(
             "# Generated by build-state-pages.py — paste this line into index.html\n"
             "# to replace the existing 'const HOUSE_DELEGATION = ...' line.\n"
-            "# This fixes the first-paint count flash on state pages.\n\n"
+            "# This fixes the first-paint count flash on state pages.\n"
+            + note + "\n"
             + corrected_line + "\n"
         )
     print("  → wrote house-delegation-corrected.txt for paste-in.")
@@ -266,11 +380,17 @@ print("")
 def build_seo_section(state_name):
     abbr = STATE_ABBR.get(state_name)
     reps = reps_for_state(abbr) if abbr else []
-    # Use LIVE counts (computed from the rep list above), not the hardcoded
-    # HOUSE_DELEGATION which can be stale — see the audit output above.
+    # Live counts (currently seated reps) for the party breakdown.
     live = LIVE_DELEGATION.get(state_name) or {"d": 0, "r": 0, "i": 0, "total": 0}
     d_count, r_count, i_count = live["d"], live["r"], live.get("i", 0)
-    total = live["total"]
+    live_total = live["total"]
+    # Constitutional seat count for the state — the legal number of districts.
+    # Use the larger of (hardcoded HOUSE_DELEGATION total, live count) so we
+    # don't undercount when there's an unfilled vacancy in the live data.
+    hard = DELEGATION.get(state_name) or {"d": 0, "r": 0}
+    hard_total = hard.get("d", 0) + hard.get("r", 0)
+    total = max(hard_total, live_total)
+    vacancies = total - live_total
     redis = REDISTRICTING.get(state_name)
 
     # Opening paragraph
@@ -281,6 +401,8 @@ def build_seo_section(state_name):
         breakdown = "{d} held by Democrats and {r} held by Republicans".format(d=d_count, r=r_count)
         if i_count:
             breakdown += " (plus {} independent{})".format(i_count, "" if i_count == 1 else "s")
+        if vacancies > 0:
+            breakdown += ", with {} seat{} currently vacant".format(vacancies, "" if vacancies == 1 else "s")
         parts.append("{n} has {t} U.S. House congressional districts \u2014 {b} in the 119th Congress (2025-2027).".format(n=state_name, t=total, b=breakdown))
 
     # Redistricting note for affected states
