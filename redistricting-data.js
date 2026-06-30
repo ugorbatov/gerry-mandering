@@ -6,7 +6,7 @@
    This is a fast-moving, partly-litigated topic — verify against the linked
    sources before relying on any figure.
 
-   LAST UPDATED: 2026-06-09   (edit RT_LAST_UPDATED below when you revise)
+   LAST UPDATED: 2026-06-30   (edit RT_LAST_UPDATED below when you revise)
 
    FIELD GUIDE
      status   : 'enacted'     new map in effect for 2026, not seriously contested
@@ -22,7 +22,7 @@
      sources  : [{label, url}]
    ============================================================================ */
 
-const RT_LAST_UPDATED = 'June 9, 2026';
+const RT_LAST_UPDATED = 'June 30, 2026';
 
 const REDISTRICTING = {
 
@@ -95,14 +95,18 @@ const REDISTRICTING = {
   },
 
   "Tennessee": {
-    status: "enacted", favors: "R", seats: null, voluntary: true,
-    summary: "Tennessee is listed among the states that redrew congressional lines in this cycle to favor Republicans, over Democratic objections. Sources differ on the exact seat impact and on how to classify it relative to the partisan wave — treat the seat figure as unconfirmed.",
+    status: "contested", favors: "R", seats: 1, voluntary: true,
+    summary: "Days after the Supreme Court's Louisiana v. Callais ruling weakened the Voting Rights Act, Tennessee repealed its own decades-old ban on mid-decade redistricting and enacted a new map on May 7, 2026. The map carves up the Memphis-based 9th District — the state's only majority-Black and only Democratic seat, held by Rep. Steve Cohen — into three Republican-leaning districts, positioning the GOP to hold all nine seats. Rep. Cohen and the Tennessee NAACP sued to block it; the case is pending.",
     timeline: [
-      { date: "2025–26", text: "Legislature approves a redrawn congressional map amid Democratic protest." }
+      { date: "Apr 29 2026", text: "Supreme Court decides Louisiana v. Callais, weakening Voting Rights Act protections; Republicans press Tennessee to redraw." },
+      { date: "May 1 2026", text: "Gov. Bill Lee calls a special session to review the congressional map." },
+      { date: "May 7 2026", text: "Legislature repeals its mid-decade ban and passes the new map; Lee signs it the same day. Cohen and the NAACP file suit." },
+      { date: "Aug 6 2026", text: "State primary scheduled." }
     ],
     sources: [
-      { label: "Democracy Docket", url: "https://www.democracydocket.com/analysis/live-redistricting-tracker/" },
-      { label: "PBS", url: "https://www.pbs.org/newshour/politics/a-state-by-state-guide-to-the-redistricting-fight" }
+      { label: "All About Redistricting", url: "https://redistricting.lls.edu/state/tennessee/" },
+      { label: "NBC News", url: "https://www.nbcnews.com/politics/2026-election/tennessee-republicans-pass-map-splitting-states-lone-majority-black-di-rcna343934" },
+      { label: "TN Sec. of State", url: "https://sos.tn.gov/announcements/2026-congressional-redistricting" }
     ]
   },
 
@@ -137,28 +141,34 @@ const REDISTRICTING = {
   },
 
   "Louisiana": {
-    status: "court", favors: "none", seats: null, voluntary: false,
-    summary: "Louisiana did not volunteer for a partisan redraw. Its map is in flux because of Louisiana v. Callais, the Voting Rights Act case at the U.S. Supreme Court — the dispute centers on a second majority-Black district, and the outcome could shift a seat. Effect is unsettled.",
+    status: "contested", favors: "R", seats: 1, voluntary: true,
+    summary: "Louisiana was the case that reshaped the whole cycle. After the Supreme Court ruled in Louisiana v. Callais (Apr 29, 2026) that the state's two-majority-Black-district map was an unconstitutional racial gerrymander, the legislature drew a new map eliminating one of those districts. Gov. Jeff Landry signed it on May 29, 2026, shifting the delegation from 4-2 to 5-1 Republican. Voting-rights groups are challenging the new map, but it is expected to be used for the 2026 midterms.",
     timeline: [
-      { date: "2024", text: "Legislature enacts a map adding a second majority-Black district under court pressure." },
-      { date: "2025–26", text: "Louisiana v. Callais at the U.S. Supreme Court threatens that district." }
+      { date: "2024", text: "Under court order after Allen v. Milligan, Louisiana enacts a map with a second majority-Black district." },
+      { date: "Apr 29 2026", text: "Supreme Court strikes that map down 6-3 as a racial gerrymander in Louisiana v. Callais." },
+      { date: "May 29 2026", text: "Legislature passes and Gov. Landry signs a new map dropping to one majority-Black district; delegation moves toward 5-1 R." }
     ],
     sources: [
-      { label: "All About Redistricting", url: "https://redistricting.lls.edu/national-overview/" },
-      { label: "MidtermProject", url: "https://themidtermproject.org/redistricting-2026" }
+      { label: "Ballotpedia News", url: "https://news.ballotpedia.org/2026/06/02/a-new-congressional-map-is-enacted-in-louisiana-blocked-in-alabama-and-dead-in-south-carolina/" },
+      { label: "NBC News", url: "https://www.nbcnews.com/politics/2026-election/louisiana-passes-new-congressional-map-dismantling-one-majority-black-rcna347575" },
+      { label: "Callais (SCOTUSblog)", url: "https://www.scotusblog.com/cases/louisiana-v-callais-2/" }
     ]
   },
 
   "Alabama": {
-    status: "considering", favors: "R", seats: null, voluntary: false,
-    summary: "Alabama remains under a court order from Allen v. Milligan not to redraw before 2030, but the state attorney general has asked the Supreme Court to lift that injunction in light of the Louisiana v. Callais decision, and the legislature has prepared for a possible return toward its earlier map. Nothing is in effect.",
+    status: "court", favors: null, seats: null, voluntary: false,
+    summary: "Alabama's situation is procedurally tangled and moved fast. After Allen v. Milligan forced a second majority-Black district, the Callais ruling let the state revisit its 2023 map (which has only one). A lower court again blocked that 2023 map as a racial gerrymander on May 26, 2026; on June 2 the U.S. Supreme Court vacated the injunction and remanded for review under Callais — but on June 14 the district court re-blocked the 2023 map and reinstated the court's remedial map (two Black-opportunity districts) for the 2026 elections. Litigation continues; Alabama's appeal is pending.",
     timeline: [
-      { date: "2023–24", text: "Allen v. Milligan forces a second majority-Black district; state placed under injunction." },
-      { date: "2026", text: "Attorney general asks the Supreme Court to lift the injunction post-Callais." }
+      { date: "2023–24", text: "Allen v. Milligan forces a second majority-Black district; the state's 2023 one-district map is enjoined." },
+      { date: "Apr 29 2026", text: "Callais ruling prompts Alabama to seek to revive its 2023 map." },
+      { date: "May 26 2026", text: "Lower court again blocks the 2023 map as a racial gerrymander; the state appeals." },
+      { date: "Jun 2 2026", text: "U.S. Supreme Court vacates injunction; remands for review under Callais." },
+      { date: "Jun 14 2026", text: "District court re-blocks the 2023 map; court's remedial map (2 Black-opp districts) stays for 2026." }
     ],
     sources: [
-      { label: "Voting Rights Lab", url: "https://votingrightslab.org/2026/05/11/an-emerging-trend-mid-decade-redistricting/" },
-      { label: "All About Redistricting", url: "https://redistricting.lls.edu/national-overview/" }
+      { label: "Ballotpedia News", url: "https://news.ballotpedia.org/2026/06/02/a-new-congressional-map-is-enacted-in-louisiana-blocked-in-alabama-and-dead-in-south-carolina/" },
+      { label: "SCOTUSblog", url: "https://www.scotusblog.com/cases/louisiana-v-callais-2/" },
+      { label: "ACLU", url: "https://www.aclu.org/cases/milligan-v-allen" }
     ]
   },
 
@@ -193,12 +203,13 @@ const REDISTRICTING = {
 
   "South Carolina": {
     status: "failed", favors: "R", seats: null, voluntary: true,
-    summary: "A Republican redraw passed the state House but died in the state Senate, leaving the existing map in place for 2026. South Carolina is among the states that could revisit the question after Louisiana v. Callais.",
+    summary: "Republicans pushed a mid-decade redraw after the Callais ruling, but it died in the state Senate. On May 26, 2026, the Senate voted 24-20 against advancing a new map — twelve Republicans joined twelve Democrats — and then adjourned the special session, leaving the existing map in place for 2026.",
     timeline: [
-      { date: "2025–26", text: "New map passes the House; the Senate does not take it up." }
+      { date: "May 2026", text: "Republicans take up a redraw following Louisiana v. Callais." },
+      { date: "May 26 2026", text: "Senate votes 24-20 against the map (12 Republicans join 12 Democrats); special session adjourns." }
     ],
     sources: [
-      { label: "PBS", url: "https://www.pbs.org/newshour/politics/republicans-won-the-redistricting-battle-now-voters-will-decide-whether-they-win-congress" },
+      { label: "Ballotpedia News", url: "https://news.ballotpedia.org/2026/06/02/a-new-congressional-map-is-enacted-in-louisiana-blocked-in-alabama-and-dead-in-south-carolina/" },
       { label: "All About Redistricting", url: "https://redistricting.lls.edu/national-overview/" }
     ]
   },
@@ -252,14 +263,27 @@ const REDISTRICTING = {
     sources: [
       { label: "The Hill / AOL", url: "https://www.aol.com/articles/redistricting-battles-brewing-across-country-164329698.html" }
     ]
+  },
+
+  "Georgia": {
+    status: "considering", favors: "R", seats: null, voluntary: true,
+    summary: "After the Callais ruling, Gov. Brian Kemp said Georgia would not redraw its congressional map before November 2026 because voting was already underway, but signaled the state likely would draw new lines before the 2028 cycle.",
+    timeline: [
+      { date: "May 2026", text: "Gov. Kemp rules out a 2026 redraw but points to likely action before 2028." }
+    ],
+    sources: [
+      { label: "The Hill", url: "https://thehill.com/homenews/campaign/5860114-redistricting-battle-states-midterms/" }
+    ]
   }
 
 };
 
-/* Net-impact rollup for the summary stats. Figures reflect projections that
-   assume past voting patterns hold; see PBS / Cook for the underlying ranges. */
+/* Net-impact rollup for the summary stats. Figures are projections that assume
+   past voting patterns hold and shift as litigation resolves — see sources for
+   the underlying ranges. */
 const RT_TOTALS = {
-  gopGain: 14,   // up to ~14 from TX, FL, MO, NC, OH, TN (PBS)
-  demGain: 6,    // up to ~6 from CA and UT (PBS)
-  note: "Cook Political Report projects the most likely net effect is close to a wash, with Democratic gains in California offsetting Republican gains elsewhere — especially after Virginia's counter-map was struck down."
+  gopGain: 9,    // Ballotpedia (late June 2026): R net ~9 seats; Alabama's flip removed after the 6/14 district court ruling reinstated the remedial map for 2026.
+  demGain: 6,    // up to ~6 from California and Utah; Virginia's counter-map was struck down
+  note: "Estimates vary by source and date. As of late June 2026, Republicans are projected to net around 9 seats from this cycle once Louisiana, Tennessee, and Texas are counted — a tilt that grew after the Supreme Court's Louisiana v. Callais ruling weakened the Voting Rights Act. Alabama briefly looked likely to add another R seat after the June 2 SCOTUS remand, but the district court re-blocked the 2023 map on June 14 and reinstated the court's remedial map for 2026 elections."
 };
+
