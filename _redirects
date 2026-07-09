@@ -17,6 +17,7 @@
 /ftm-nj                 /ftm-nj.html   200
 /ftm-wi                 /ftm-wi.html   200
 /about                  /about.html   200
+/prediction-markets     /prediction-markets.html   200
 
 # ── Page .html → clean URL (301 redirect) ──────────
 /legal-tracker.html      /legal-tracker   301
@@ -26,6 +27,7 @@
 /ftm-nj.html             /ftm-nj   301
 /ftm-wi.html             /ftm-wi   301
 /about.html              /about   301
+/prediction-markets.html /prediction-markets   301
 
 # ── Legacy /<slug> state URLs → /state/<slug> (301) ──
 # Old shared/indexed links keep working but bounce to the canonical form.

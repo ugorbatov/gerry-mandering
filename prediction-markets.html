@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-77B0PFDD87"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-77B0PFDD87');
+</script>
+<!-- End Google tag -->
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+
+<title>Prediction Markets · Gerrymandering Revealed</title>
+<link rel="canonical" href="https://gerrymandering-revealed.netlify.app/prediction-markets" />
+<meta name="description" content="Live prediction-market odds for U.S. House control, Senate control, and Congress balance of power in 2026 — powered by Kalshi." />
+
+<!-- Open Graph -->
+<meta property="og:type" content="website" />
+<meta property="og:site_name" content="Gerrymandering Revealed" />
+<meta property="og:title" content="Prediction Markets · Gerrymandering Revealed" />
+<meta property="og:description" content="Live prediction-market odds for U.S. House control, Senate control, and Congress balance of power in 2026." />
+<meta property="og:url" content="https://gerrymandering-revealed.netlify.app/prediction-markets" />
+<meta property="og:image" content="https://gerrymandering-revealed.netlify.app/og-image.png" />
+
+<!-- Twitter -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content="Prediction Markets · Gerrymandering Revealed" />
+<meta name="twitter:description" content="Live prediction-market odds for U.S. House control, Senate control, and Congress balance of power in 2026." />
+<meta name="twitter:image" content="https://gerrymandering-revealed.netlify.app/og-image.png" />
+<meta name="twitter:url" content="https://gerrymandering-revealed.netlify.app/prediction-markets" />
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+:root {
+  --bg:#0A0A0B; --surface:#111113; --surface-2:#18181B; --border:#1F1F23;
+  --border-hi:#2E2E33; --text:#F4F4F5; --text-dim:#A1A1AA; --text-mute:#52525B;
+  --dem:#3B82F6; --rep:#EF4444; --ind:#A855F7; --green:#22C55E; --amber:#F59E0B;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--bg);color:var(--text);font-family:"Inter",-apple-system,BlinkMacSystemFont,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-size:14px;line-height:1.55}
+a{color:var(--text-dim);text-decoration:underline;text-decoration-color:var(--border-hi);text-underline-offset:2px;transition:color 150ms}
+a:hover{color:var(--text);text-decoration-color:var(--text-dim)}
+.page{padding:16px 20px 40px;min-height:100vh;max-width:1280px;margin:0 auto}
+
+/* Top-right status */
+.top-right{position:absolute;top:18px;right:24px;display:flex;flex-direction:column;align-items:flex-end;gap:4px;z-index:5}
+.ts-line{font-size:10px;color:var(--text-mute);letter-spacing:.04em;font-family:"JetBrains Mono",monospace;display:flex;align-items:center;gap:6px}
+.ts-line .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.6)}
+.ts-line .dot.stale{background:var(--amber);box-shadow:0 0 6px rgba(245,158,11,.6)}
+
+/* Header */
+header{margin-bottom:18px;padding-right:220px;position:relative}
+.eyebrow{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.eyebrow .pill{width:8px;height:8px;border-radius:2px;background:linear-gradient(135deg,var(--dem) 0%,var(--rep) 100%)}
+.eyebrow span{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-dim);font-weight:500}
+.eyebrow .wordmark{color:var(--text);font-weight:600;letter-spacing:.08em}
+.eyebrow .eyebrow-sub{color:var(--text-mute);font-weight:500;letter-spacing:.1em;padding-left:10px;border-left:1px solid var(--border-hi)}
+h1{font-size:28px;font-weight:600;margin:0;letter-spacing:-.02em;line-height:1.15}
+.lede{font-size:13px;color:var(--text-dim);margin-top:6px;max-width:640px;line-height:1.5}
+
+/* Nav */
+.site-nav{display:flex;align-items:center;gap:2px;margin-top:10px;margin-bottom:16px;padding:3px;background:var(--surface);border:1px solid var(--border);border-radius:8px;width:fit-content;position:relative;z-index:10}
+.nav-item{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;border-radius:5px;font-size:11px;font-family:"JetBrains Mono",monospace;font-weight:500;letter-spacing:.04em;text-transform:uppercase;color:var(--text-mute);text-decoration:none;cursor:pointer;border:none;background:none;transition:all 150ms;white-space:nowrap}
+.nav-item:hover{color:var(--text-dim);background:var(--surface-2);text-decoration:none}
+.nav-item.active{color:var(--text);background:var(--surface-2);border:1px solid var(--border-hi)}
+.nav-item .nav-dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+.nav-divider{width:1px;height:16px;background:var(--border-hi);flex-shrink:0;margin:0 2px}
+
+/* Loading state */
+.loading-shell{padding:40px 0;color:var(--text-mute);font-family:"JetBrains Mono",monospace;font-size:12px;letter-spacing:.06em;text-align:center}
+.loading-shell.err{color:var(--rep)}
+
+/* Control-market cards row */
+.cards-row{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;margin-top:20px}
+@media (max-width:820px){.cards-row{grid-template-columns:1fr}}
+
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px 22px 18px;position:relative}
+.card-label{font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:var(--text-mute);font-family:"JetBrains Mono",monospace;margin-bottom:4px}
+.card-title{font-size:19px;font-weight:600;color:var(--text);margin-bottom:14px;letter-spacing:-.01em}
+
+/* Party split bar */
+.split{display:flex;align-items:stretch;height:44px;border-radius:6px;overflow:hidden;background:var(--surface-2);border:1px solid var(--border-hi)}
+.split .side{display:flex;flex-direction:column;justify-content:center;align-items:center;padding:0 10px;color:#fff;font-family:"JetBrains Mono",monospace;transition:flex 400ms ease;min-width:44px}
+.split .side.dem{background:var(--dem)}
+.split .side.rep{background:var(--rep)}
+.split .side .pct{font-size:16px;font-weight:600}
+.split .side .who{font-size:9px;letter-spacing:.1em;text-transform:uppercase;opacity:.85;margin-top:-1px}
+
+/* Meta row under card */
+.card-foot{display:flex;justify-content:space-between;align-items:center;margin-top:12px;font-size:11px;color:var(--text-mute);font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+.card-foot a{color:var(--text-dim);text-decoration:none;border-bottom:1px dashed var(--border-hi);padding-bottom:1px}
+.card-foot a:hover{color:var(--text);border-bottom-color:var(--text-dim)}
+
+/* Balance-of-power outcomes list */
+.balance-card{grid-column:1/-1}
+.outcomes{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;background:var(--border);border:1px solid var(--border-hi);border-radius:6px;overflow:hidden;margin-top:6px}
+@media (max-width:720px){.outcomes{grid-template-columns:repeat(2,1fr)}}
+.outcome{background:var(--surface);padding:14px 14px 12px;position:relative}
+.outcome .label{font-size:11px;color:var(--text-dim);margin-bottom:6px;line-height:1.4}
+.outcome .pct{font-size:22px;font-weight:600;color:var(--text);font-family:"JetBrains Mono",monospace}
+.outcome .fill{position:absolute;left:0;bottom:0;height:2px;background:var(--ind);opacity:.6}
+
+/* Volume / freshness footer */
+.section-note{margin-top:22px;padding:14px 16px;border:1px solid var(--border);border-radius:8px;background:var(--surface);font-size:12px;color:var(--text-mute);line-height:1.6}
+.section-note strong{color:var(--text-dim);font-weight:500}
+.section-note a{color:var(--text-dim);border-bottom:1px dashed var(--border-hi);text-decoration:none;padding-bottom:1px}
+
+/* Disclaimer */
+.disclaimer{margin-top:22px;padding:14px 16px;border-left:2px solid var(--amber);background:rgba(245,158,11,.05);font-size:12px;color:var(--text-dim);line-height:1.7}
+.disclaimer strong{color:var(--text);font-weight:600}
+
+/* Footer */
+footer{margin-top:40px;padding-top:18px;border-top:1px solid var(--border);color:var(--text-mute);font-size:11px;font-family:"JetBrains Mono",monospace;letter-spacing:.04em;line-height:1.7}
+footer a{color:var(--text-dim)}
+</style>
+</head>
+<body>
+
+<div class="page">
+
+  <div class="top-right">
+    <div class="ts-line"><span class="dot" id="statusDot"></span><span id="statusText">FETCHING…</span></div>
+    <div class="ts-line" id="tsGenerated">—</div>
+  </div>
+
+  <header>
+    <div class="eyebrow">
+      <div class="pill"></div>
+      <span class="wordmark">Gerrymandering Revealed</span>
+      <span class="eyebrow-sub">Prediction Markets</span>
+    </div>
+
+    <nav class="site-nav" aria-label="Site navigation">
+      <a class="nav-item" href="/">
+        <span class="nav-dot" style="background:var(--text-mute)"></span>
+        District Map
+      </a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="/legal-tracker">Legal Tracker</a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="/redistricting-tracker">Redistricting</a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="/vote-gap">Vote Gap</a>
+      <div class="nav-divider"></div>
+      <a class="nav-item active" aria-current="page" href="/prediction-markets">
+        <span class="nav-dot" style="background:var(--green)"></span>
+        Markets
+      </a>
+      <div class="nav-divider"></div>
+      <a class="nav-item" href="/about">About</a>
+    </nav>
+
+    <h1>Prediction Markets — 2026 Congress</h1>
+    <p class="lede">Live probabilities from Kalshi's public prediction markets for U.S. House control, Senate control, and the combined balance of power. Prices reflect what traders are willing to bet, not a forecast.</p>
+  </header>
+
+  <!-- Content injected by loader below -->
+  <div id="content">
+    <div class="loading-shell" id="loader">Fetching live market data from Kalshi…</div>
+  </div>
+
+  <div class="disclaimer" id="disclaimer" style="display:none;">
+    <strong>What these numbers mean.</strong> Prediction market prices reflect what traders on
+    Kalshi are willing to pay for a contract that pays $1 if the outcome happens. A price of $0.78
+    on "Democrats win the House" implies a market-priced probability of 78%. Prices are noisy,
+    react to news, and are shaped by the traders currently active on Kalshi — they are not a
+    forecast and they do not replace polling or election analysis. Use them as one signal
+    among many.
+  </div>
+
+  <footer>
+    <div>Data source: <a href="https://kalshi.com" target="_blank" rel="noopener">Kalshi</a> · CFTC-regulated event contract exchange. Prices cached server-side for 5 minutes.</div>
+    <div style="margin-top:8px">© Gerrymandering Revealed · <a href="/about">About</a> · <a href="https://kalshi.com/disclaimers" target="_blank" rel="noopener">Kalshi disclaimers</a></div>
+  </footer>
+
+</div>
+
+<script>
+/**
+ * Load Kalshi market data from our Netlify function and render the cards.
+ * The function does the caching / CORS handling / normalization; we just
+ * render whatever it returns.
+ */
+(function() {
+  const contentEl = document.getElementById('content');
+  const loaderEl = document.getElementById('loader');
+  const statusDot = document.getElementById('statusDot');
+  const statusText = document.getElementById('statusText');
+  const tsGenerated = document.getElementById('tsGenerated');
+  const disclaimerEl = document.getElementById('disclaimer');
+
+  function fmtPct(x) {
+    if (x == null || Number.isNaN(x)) return '—';
+    return Math.round(x * 100) + '%';
+  }
+  function fmtVolume(v) {
+    if (!v) return '';
+    if (v >= 1_000_000) return '$' + (v / 1_000_000).toFixed(1) + 'M vol';
+    if (v >= 1_000) return '$' + (v / 1_000).toFixed(0) + 'K vol';
+    return '$' + v + ' vol';
+  }
+
+  function renderControlCard(label, title, data) {
+    if (!data || (data.dem_pct == null && data.rep_pct == null)) {
+      return `
+        <div class="card">
+          <div class="card-label">${label}</div>
+          <div class="card-title">${title}</div>
+          <div style="color:var(--text-mute);font-size:12px;padding:8px 0;">
+            Market data unavailable right now. Check <a href="${data && data.kalshi_url ? data.kalshi_url : 'https://kalshi.com'}" target="_blank" rel="noopener">Kalshi</a> directly.
+          </div>
+        </div>`;
+    }
+    // If we only have one side, infer the other as (1 - it).
+    const dem = data.dem_pct != null ? data.dem_pct : (1 - data.rep_pct);
+    const rep = data.rep_pct != null ? data.rep_pct : (1 - data.dem_pct);
+    const total = dem + rep;
+    // Normalize to 100% for the split bar (they can slightly exceed 1.00
+    // when derived from bid/ask midpoints on both sides).
+    const demPart = total > 0 ? dem / total : 0.5;
+    const repPart = total > 0 ? rep / total : 0.5;
+    const volTag = data.volume ? fmtVolume(data.volume) : '';
+    return `
+      <div class="card">
+        <div class="card-label">${label}</div>
+        <div class="card-title">${title}</div>
+        <div class="split" role="img" aria-label="Democratic ${fmtPct(dem)}, Republican ${fmtPct(rep)}">
+          <div class="side dem" style="flex:${demPart}">
+            <div class="pct">${fmtPct(dem)}</div>
+            <div class="who">Democrat</div>
+          </div>
+          <div class="side rep" style="flex:${repPart}">
+            <div class="pct">${fmtPct(rep)}</div>
+            <div class="who">Republican</div>
+          </div>
+        </div>
+        <div class="card-foot">
+          <span>${volTag}</span>
+          <a href="${data.kalshi_url}" target="_blank" rel="noopener">View on Kalshi →</a>
+        </div>
+      </div>`;
+  }
+
+  function renderBalanceCard(data) {
+    if (!data || !data.outcomes || data.outcomes.length === 0) {
+      return `
+        <div class="card balance-card">
+          <div class="card-label">Balance of Power (House + Senate combined)</div>
+          <div class="card-title">Congress Control Combo</div>
+          <div style="color:var(--text-mute);font-size:12px;padding:8px 0;">
+            Combo market data unavailable right now.
+          </div>
+        </div>`;
+    }
+    const max = Math.max(...data.outcomes.map(o => o.pct || 0));
+    const cells = data.outcomes.map(o => {
+      const width = max > 0 ? (o.pct || 0) / max * 100 : 0;
+      return `
+        <div class="outcome">
+          <div class="label">${(o.label || '').replace(/</g, '&lt;')}</div>
+          <div class="pct">${fmtPct(o.pct)}</div>
+          <div class="fill" style="width:${width}%"></div>
+        </div>`;
+    }).join('');
+    return `
+      <div class="card balance-card">
+        <div class="card-label">Balance of Power (House + Senate combined)</div>
+        <div class="card-title">Which party controls each chamber?</div>
+        <div class="outcomes">${cells}</div>
+        <div class="card-foot" style="margin-top:14px">
+          <span>Combo market · 4 mutually-exclusive outcomes</span>
+          <a href="${data.kalshi_url}" target="_blank" rel="noopener">View on Kalshi →</a>
+        </div>
+      </div>`;
+  }
+
+  function relTime(iso) {
+    if (!iso) return '';
+    const d = new Date(iso);
+    const diffMin = Math.round((Date.now() - d.getTime()) / 60000);
+    if (diffMin < 1) return 'just now';
+    if (diffMin < 60) return diffMin + ' min ago';
+    if (diffMin < 24 * 60) return Math.round(diffMin / 60) + ' hr ago';
+    return d.toLocaleDateString();
+  }
+
+  fetch('/api/kalshi-markets', { cache: 'no-store' })
+    .then(r => {
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
+    .then(data => {
+      const houseCard = renderControlCard('U.S. House Control · 2026', 'Which party wins the House?', data.house);
+      const senateCard = renderControlCard('U.S. Senate Control · 2026', 'Which party wins the Senate?', data.senate);
+      const balanceCard = renderBalanceCard(data.balance);
+      contentEl.innerHTML = `
+        <div class="cards-row">
+          ${houseCard}
+          ${senateCard}
+          ${balanceCard}
+        </div>
+        <div class="section-note">
+          <strong>How to read this:</strong> The colored bars show the current market-implied
+          probability that each party wins control after the November 2026 election. Prices
+          come from <a href="https://kalshi.com" target="_blank" rel="noopener">Kalshi</a>,
+          a CFTC-regulated exchange where traders buy and sell contracts on real-world events.
+          Data refreshes when you reload the page; our server caches Kalshi's response for 5
+          minutes to be a good API citizen.
+        </div>`;
+      // Status indicator
+      statusDot.classList.remove('stale');
+      statusText.textContent = 'LIVE';
+      tsGenerated.textContent = 'Updated ' + relTime(data.generated_at);
+      disclaimerEl.style.display = 'block';
+    })
+    .catch(err => {
+      console.error('Kalshi fetch error:', err);
+      statusDot.classList.add('stale');
+      statusText.textContent = 'OFFLINE';
+      contentEl.innerHTML = `
+        <div class="loading-shell err">
+          Unable to load live market data right now.<br>
+          You can view the same markets directly at
+          <a href="https://kalshi.com" target="_blank" rel="noopener" style="color:var(--dem)">kalshi.com</a>.
+        </div>`;
+    });
+})();
+</script>
+
+</body>
+</html>
