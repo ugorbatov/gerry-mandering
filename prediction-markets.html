@@ -108,6 +108,27 @@ h1{font-size:28px;font-weight:600;margin:0;letter-spacing:-.02em;line-height:1.1
 .section-note strong{color:var(--text-dim);font-weight:500}
 .section-note a{color:var(--text-dim);border-bottom:1px dashed var(--border-hi);text-decoration:none;padding-bottom:1px}
 
+/* History chart */
+.chart-card{margin-top:20px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:22px}
+.chart-header{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px}
+.chart-title{font-size:16px;font-weight:600;color:var(--text);letter-spacing:-.01em}
+.chart-subtitle{font-size:11px;color:var(--text-mute);font-family:"JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase}
+.chart-legend{display:flex;gap:14px;font-size:11px;color:var(--text-dim);font-family:"JetBrains Mono",monospace;letter-spacing:.04em}
+.chart-legend .swatch{display:inline-block;width:10px;height:2px;vertical-align:middle;margin-right:5px}
+.chart-legend .swatch.dem{background:var(--dem)}
+.chart-legend .swatch.rep{background:var(--rep)}
+.chart-svg-wrap{position:relative;width:100%;height:340px}
+.chart-svg-wrap svg{width:100%;height:100%;display:block}
+.chart-axis-line{stroke:var(--border);stroke-width:1}
+.chart-axis-tick{fill:var(--text-mute);font-family:"JetBrains Mono",monospace;font-size:10px;letter-spacing:.04em}
+.chart-grid{stroke:var(--border);stroke-width:1;stroke-dasharray:2 3;opacity:.5}
+.chart-line{fill:none;stroke-width:1.8;stroke-linejoin:round;stroke-linecap:round}
+.chart-line.dem{stroke:var(--dem)}
+.chart-line.rep{stroke:var(--rep)}
+.chart-loading{display:flex;align-items:center;justify-content:center;color:var(--text-mute);font-size:12px;font-family:"JetBrains Mono",monospace;letter-spacing:.06em;height:100%}
+.chart-hover{fill:var(--text);font-family:"JetBrains Mono",monospace;font-size:11px;pointer-events:none}
+.chart-crosshair{stroke:var(--text-mute);stroke-width:1;stroke-dasharray:3 3;opacity:.5;pointer-events:none}
+
 /* Disclaimer */
 .disclaimer{margin-top:22px;padding:14px 16px;border-left:2px solid var(--amber);background:rgba(245,158,11,.05);font-size:12px;color:var(--text-dim);line-height:1.7}
 .disclaimer strong{color:var(--text);font-weight:600}
@@ -302,6 +323,21 @@ footer a{color:var(--text-dim)}
           ${senateCard}
           ${balanceCard}
         </div>
+        <div class="chart-card" id="houseChartCard">
+          <div class="chart-header">
+            <div>
+              <div class="chart-title">U.S. House Control · Historical Probability</div>
+              <div class="chart-subtitle">Daily close prices · fall 2024 → today</div>
+            </div>
+            <div class="chart-legend">
+              <span><span class="swatch dem"></span>Democrat wins House</span>
+              <span><span class="swatch rep"></span>Republican wins House</span>
+            </div>
+          </div>
+          <div class="chart-svg-wrap" id="houseChartWrap">
+            <div class="chart-loading">Loading history…</div>
+          </div>
+        </div>
         <div class="section-note">
           <strong>How to read this:</strong> The colored bars show the current market-implied
           probability that each party wins control after the November 2026 election. Prices
@@ -315,6 +351,8 @@ footer a{color:var(--text-dim)}
       statusText.textContent = 'LIVE';
       tsGenerated.textContent = 'Updated ' + relTime(data.generated_at);
       disclaimerEl.style.display = 'block';
+      // Kick off history load for the House chart
+      loadHouseHistory();
     })
     .catch(err => {
       console.error('Kalshi fetch error:', err);
@@ -327,6 +365,183 @@ footer a{color:var(--text-dim)}
           <a href="https://kalshi.com" target="_blank" rel="noopener" style="color:var(--dem)">kalshi.com</a>.
         </div>`;
     });
+
+  /**
+   * Fetch House control history and draw the chart. Gracefully hides the
+   * chart card if data is unavailable rather than showing an empty box.
+   */
+  function loadHouseHistory() {
+    const wrap = document.getElementById('houseChartWrap');
+    const card = document.getElementById('houseChartCard');
+    if (!wrap || !card) return;
+
+    fetch('/api/kalshi-history?chamber=house', { cache: 'no-store' })
+      .then(r => r.ok ? r.json() : Promise.reject('HTTP ' + r.status))
+      .then(data => {
+        const dem = (data.series && data.series.dem) || [];
+        const rep = (data.series && data.series.rep) || [];
+        if (dem.length < 2 && rep.length < 2) {
+          card.style.display = 'none';
+          return;
+        }
+        drawChart(wrap, dem, rep);
+      })
+      .catch(err => {
+        console.error('Kalshi history error:', err);
+        card.style.display = 'none';
+      });
+  }
+
+  /**
+   * Draw a two-line time series chart into `wrap` using hand-rolled SVG.
+   * X axis: unix seconds → viewport x. Y axis: probability 0-1 → viewport y.
+   * Adds a rectangular hover overlay that shows the value on the closest
+   * data point via crosshair + text.
+   */
+  function drawChart(wrap, dem, rep) {
+    // Fixed logical coordinate system; CSS scales to container width.
+    const W = 900, H = 340;
+    const M = { l: 44, r: 20, t: 12, b: 32 };
+    const innerW = W - M.l - M.r, innerH = H - M.t - M.b;
+
+    // Combined time bounds across both series
+    const allT = dem.concat(rep).map(d => d.t);
+    if (allT.length === 0) { wrap.innerHTML = ''; return; }
+    const tMin = Math.min(...allT), tMax = Math.max(...allT);
+    const tSpan = Math.max(1, tMax - tMin);
+
+    // Y axis: probability 0 to 1
+    const yMin = 0, yMax = 1;
+
+    function xOf(t) { return M.l + (t - tMin) / tSpan * innerW; }
+    function yOf(p) { return M.t + (1 - (p - yMin) / (yMax - yMin)) * innerH; }
+
+    // Path builders
+    function pathFor(pts) {
+      if (pts.length === 0) return '';
+      // Sort by t just in case
+      const s = pts.slice().sort((a, b) => a.t - b.t);
+      let d = 'M' + xOf(s[0].t).toFixed(1) + ',' + yOf(s[0].p).toFixed(1);
+      for (let i = 1; i < s.length; i++) {
+        d += ' L' + xOf(s[i].t).toFixed(1) + ',' + yOf(s[i].p).toFixed(1);
+      }
+      return d;
+    }
+
+    // Y axis ticks at 0%, 25%, 50%, 75%, 100%
+    const yTicks = [0, 0.25, 0.5, 0.75, 1];
+    let gridLines = '';
+    let yLabels = '';
+    yTicks.forEach(p => {
+      const y = yOf(p);
+      gridLines += `<line class="chart-grid" x1="${M.l}" x2="${W - M.r}" y1="${y.toFixed(1)}" y2="${y.toFixed(1)}"/>`;
+      yLabels += `<text class="chart-axis-tick" x="${M.l - 8}" y="${(y + 3).toFixed(1)}" text-anchor="end">${(p * 100).toFixed(0)}%</text>`;
+    });
+
+    // X axis ticks: 5 evenly-spaced dates
+    let xLabels = '';
+    const xTicks = 5;
+    for (let i = 0; i < xTicks; i++) {
+      const t = tMin + (tSpan * i) / (xTicks - 1);
+      const x = xOf(t);
+      const d = new Date(t * 1000);
+      const label = d.toLocaleDateString(undefined, { month: 'short', year: '2-digit' });
+      xLabels += `<text class="chart-axis-tick" x="${x.toFixed(1)}" y="${H - M.b + 18}" text-anchor="middle">${label}</text>`;
+    }
+
+    // Assemble SVG
+    const svg = `
+      <svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" role="img"
+           aria-label="U.S. House control probability over time">
+        ${gridLines}
+        <line class="chart-axis-line" x1="${M.l}" x2="${W - M.r}" y1="${H - M.b}" y2="${H - M.b}"/>
+        ${yLabels}
+        ${xLabels}
+        <path class="chart-line dem" d="${pathFor(dem)}"/>
+        <path class="chart-line rep" d="${pathFor(rep)}"/>
+        <g id="chartHover"></g>
+        <rect id="chartHitArea" x="${M.l}" y="${M.t}" width="${innerW}" height="${innerH}"
+              fill="transparent" style="cursor:crosshair"/>
+      </svg>
+    `;
+    wrap.innerHTML = svg;
+
+    // Hover interaction: find nearest data points on both series to the cursor's t
+    const svgEl = wrap.querySelector('svg');
+    const hitArea = svgEl.querySelector('#chartHitArea');
+    const hoverGroup = svgEl.querySelector('#chartHover');
+    const demSorted = dem.slice().sort((a, b) => a.t - b.t);
+    const repSorted = rep.slice().sort((a, b) => a.t - b.t);
+
+    function nearest(sorted, t) {
+      if (sorted.length === 0) return null;
+      // Binary search
+      let lo = 0, hi = sorted.length - 1;
+      while (lo < hi) {
+        const mid = (lo + hi) >> 1;
+        if (sorted[mid].t < t) lo = mid + 1; else hi = mid;
+      }
+      const cand = [sorted[lo]];
+      if (lo > 0) cand.push(sorted[lo - 1]);
+      return cand.reduce((best, c) => Math.abs(c.t - t) < Math.abs(best.t - t) ? c : best);
+    }
+
+    hitArea.addEventListener('mousemove', ev => {
+      const rect = svgEl.getBoundingClientRect();
+      const relX = (ev.clientX - rect.left) / rect.width * W;
+      // Convert x to t
+      const t = tMin + (relX - M.l) / innerW * tSpan;
+      const dPoint = nearest(demSorted, t);
+      const rPoint = nearest(repSorted, t);
+      if (!dPoint && !rPoint) return;
+      // Reference the more-populous series' timestamp for the crosshair
+      const refT = (dPoint || rPoint).t;
+      const xLine = xOf(refT);
+      const dateStr = new Date(refT * 1000).toLocaleDateString(undefined, {
+        month: 'short', day: 'numeric', year: 'numeric'
+      });
+      let hoverHtml = `
+        <line class="chart-crosshair" x1="${xLine.toFixed(1)}" x2="${xLine.toFixed(1)}"
+              y1="${M.t}" y2="${H - M.b}"/>
+      `;
+      if (dPoint) {
+        hoverHtml += `
+          <circle cx="${xOf(dPoint.t).toFixed(1)}" cy="${yOf(dPoint.p).toFixed(1)}" r="3" fill="var(--dem)"/>
+        `;
+      }
+      if (rPoint) {
+        hoverHtml += `
+          <circle cx="${xOf(rPoint.t).toFixed(1)}" cy="${yOf(rPoint.p).toFixed(1)}" r="3" fill="var(--rep)"/>
+        `;
+      }
+      // Label box
+      const labelX = xLine < W / 2 ? xLine + 8 : xLine - 8;
+      const labelAnchor = xLine < W / 2 ? 'start' : 'end';
+      hoverHtml += `
+        <text class="chart-hover" x="${labelX.toFixed(1)}" y="${M.t + 14}" text-anchor="${labelAnchor}">
+          ${dateStr}
+        </text>
+      `;
+      if (dPoint) {
+        hoverHtml += `
+          <text class="chart-hover" x="${labelX.toFixed(1)}" y="${M.t + 32}" text-anchor="${labelAnchor}" fill="var(--dem)">
+            D ${(dPoint.p * 100).toFixed(0)}%
+          </text>
+        `;
+      }
+      if (rPoint) {
+        hoverHtml += `
+          <text class="chart-hover" x="${labelX.toFixed(1)}" y="${M.t + 48}" text-anchor="${labelAnchor}" fill="var(--rep)">
+            R ${(rPoint.p * 100).toFixed(0)}%
+          </text>
+        `;
+      }
+      hoverGroup.innerHTML = hoverHtml;
+    });
+    hitArea.addEventListener('mouseleave', () => {
+      hoverGroup.innerHTML = '';
+    });
+  }
 })();
 </script>
 
