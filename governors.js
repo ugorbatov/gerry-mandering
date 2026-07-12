@@ -98,6 +98,12 @@
                         partyClass === 'republican' ? 'rgba(239, 68, 68, 0.25)' : 'rgba(168, 85, 247, 0.25)';
     const title = gov.isMayor ? 'Mayor' : 'Governor';
     const yearsInOffice = new Date().getFullYear() - gov.since;
+    // Under a year in office (e.g. Sherrill in NJ took office Jan 2026) we
+    // show "NEW" instead of "0 YRS", which read wrong and made it look like
+    // the card was broken. Anyone at 1+ years keeps the calendar-year count.
+    const tenureLabel = yearsInOffice < 1
+      ? '<span style="color:var(--green);font-weight:500;">NEW</span>'
+      : yearsInOffice + ' YR' + (yearsInOffice !== 1 ? 'S' : '');
 
     return `
       <div class="governor-info" style="
@@ -125,7 +131,7 @@
           </div>
           <div style="text-align:right;font-size:10px;color:var(--text-mute);font-family:'JetBrains Mono', monospace;">
             <div>SINCE ${gov.since}</div>
-            <div style="margin-top:2px;color:var(--text-dim);">${yearsInOffice} YR${yearsInOffice !== 1 ? 'S' : ''}</div>
+            <div style="margin-top:2px;color:var(--text-dim);">${tenureLabel}</div>
           </div>
         </div>
       </div>
