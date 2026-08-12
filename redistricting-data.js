@@ -22,7 +22,7 @@
      sources  : [{label, url}]
    ============================================================================ */
 
-const RT_LAST_UPDATED = 'June 30, 2026';
+const RT_LAST_UPDATED = 'August 11, 2026';
 
 const REDISTRICTING = {
 
@@ -74,7 +74,9 @@ const REDISTRICTING = {
     timeline: [
       { date: "Dec 2025", text: "Florida House select committee begins drawing a new map." },
       { date: "Apr 2026", text: "A 24-4 map is unveiled and passed by the legislature along party lines." },
-      { date: "May 2026", text: "DeSantis signs the map; a Fair Districts lawsuit is filed the same day." }
+      { date: "May 2026", text: "DeSantis signs the map; a Fair Districts lawsuit is filed the same day." },
+      { date: "May 27 2026", text: "Trial judge declines to temporarily block the map." },
+      { date: "Jun 10 2026", text: "Florida Supreme Court declines 6-1 to intervene, leaving the map in place through the midterms; the underlying Fair Districts challenge continues in lower courts." }
     ],
     sources: [
       { label: "MidtermProject", url: "https://themidtermproject.org/redistricting-2026" },
@@ -95,13 +97,14 @@ const REDISTRICTING = {
   },
 
   "Tennessee": {
-    status: "contested", favors: "R", seats: 1, voluntary: true,
-    summary: "Days after the Supreme Court's Louisiana v. Callais ruling weakened the Voting Rights Act, Tennessee repealed its own decades-old ban on mid-decade redistricting and enacted a new map on May 7, 2026. The map carves up the Memphis-based 9th District — the state's only majority-Black and only Democratic seat, held by Rep. Steve Cohen — into three Republican-leaning districts, positioning the GOP to hold all nine seats. Rep. Cohen and the Tennessee NAACP sued to block it; the case is pending.",
+    status: "enacted", favors: "R", seats: 1, voluntary: true,
+    summary: "Days after the Supreme Court's Louisiana v. Callais ruling weakened the Voting Rights Act, Tennessee repealed its own decades-old ban on mid-decade redistricting and enacted a new map on May 7, 2026. The map carves up the Memphis-based 9th District — the state's only majority-Black and only Democratic seat, held by Rep. Steve Cohen — into three Republican-leaning districts, positioning the GOP to hold all nine seats. Three federal and state suits challenged it (Sherman v. Hargett, Hale v. Lee, TN NAACP v. Hargett); a three-judge federal panel denied a preliminary injunction on Jul 23, 2026, and the map was used for the Aug 6 primary. The underlying suits remain pending.",
     timeline: [
       { date: "Apr 29 2026", text: "Supreme Court decides Louisiana v. Callais, weakening Voting Rights Act protections; Republicans press Tennessee to redraw." },
       { date: "May 1 2026", text: "Gov. Bill Lee calls a special session to review the congressional map." },
       { date: "May 7 2026", text: "Legislature repeals its mid-decade ban and passes the new map; Lee signs it the same day. Cohen and the NAACP file suit." },
-      { date: "Aug 6 2026", text: "State primary scheduled." }
+      { date: "Jul 23 2026", text: "Three-judge federal panel denies plaintiffs' preliminary injunction; map cleared for the primary." },
+      { date: "Aug 6 2026", text: "State primary held under the new map; underlying suits still pending." }
     ],
     sources: [
       { label: "All About Redistricting", url: "https://redistricting.lls.edu/state/tennessee/" },
@@ -156,19 +159,19 @@ const REDISTRICTING = {
   },
 
   "Alabama": {
-    status: "court", favors: null, seats: null, voluntary: false,
-    summary: "Alabama's situation is procedurally tangled and moved fast. After Allen v. Milligan forced a second majority-Black district, the Callais ruling let the state revisit its 2023 map (which has only one). A lower court again blocked that 2023 map as a racial gerrymander on May 26, 2026; on June 2 the U.S. Supreme Court vacated the injunction and remanded for review under Callais — but on June 14 the district court re-blocked the 2023 map and reinstated the court's remedial map (two Black-opportunity districts) for the 2026 elections. Litigation continues; Alabama's appeal is pending.",
+    status: "enacted", favors: "R", seats: 1, voluntary: false,
+    summary: "Alabama's map fight went through five reversals before finally settling. After Allen v. Milligan forced a second majority-Black district, the Callais ruling let the state revisit its 2023 map (which has only one). A three-judge panel blocked that map again on May 26, 2026 after an 11-day trial, finding intentional racial discrimination — but the U.S. Supreme Court reversed 6-3 on June 2, 2026, ruling the district court shouldn't have interfered with the state's own map choice this close to an election. Alabama held a special primary on Aug 11, 2026 for the four affected districts (1st, 2nd, 6th, 7th) under the 2023 map, shifting the delegation to 6 Republican-leaning seats and 1 Democratic-leaning one. Litigation over the underlying discrimination finding continues.",
     timeline: [
       { date: "2023–24", text: "Allen v. Milligan forces a second majority-Black district; the state's 2023 one-district map is enjoined." },
-      { date: "Apr 29 2026", text: "Callais ruling prompts Alabama to seek to revive its 2023 map." },
-      { date: "May 26 2026", text: "Lower court again blocks the 2023 map as a racial gerrymander; the state appeals." },
-      { date: "Jun 2 2026", text: "U.S. Supreme Court vacates injunction; remands for review under Callais." },
-      { date: "Jun 14 2026", text: "District court re-blocks the 2023 map; court's remedial map (2 Black-opp districts) stays for 2026." }
+      { date: "May 11 2026", text: "SCOTUS vacates the standing injunction and remands for review under Callais." },
+      { date: "May 26 2026", text: "On remand, a three-judge panel again blocks the 2023 map as intentionally discriminatory after an 11-day trial; orders the court-drawn remedial map used instead." },
+      { date: "Jun 2 2026", text: "SCOTUS reverses 6-3, allowing the 2023 map to be used; Gov. Ivey sets an Aug 11 special primary for the 4 affected districts." },
+      { date: "Aug 11 2026", text: "Special primary held under the 2023 map; delegation shifts toward 6R–1D. Underlying discrimination case continues." }
     ],
     sources: [
-      { label: "Ballotpedia News", url: "https://news.ballotpedia.org/2026/06/02/a-new-congressional-map-is-enacted-in-louisiana-blocked-in-alabama-and-dead-in-south-carolina/" },
-      { label: "SCOTUSblog", url: "https://www.scotusblog.com/cases/louisiana-v-callais-2/" },
-      { label: "ACLU", url: "https://www.aclu.org/cases/milligan-v-allen" }
+      { label: "Alabama Reflector", url: "https://alabamareflector.com/2026/06/02/supreme-court-allows-alabama-to-use-2023-congressional-map-in-august-special-primary/" },
+      { label: "NPR", url: "https://www.npr.org/2026/06/02/nx-s1-5844744/supreme-court-alabama-congressional-districts" },
+      { label: "Gov. Ivey's Office", url: "https://governor.alabama.gov/newsroom/2026/05/governor-ivey-celebrates-major-court-victory-in-states-redistricting-battle-calls-special-election-for-alabama-drawn-congressional-map/" }
     ]
   },
 
@@ -239,6 +242,32 @@ const REDISTRICTING = {
     ]
   },
 
+  "Wisconsin": {
+    status: "failed", favors: "D", seats: null, voluntary: true,
+    summary: "Democrats brought two lawsuits arguing Wisconsin's current map — six Republican-favorable seats and two heavily Democratic ones — was an unlawful partisan gerrymander, hoping to put two GOP-held seats in play for 2026. A three-judge panel dismissed one case in March 2026, and the Wisconsin Supreme Court separately declined without explanation to hear the challenges, leaving the existing map in place for 2026; both cases are expected to continue toward a resolution after this cycle.",
+    timeline: [
+      { date: "2025", text: "Democrats file two suits challenging the congressional map as a partisan gerrymander." },
+      { date: "Mar 2026", text: "Three-judge panel dismisses one suit, finding no basis to invalidate the current map." },
+      { date: "2026", text: "Wisconsin Supreme Court declines to hear the challenges; map stays for 2026." }
+    ],
+    sources: [
+      { label: "AP via Audacy", url: "https://www.audacy.com/wwl/news/politics/ap-us-election-2026-redistricting-wisconsin-1st-ld-writethru" },
+      { label: "Fox News", url: "https://www.foxnews.com/politics/court-shuts-down-redistricting-fight-key-swing-state-heres-what-means.amp" }
+    ]
+  },
+
+  "Arkansas": {
+    status: "failed", favors: "D", seats: null, voluntary: false,
+    summary: "Voters challenged Arkansas's congressional map as a Voting Rights Act violation, arguing it should include a second majority-Black or majority-minority district. A federal court dismissed the case, leaving the existing Republican-favorable map in place for 2026.",
+    timeline: [
+      { date: "2026", text: "Federal court dismisses the VRA challenge to Arkansas's congressional map." }
+    ],
+    sources: [
+      { label: "Wikipedia — 2026 U.S. House elections", url: "https://en.wikipedia.org/wiki/2026_United_States_House_of_Representatives_elections" },
+      { label: "Ballotpedia", url: "https://ballotpedia.org/Redistricting_in_Arkansas" }
+    ]
+  },
+
   "New York": {
     status: "failed", favors: "D", seats: null, voluntary: false,
     summary: "A state court ruled in January 2026 that New York's 11th District — one of the state's few Republican-held seats — violated the state constitution, reopening the map. But the U.S. Supreme Court set aside the lower-court order, so no new map takes effect for 2026.",
@@ -282,8 +311,8 @@ const REDISTRICTING = {
    past voting patterns hold and shift as litigation resolves — see sources for
    the underlying ranges. */
 const RT_TOTALS = {
-  gopGain: 9,    // Ballotpedia (late June 2026): R net ~9 seats; Alabama's flip removed after the 6/14 district court ruling reinstated the remedial map for 2026.
-  demGain: 6,    // up to ~6 from California and Utah; Virginia's counter-map was struck down
-  note: "Estimates vary by source and date. As of late June 2026, Republicans are projected to net around 9 seats from this cycle once Louisiana, Tennessee, and Texas are counted — a tilt that grew after the Supreme Court's Louisiana v. Callais ruling weakened the Voting Rights Act. Alabama briefly looked likely to add another R seat after the June 2 SCOTUS remand, but the district court re-blocked the 2023 map on June 14 and reinstated the court's remedial map for 2026 elections."
+  gopGain: 10,   // Ballotpedia + case tracking (Aug 2026): R net ~10 seats — Texas, Missouri, NC, Ohio, Florida, Louisiana, Tennessee, and Alabama (whose 2023 map was reinstated by SCOTUS on Jun 2 and used for the Aug 11 special primary), once California and Utah's Democratic gains are offset elsewhere.
+  demGain: 6,    // up to ~6 from California and Utah; Virginia's counter-map was struck down, and Wisconsin's/Arkansas's challenges were dismissed
+  note: "Estimates vary by source and date. As of August 2026, Republicans are projected to net around 10 seats from this cycle — a tilt that grew after the Supreme Court's Louisiana v. Callais ruling weakened the Voting Rights Act and, most recently, after Alabama's 2023 map (favoring Republicans, 6-1) was reinstated by the Supreme Court on June 2 and used for the state's Aug 11 special primary. Several other GOP and Democratic redraw attempts (Wisconsin, Arkansas, Indiana, South Carolina, Kansas, Maryland, New York) failed or were dismissed."
 };
 
